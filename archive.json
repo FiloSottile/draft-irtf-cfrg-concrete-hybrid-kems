@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-05-01T01:46:16.269523+00:00",
+  "timestamp": "2025-05-04T01:46:44.614929+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -56,26 +56,42 @@
       "id": "PR_kwDOMmh5WM6UNhHg",
       "title": "Copy/paste text from generic document",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/1",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
-      "authorAssociation": "NONE",
+      "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Mostly literally a copy/paste.  I added a little bit of introductory text at the top because there wasn't anything.",
       "createdAt": "2025-04-28T18:16:20Z",
-      "updatedAt": "2025-04-28T18:16:21Z",
+      "updatedAt": "2025-05-01T14:47:16Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "baseRefName": "main",
       "baseRefOid": "ac68b752be2bf668d88c068a2188582b4804ce80",
       "headRepository": "bifurcation/draft-irtf-cfrg-concrete-hybrid-kems",
       "headRefName": "copy-paste",
       "headRefOid": "85e4ffca1549384a0296f8815d6a74af458fc5c9",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-05-01T14:47:16Z",
+      "mergedAt": "2025-05-01T14:47:16Z",
+      "mergedBy": "dconnolly",
+      "mergeCommit": {
+        "oid": "17d1fc266c555992b0c167f275e7a72b5e35f71d"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOMmh5WM6nfH8F",
+          "commit": {
+            "abbreviatedOid": "85e4ffc"
+          },
+          "author": "dconnolly",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-05-01T14:47:07Z",
+          "updatedAt": "2025-05-01T14:47:07Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
