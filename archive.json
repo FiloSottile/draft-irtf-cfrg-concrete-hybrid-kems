@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-01T01:58:12.421590+00:00",
+  "timestamp": "2025-06-05T01:42:15.449315+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -107,6 +107,136 @@
           "createdAt": "2025-05-01T14:47:07Z",
           "updatedAt": "2025-05-01T14:47:07Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "id": "PR_kwDOMmh5WM6ZCOhf",
+      "title": "Align with the general framework and abstractions",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/3",
+      "state": "MERGED",
+      "author": "chris-wood",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This change aligns the concrete hybrid KEMs with the generic framework specified in -hybrid-kems, allowing them to be [used in HPKE](https://github.com/hpkewg/hpke-pq/pull/5). It includes three hybrid KEM instances:\r\n\r\n- HNN3: P-256 + ML-KEM-768\r\n- HNN5: P-384 + ML-KEM-1024\r\n- HNX: X25519 + ML-KEM-768 (this is X-Wing)\r\n\r\nOthers can be added in the future if and when they're needed. ",
+      "createdAt": "2025-06-04T14:17:52Z",
+      "updatedAt": "2025-06-04T14:57:43Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
+      "baseRefName": "main",
+      "baseRefOid": "17d1fc266c555992b0c167f275e7a72b5e35f71d",
+      "headRepository": "chris-wood/draft-irtf-cfrg-concrete-hybrid-kems",
+      "headRefName": "caw/align",
+      "headRefOid": "dd0008b110160b952cdced0fbffe0704fcbc1d2b",
+      "closedAt": "2025-06-04T14:57:37Z",
+      "mergedAt": "2025-06-04T14:57:37Z",
+      "mergedBy": "chris-wood",
+      "mergeCommit": {
+        "oid": "a8e7414a669a7172ab29e41de8e4c3df0f1b6fec"
+      },
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Actually, it appears that I lack merge privileges here, working on getting that fixed...",
+          "createdAt": "2025-06-04T14:54:44Z",
+          "updatedAt": "2025-06-04T14:54:44Z"
+        },
+        {
+          "author": "chris-wood",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "(Merged for you)",
+          "createdAt": "2025-06-04T14:57:42Z",
+          "updatedAt": "2025-06-04T14:57:42Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOMmh5WM6srhUm",
+          "commit": {
+            "abbreviatedOid": "dd0008b"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Thanks @chris-wood.  This looks like good alignment with what's on `main` for the generic doc.  I have a couple minor comments, but I'll handle those in a follow-on.  Merging now so that we have a coherent reference stack for the HPKE WG meeting on Friday.",
+          "createdAt": "2025-06-04T14:53:28Z",
+          "updatedAt": "2025-06-04T14:53:28Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOMmh5WM6srk7s",
+          "commit": {
+            "abbreviatedOid": "dd0008b"
+          },
+          "author": "dconnolly",
+          "authorAssociation": "COLLABORATOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "I do not agree with removing the KitchenSink instance, we need at least one concrete instance of each generic design per the design team ",
+          "createdAt": "2025-06-04T14:57:43Z",
+          "updatedAt": "2025-06-04T14:57:43Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "id": "PR_kwDOMmh5WM6ZC_g7",
+      "title": "Align with the general framework and abstractions",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/4",
+      "state": "OPEN",
+      "author": "dconnolly",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Updated per latest changes on https://github.com/cfrg/draft-irtf-cfrg-hybrid-kems/pull/22",
+      "createdAt": "2025-06-04T15:28:35Z",
+      "updatedAt": "2025-06-04T19:55:16Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
+      "baseRefName": "main",
+      "baseRefOid": "17d1fc266c555992b0c167f275e7a72b5e35f71d",
+      "headRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
+      "headRefName": "caw/align",
+      "headRefOid": "f08eedf7f5f41a2e0280e87cac6a5ba22dc0ee69",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOMmh5WM6sr-N9",
+          "commit": {
+            "abbreviatedOid": "f08eedf"
+          },
+          "author": "dconnolly",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "I do not agree with removing the KitchenSink instance nor the broad refactoring so far, hence reopening",
+          "createdAt": "2025-06-04T15:29:07Z",
+          "updatedAt": "2025-06-04T15:29:07Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOMmh5WM6ssGfY",
+          "commit": {
+            "abbreviatedOid": "f08eedf"
+          },
+          "author": "dconnolly",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-04T15:38:24Z",
+          "updatedAt": "2025-06-04T15:38:24Z",
+          "comments": [
+            {
+              "originalPosition": 317,
+              "body": "This language has not been introduced before and is inconsistent with the generic document and unfortunately collides with evolving notions/research on n-KDFs in general so I think we should avoid it",
+              "createdAt": "2025-06-04T15:38:24Z",
+              "updatedAt": "2025-06-04T15:38:24Z"
+            }
+          ]
         }
       ]
     }
