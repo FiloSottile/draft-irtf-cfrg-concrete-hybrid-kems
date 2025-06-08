@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-05T01:42:15.449315+00:00",
+  "timestamp": "2025-06-08T01:50:36.888792+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -192,7 +192,7 @@
       "labels": [],
       "body": "Updated per latest changes on https://github.com/cfrg/draft-irtf-cfrg-hybrid-kems/pull/22",
       "createdAt": "2025-06-04T15:28:35Z",
-      "updatedAt": "2025-06-04T19:55:16Z",
+      "updatedAt": "2025-06-05T22:15:50Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "baseRefName": "main",
       "baseRefOid": "17d1fc266c555992b0c167f275e7a72b5e35f71d",
@@ -235,6 +235,26 @@
               "body": "This language has not been introduced before and is inconsistent with the generic document and unfortunately collides with evolving notions/research on n-KDFs in general so I think we should avoid it",
               "createdAt": "2025-06-04T15:38:24Z",
               "updatedAt": "2025-06-04T15:38:24Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOMmh5WM6tAxGL",
+          "commit": {
+            "abbreviatedOid": "f08eedf"
+          },
+          "author": "dconnolly",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-05T22:15:50Z",
+          "updatedAt": "2025-06-05T22:15:50Z",
+          "comments": [
+            {
+              "originalPosition": 497,
+              "body": "This label makes this instance non-interoperable with X-Wing ",
+              "createdAt": "2025-06-05T22:15:50Z",
+              "updatedAt": "2025-06-05T22:15:50Z"
             }
           ]
         }
