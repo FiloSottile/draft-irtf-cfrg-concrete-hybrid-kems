@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-08T01:50:36.888792+00:00",
+  "timestamp": "2025-06-12T01:42:52.403484+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -192,7 +192,7 @@
       "labels": [],
       "body": "Updated per latest changes on https://github.com/cfrg/draft-irtf-cfrg-hybrid-kems/pull/22",
       "createdAt": "2025-06-04T15:28:35Z",
-      "updatedAt": "2025-06-05T22:15:50Z",
+      "updatedAt": "2025-06-10T19:48:18Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "baseRefName": "main",
       "baseRefOid": "17d1fc266c555992b0c167f275e7a72b5e35f71d",
@@ -255,6 +255,32 @@
               "body": "This label makes this instance non-interoperable with X-Wing ",
               "createdAt": "2025-06-05T22:15:50Z",
               "updatedAt": "2025-06-05T22:15:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOMmh5WM6tvTI5",
+          "commit": {
+            "abbreviatedOid": "f08eedf"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "",
+          "createdAt": "2025-06-10T19:45:12Z",
+          "updatedAt": "2025-06-10T19:48:18Z",
+          "comments": [
+            {
+              "originalPosition": 535,
+              "body": "I don't think we need to recite all the algorithms here.",
+              "createdAt": "2025-06-10T19:45:13Z",
+              "updatedAt": "2025-06-10T19:48:18Z"
+            },
+            {
+              "originalPosition": 497,
+              "body": "```suggestion\r\n* `Label` - `\\.//^\\`\r\n```\r\n\r\nThis should fix it, right @dconnolly ?",
+              "createdAt": "2025-06-10T19:46:08Z",
+              "updatedAt": "2025-06-10T19:48:18Z"
             }
           ]
         }
