@@ -344,7 +344,7 @@ This hybrid KEM is identical to X-Wing {{XWING-SPEC}}. It has the following para
 * `KEM_PQ`: ML-KEM-768 {{mlkem-768}}
 * `Expand`: SHAKE-256 {{FIPS202}}
 * `Combine`: SHA3-256 {{FIPS202}}
-* `Label` - `HNX`
+* `Label` - `\.//^\`
 
 The following constants for the hybrid KEM are also defined:
 
