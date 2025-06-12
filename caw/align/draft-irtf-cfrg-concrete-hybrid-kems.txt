@@ -4,8 +4,8 @@
 
 Crypto Forum                                                 D. Connolly
 Internet-Draft                                                 SandboxAQ
-Intended status: Informational                               4 June 2025
-Expires: 6 December 2025
+Intended status: Informational                              12 June 2025
+Expires: 14 December 2025
 
 
            Concrete Hybrid PQ/T Key Encapsulation Mechanisms
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 6 December 2025.
+   This Internet-Draft will expire on 14 December 2025.
 
 Copyright Notice
 
@@ -402,7 +402,7 @@ Table of Contents
 
    *  Combine: SHA3-256 [FIPS202]
 
-   *  Label - HNX
+   *  Label - \.//^\
 
    The following constants for the hybrid KEM are also defined:
 
