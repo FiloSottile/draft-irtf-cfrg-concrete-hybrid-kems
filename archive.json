@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-12T01:42:52.403484+00:00",
+  "timestamp": "2025-06-15T01:52:43.032612+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -192,13 +192,13 @@
       "labels": [],
       "body": "Updated per latest changes on https://github.com/cfrg/draft-irtf-cfrg-hybrid-kems/pull/22",
       "createdAt": "2025-06-04T15:28:35Z",
-      "updatedAt": "2025-06-10T19:48:18Z",
+      "updatedAt": "2025-06-12T14:40:06Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "baseRefName": "main",
       "baseRefOid": "17d1fc266c555992b0c167f275e7a72b5e35f71d",
       "headRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "headRefName": "caw/align",
-      "headRefOid": "f08eedf7f5f41a2e0280e87cac6a5ba22dc0ee69",
+      "headRefOid": "c0ccc38120df6955754fc4295c64c772aa1b0938",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
