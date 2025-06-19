@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-15T01:52:43.032612+00:00",
+  "timestamp": "2025-06-19T01:44:51.125401+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -185,24 +185,26 @@
       "id": "PR_kwDOMmh5WM6ZC_g7",
       "title": "Align with the general framework and abstractions",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/4",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "dconnolly",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Updated per latest changes on https://github.com/cfrg/draft-irtf-cfrg-hybrid-kems/pull/22",
       "createdAt": "2025-06-04T15:28:35Z",
-      "updatedAt": "2025-06-12T14:40:06Z",
+      "updatedAt": "2025-06-18T16:59:26Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "baseRefName": "main",
       "baseRefOid": "17d1fc266c555992b0c167f275e7a72b5e35f71d",
       "headRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "headRefName": "caw/align",
       "headRefOid": "c0ccc38120df6955754fc4295c64c772aa1b0938",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-06-18T16:59:25Z",
+      "mergedAt": "2025-06-18T16:59:25Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "453f291004bccb23c6f63bdbbfef9f9adad681a0"
+      },
       "comments": [],
       "reviews": [
         {
