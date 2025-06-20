@@ -39,6 +39,7 @@ author:
 normative:
   FIPS202: DOI.10.6028/NIST.FIPS.202
   FIPS203: DOI.10.6028/NIST.FIPS.203
+  SP800-186: DOI.10.6028/NIST.SP.800-186
 
 informative:
   ANSIX9.62:
@@ -83,7 +84,6 @@ informative:
         ins: N. Medinger
         name: Niklas Medinger
         org: CISPA Helmholtz Center for Information Security
-  FIPS186: DOI.10.6028/NIST.FIPS.186-5 #https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf
   KSMW2024:
     target: https://eprint.iacr.org/2024/1233
     title: "Binding Security of Implicitly-Rejecting KEMs and Application to BIKE and HQC"
@@ -145,64 +145,52 @@ the concrete nominal groups, and {{nominal-kems}} defines the nominal KEMs.
 
 This section specifies concrete nominal groups that implement the abstraction
 in {{HYBRID-KEMS}}. It includes groups based on the NIST curves P-256 and
-P-384 {{FIPS186}}, as well as a group based on Curve25519 from {{!RFC7748}}
+P-384, as well as a group based on Curve25519.
 
-### P-256 Nominal Group {#group-p256}
+### P-256 and P-384 Nominal Groups {#group-nist}
 
-The following functions for the P-256 nominal group are defined:
+The NIST P-256 and P-384 elliptic curves are defined in {{SP800-186}}.  They are
+widely used for key agreement and digital signature.  In this section, we define
+how they meet the Nominal Group interface described in {{HYBRID-KEMS}}.
+
+Group elements are elliptic curve points, represented as byte strings in the
+compressed representation defined by the Elliptic-Curve-Point-to-Octet-String
+function in {{SEC1}}.
+
+The Nominal Group algorithms are the same for both groups:
 
 - `Exp(p, x) -> q`: This function computes scalar multiplication between the
-  input element (or point) `p` and the scalar `x` {{FIPS186}}.
+  input element (or point) `p` and the scalar `x`, according to the group law
+  for the curve specified in {{SP800-186}}.
 - `RandomScalar(seed) -> k`: Implemented by converting `seed` to an integer
-  using OS2IP, and then reducing the resulting integer modulo the group
-  order.
-- `ElementToSharedSecret(P) -> ss`: Implemented using the compressed
-  Elliptic-Curve-Point-to-Octet-String method according to {{SEC1}} with
-  input `P`, yielding a Nelem-byte output. Additionally, this function
-  validates that the input element is not the group identity
-  element. Finally, this function outputs the encoding the X coordinate of
-  the elliptic curve point corresponding to P to a little-endian Nss-byte
-  string.
+  using the Octet-String-to-Integer function in {{SEC1}}, and then reducing the
+  resulting integer modulo the group order.
+- `ElementToSharedSecret(p) -> ss`: The shared secret is the X coordinate of the
+  elliptic curve point `p`, encoded as an `Nss`-byte string using the
+  Field-Element-to-Octet-String function in {{SEC1}}.
 
-The following constants are also defined.
+The group constants for the P-256 group are as follows:
 
 - `Nseed`: 48
 - `Nscalar`: 32
 - `Nelem`: 33
 - `Nss`: 32
 
-### P-384 Nominal Group {#group-p384}
-
-The following functions for the P-384 nominal group are defined:
-
-- `Exp(p, x) -> q`: This function computes scalar multiplication between the
-  input element (or point) `p` and the scalar `x` {{FIPS186}}.
-- `RandomScalar(seed) -> k`: Implemented by converting `seed` to an integer
-  using OS2IP, and then reducing the resulting integer modulo the group
-  order.
-- `ElementToSharedSecret(P) -> ss`: Implemented using the compressed
-  Elliptic-Curve-Point-to-Octet-String method according to {{SEC1}} with
-  input `P`, yielding a Nelem-byte output. Additionally, this function
-  validates that the input element is not the group identity
-  element. Finally, this function outputs the encoding the X coordinate of
-  the elliptic curve point corresponding to P to a little-endian Nss-byte
-  string.
-
-The following constants are also defined.
+The group constants for the P-384 group are as follows:
 
 - `Nseed`: 72
 - `Nscalar`: 48
-- `Nelem`: 48
-- `Nss`: 32
+- `Nelem`: 49
+- `Nss`: 48
 
 ### Curve25519 Nominal Group {#group-curve25519}
 
 The following functions for the Curve25519 nominal group are defined:
 
-- `Exp(p, x) -> q`: Implemented by X25519(x, p) from {{RFC7748}}.
+- `Exp(p, x) -> q`: Implemented by X25519(x, p) from {{!RFC7748}}.
 - `RandomScalar(seed) -> k`: Implemented by sampling and outputting 32 random
   bytes from a cryptographically secure pseudorandom number generator.
-- `ElementToSharedSecret(P) -> ss`: Implemented by the identity function,
+- `ElementToSharedSecret(p) -> ss`: Implemented by the identity function,
   i.e., by outputting P.
 
 The following constants are also defined.
@@ -215,13 +203,13 @@ The following constants are also defined.
 ## Concrete KEM Instances {#nominal-kems}
 
 This section specifies concrete KEM instances that implement the KEM
-abstraction from {{HYBRID-KEMS}}. It focuses solely on ML-KEM as specified in
-{{FIPS203}}.
+abstraction from {{HYBRID-KEMS}}.
 
-### ML-KEM-768 {#mlkem-768}
+### ML-KEM-768 and ML-KEM-1024 {#mlkem}
 
-The ML-KEM-768 nominal KEM implements the KEM abstraction from
-{{HYBRID-KEMS}} with the following functions:
+The ML-KEM-768 and ML-KEM-1024 KEMs are defined in {{FIPS203}}.  The algorithms
+defined in that specification map to the KEM abstraction in {{HYBRID-KEMS}} as
+follows:
 
 - `GenerateKeyPair() -> (ek, dk)`: Implemented as KeyGen in Section 7.1 of
   {{FIPS203}}.
@@ -232,9 +220,8 @@ The ML-KEM-768 nominal KEM implements the KEM abstraction from
   {{FIPS203}}.
 - `Decaps(dk, ct) -> ss`: Implemented as Encaps in Section 7.3 of
   {{FIPS203}}.
-- `EncapsDerand(ek, randomness) -> (ct, shared_secret)`: [[TODO: citeme]
 
-The following constants are also defined:
+The KEM constants for ML-KEM-768 are as follows:
 
 - `Nseed`: 64
 - `Nek`: 1216
@@ -242,29 +229,16 @@ The following constants are also defined:
 - `Nct`: 1120
 - `Nss`: 32
 
-### ML-KEM-1024 {#mlkem-1024}
-
-The ML-KEM-1024 nominal KEM implements the KEM abstraction from
-{{HYBRID-KEMS}} with the following functions:
-
-- `GenerateKeyPair() -> (ek, dk)`: Implemented as KeyGen in Section 7.1 of
-  {{FIPS203}}.
-- `DeriveKeyPair(seed) -> (ek, dk)`: Implemented as
-  KeyGen_internal(seed[0:32], seed[32:64]), where KeyGen_internal is defined
-  in Section 6 of {{FIPS203}}.
-- `Encaps(ek) -> (ct, ss)`: Implemented as Encaps in Section 7.2 of
-  {{FIPS203}}.
-- `Decaps(dk, ct) -> ss`: Implemented as Encaps in Section 7.3 of
-  {{FIPS203}}.
-- `EncapsDerand(ek, randomness) -> (ct, shared_secret)`: [[TODO: citeme]
-
-The following constants are also defined:
+The KEM constants for ML-KEM-1024 are as follows:
 
 - `Nseed`: 64
 - `Nek`: 1629
 - `Ndk`: 32
 - `Nct`: 1629
 - `Nss`: 32
+
+<!-- TODO: We need to define how SHA3 functions meet the PRG/KDF interfaces,
+though this should be trivial -->
 
 # Concrete Hybrid KEM Instances
 
@@ -295,8 +269,8 @@ This hybrid KEM is heavily based on {{XWING}}, using the QSF combiner from
 instead of X25519 as the the traditional component of the algorithm. It has
 the following parameters.
 
-* `Group_T`: P-256 {{group-p256}}
-* `KEM_PQ`: ML-KEM-768 {{mlkem-768}}
+* `Group_T`: P-256 {{group-nist}}
+* `KEM_PQ`: ML-KEM-768 {{mlkem}}
 * `PRG`: SHAKE-256 {{FIPS202}}
 * `KDF`: SHA3-256 {{FIPS202}}
 * `Label` - `HNN3`
@@ -360,7 +334,7 @@ This hybrid KEM is identical to X-Wing {{XWING-SPEC}}. It has the following
 parameters.
 
 * `Group_T`: Curve25519 {{group-curve25519}}
-* `KEM_PQ`: ML-KEM-768 {{mlkem-768}}
+* `KEM_PQ`: ML-KEM-768 {{mlkem}}
 * `PRG`: SHAKE-256 {{FIPS202}}
 * `KDF`: SHA3-256 {{FIPS202}}
 * `Label` - `\.//^\`
@@ -422,8 +396,8 @@ def Decaps(dk, ct):
 
 `HNN5` has the following parameters.
 
-* `Group_T`: P-384 {{group-p384}}
-* `KEM_PQ`: ML-KEM-1024 {{mlkem-1024}}
+* `Group_T`: P-384 {{group-nist}}
+* `KEM_PQ`: ML-KEM-1024 {{mlkem}}
 * `PRG`: SHAKE-256 {{FIPS202}}
 * `KDF`: HKDF-SHA-256 {{!RFC5869}}
 * `Label` - `HNN3`
