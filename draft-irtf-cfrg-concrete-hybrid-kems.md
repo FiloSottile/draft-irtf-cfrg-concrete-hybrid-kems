@@ -242,40 +242,42 @@ though this should be trivial -->
 
 # Concrete Hybrid KEM Instances
 
-This section instantiates three concrete KEMs:
+This section instantiates the following concrete KEMs:
 
 <!-- TODO: update names; what about these 'qsf-p256'-like names? -->
 
-1. `HNN3` {{qsf-p256}}:
-   A hybrid KEM composing ML-KEM-768 and P-256 using the QSF combiner with
-   SHA3-256 as the KDF and SHAKE256 as the PRG.
-1. `HNX` {{xwing}}:
-   A hybrid KEM composing ML-KEM-768 and Curve25519 using
-   the QSF combiner with SHA3-256 as the KDF and SHAKE256 as the PRG. This
-   construction is identical to X-Wing {{XWING-SPEC}}.
-1. `HNN5` {{qsf-p384}}:
-   A hybrid KEM composing ML-KEM-1024 and P-384 using the QSF combiner with
-   SHA3-256 as the KDF and SHAKE256 as the PRG.
+QSF-P256-MLKEM-SHA3:
+: A hybrid KEM composing ML-KEM-768 and P-256 using the QSF scheme, with
+  SHA3-256 as the KDF and SHAKE256 as the PRG.
+
+QSF-X25519-MLKEM-SHA3:
+: A hybrid KEM composing ML-KEM-768 and Curve25519 using
+  the QSF scheme, with SHA3-256 as the KDF and SHAKE256 as the PRG. This
+  construction is identical to X-Wing {{XWING-SPEC}}.
+
+QSF-P384-MLKEM-SHA3:
+: A hybrid KEM composing ML-KEM-1024 and P-384 using the QSF scheme, with
+  SHA3-256 as the KDF and SHAKE256 as the PRG.
 
 Each instance specifies the PQ and traditional KEMs being combined, the
 combiner construction from {{HYBRID-KEMS}}, the `label` to use for domain
 separation in the combiner function, as well as the PRG and KDF functions to
 use throughout.
 
-## `HNN3` {#qsf-p256}
+## `QSF-P256-MLKEM-SHA3` {#qsf-p256}
 
 This hybrid KEM is heavily based on {{XWING}}, using the QSF combiner from
 {{HYBRID-KEMS}}. In particular, it has the same exact design but uses P-256
 instead of X25519 as the the traditional component of the algorithm. It has
 the following parameters.
 
-* `Group_T`: P-256 {{group-nist}}
-* `KEM_PQ`: ML-KEM-768 {{mlkem}}
-* `PRG`: SHAKE-256 {{FIPS202}}
-* `KDF`: SHA3-256 {{FIPS202}}
-* `Label` - `HNN3`
+* Group_T: P-256 {{group-nist}}
+* KEM_PQ: ML-KEM-768 {{mlkem}}
+* PRG: SHAKE-256 {{FIPS202}}
+* KDF: SHA3-256 {{FIPS202}}
+* Label: `QSF-P256-MLKEM-SHA3`
 
-The following constants for the hybrid KEM are also defined:
+The KEM constants for the resulting hybrid KEM are as follows:
 
 - `Nseed`: 32
 - `Nek`: 1217
@@ -283,61 +285,19 @@ The following constants for the hybrid KEM are also defined:
 - `Nct`: 1121
 - `Nss`: 32
 
-With these parameters in place, this hybrid KEM is defined as follows:
-
-~~~
-def GenerateKeyPair():
-    seed = random(Nseed)
-    return DeriveKeyPair(seed)
-
-def DeriveKeyPair(seed):
-    seed_full = PRG(seed)
-    (seed_T, seed_PQ) = split(Group_T.Nseed, KEM_PQ.Nseed, seed)
-
-    dk_T = Group_T.RandomScalar(seed_T)
-    ek_T = Group_T.Exp(Group_T.g, dk_T)
-    (ek_PQ, dk_PQ) = KEM_PQ.DeriveKeyPair(seed_PQ)
-
-    ek_H = concat(ek_T, ek_PQ)
-    dk_H = concat(dk_T, dk_PQ)
-    return (ek_H, dk_H)
-
-def Encaps(ek):
-    (ek_T, ek_PQ) = split(Group_T.Nek, KEM_PQ.Nek, ek)
-
-    sk_E = Group_T.RandomScalar(random(GroupT.nseed))
-    ct_T = Group_T.Exp(GroupT.g, sk_E)
-    ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ek_T, sk_E))
-    (ss_PQ, ct_PQ) = KEM_PQ.Encap(ek_PQ)
-
-    ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
-    ct_H = concat(ct_T, ct_PQ)
-    return (ss_H, ct_H)
-
-def Decaps(dk, ct):
-    (dk_T, dk_PQ) = split(Group_T.Ndk, KEM_PQ.Ndk, dk)
-    (ct_T, ct_PQ) = split(Group_T.Nct, KEM_PQ.Nct, ct)
-
-    ek_T = Group_T.ToEncaps(dk_T)
-    ek_PQ = KEM_PQ.ToEncaps(dk_PQ)
-
-    ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ct_T, dk_T))
-    ss_PQ = KEM_PQ.Decap(dk_PQ, ct_PQ)
-
-    ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
-    return ss_H
-~~~
-
-## `HNX` {#xwing}
+## `QSF-X25519-MLKEM-SHA3` {#xwing}
 
 This hybrid KEM is identical to X-Wing {{XWING-SPEC}}. It has the following
 parameters.
 
-* `Group_T`: Curve25519 {{group-curve25519}}
-* `KEM_PQ`: ML-KEM-768 {{mlkem}}
-* `PRG`: SHAKE-256 {{FIPS202}}
-* `KDF`: SHA3-256 {{FIPS202}}
-* `Label` - `\.//^\`
+* Group_T: Curve25519 {{group-curve25519}}
+* KEM_PQ: ML-KEM-768 {{mlkem}}
+* PRG: SHAKE-256 {{FIPS202}}
+* KDF: SHA3-256 {{FIPS202}}
+* Label: `\.//^\`
+
+(This label does not follow the same pattern as the other KEMs here, but was
+chosen for compatibility with the X-Wing specification.)
 
 The following constants for the hybrid KEM are also defined:
 
@@ -347,60 +307,15 @@ The following constants for the hybrid KEM are also defined:
 - `Nct`: 1120
 - `Nss`: 32
 
-With these parameters in place, this hybrid KEM is defined as follows:
+## QSF-P384-MLKEM-SHA3 {#qsf-p384}
 
-~~~
-def GenerateKeyPair():
-    seed = random(Nseed)
-    return DeriveKeyPair(seed)
+QSF-P384-MLKEM-SHA3 has the following parameters:
 
-def DeriveKeyPair(seed):
-    seed_full = PRG(seed)
-    (seed_T, seed_PQ) = split(Group_T.Nseed, KEM_PQ.Nseed, seed)
-
-    dk_T = Group_T.RandomScalar(seed_T)
-    ek_T = Group_T.Exp(Group_T.g, dk_T)
-    (ek_PQ, dk_PQ) = KEM_PQ.DeriveKeyPair(seed_PQ)
-
-    ek_H = concat(ek_T, ek_PQ)
-    dk_H = concat(dk_T, dk_PQ)
-    return (ek_H, dk_H)
-
-def Encaps(ek):
-    (ek_T, ek_PQ) = split(Group_T.Nek, KEM_PQ.Nek, ek)
-
-    sk_E = Group_T.RandomScalar(random(GroupT.nseed))
-    ct_T = Group_T.Exp(GroupT.g, sk_E)
-    ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ek_T, sk_E))
-    (ss_PQ, ct_PQ) = KEM_PQ.Encap(ek_PQ)
-
-    ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
-    ct_H = concat(ct_T, ct_PQ)
-    return (ss_H, ct_H)
-
-def Decaps(dk, ct):
-    (dk_T, dk_PQ) = split(Group_T.Ndk, KEM_PQ.Ndk, dk)
-    (ct_T, ct_PQ) = split(Group_T.Nct, KEM_PQ.Nct, ct)
-
-    ek_T = Group_T.ToEncaps(dk_T)
-    ek_PQ = KEM_PQ.ToEncaps(dk_PQ)
-
-    ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ct_T, dk_T))
-    ss_PQ = KEM_PQ.Decap(dk_PQ, ct_PQ)
-
-    ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
-    return ss_H
-~~~
-
-## `HNN5` {#qsf-p384}
-
-`HNN5` has the following parameters.
-
-* `Group_T`: P-384 {{group-nist}}
-* `KEM_PQ`: ML-KEM-1024 {{mlkem}}
-* `PRG`: SHAKE-256 {{FIPS202}}
-* `KDF`: HKDF-SHA-256 {{!RFC5869}}
-* `Label` - `HNN3`
+* Group_T: P-384 {{group-nist}}
+* KEM_PQ: ML-KEM-1024 {{mlkem}}
+* PRG: SHAKE-256 {{FIPS202}}
+* KDF: HKDF-SHA-256 {{!RFC5869}}
+* Label: `QSF-P384-MLKEM-SHA3`
 
 The following constants for the hybrid KEM are also defined:
 
@@ -409,51 +324,6 @@ The following constants for the hybrid KEM are also defined:
 - `Ndk`: 32
 - `Nct`: 1629
 - `Nss`: 32
-
-With these parameters in place, this hybrid KEM is defined as follows:
-
-~~~
-def GenerateKeyPair():
-    seed = random(Nseed)
-    return DeriveKeyPair(seed)
-
-def DeriveKeyPair(seed):
-    seed_full = PRG(seed)
-    (seed_T, seed_PQ) = split(Group_T.Nseed, KEM_PQ.Nseed, seed)
-
-    dk_T = Group_T.RandomScalar(seed_T))
-    ek_T = Group_T.Exp(Group_T.g, dk_T)
-    (ek_PQ, dk_PQ) = KEM_PQ.DeriveKeyPair(seed_PQ)
-
-    ek_H = concat(ek_T, ek_PQ)
-    dk_H = concat(dk_T, dk_PQ)
-    return (ek_H, dk_H)
-
-def Encaps(ek):
-    (ek_T, ek_PQ) = split(Group_T.Nek, KEM_PQ.Nek, ek)
-
-    sk_E = Group_T.RandomScalar(random(GroupT.nseed))
-    ct_T = Group_T.Exp(GroupT.g, sk_E)
-    ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ek_T, sk_E))
-    (ss_PQ, ct_PQ) = KEM_PQ.Encap(ek_PQ)
-
-    ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
-    ct_H = concat(ct_T, ct_PQ)
-    return (ss_H, ct_H)
-
-def Decaps(dk, ct):
-    (dk_T, dk_PQ) = split(Group_T.Ndk, KEM_PQ.Ndk, dk)
-    (ct_T, ct_PQ) = split(Group_T.Nct, KEM_PQ.Nct, ct)
-
-    ek_T = Group_T.ToEncaps(dk_T)
-    ek_PQ = KEM_PQ.ToEncaps(dk_PQ)
-
-    ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ct_T, dk_T))
-    ss_PQ = KEM_PQ.Decap(dk_PQ, ct_PQ)
-
-    ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
-    return ss_H
-~~~
 
 ### Security properties
 
