@@ -325,35 +325,9 @@ The following constants for the hybrid KEM are also defined:
 - `Nct`: 1629
 - `Nss`: 32
 
-### Security properties
-
-The inlined DH-KEM is instantiated over the elliptic curve group P-384: as
-shown in {{CDM23}}, this gives the traditional KEM maximum binding
-properties (MAL-BIND-K-CT, MAL-BIND-K-PK).
-
-ML-KEM-1024 as standardized in {{FIPS203}}, when using the 64-byte seed key
-format as is here, provides MAL-BIND-K-CT security and LEAK-BIND-K-PK
-security, as demonstrated in {{SCHMIEG2024}}.
-
-Therefore this concrete instance provides MAL-BIND-K-PK and MAL-BIND-K-CT
-security. <!-- TODO: update XWING paper to show this -->
-
-This implies via {{KSMW2024}} that this instance also satisfies
-
-- MAL-BIND-K,CT-PK
-- MAL-BIND-K,PK-CT
-- LEAK-BIND-K-PK
-- LEAK-BIND-K-CT
-- LEAK-BIND-K,CT-PK
-- LEAK-BIND-K,PK-CT
-- HON-BIND-K-PK
-- HON-BIND-K-CT
-- HON-BIND-K,CT-PK
-- HON-BIND-K,PK-CT
-
 # Security Considerations
 
-[[TODO: writeme]]
+[[ TODO ]]
 
 # IANA Considerations
 
@@ -361,7 +335,11 @@ This document has no IANA actions.
 
 --- back
 
+# Test Vectors
+
+[[ TODO ]]
+
 # Acknowledgments
 {:numbered="false"}
 
-[[TODO: writeme]]
+[[ TODO ]]
