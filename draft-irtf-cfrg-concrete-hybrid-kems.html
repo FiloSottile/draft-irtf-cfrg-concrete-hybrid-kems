@@ -6,13 +6,14 @@
 <meta content="initial-scale=1.0" name="viewport">
 <title>Concrete Hybrid PQ/T Key Encapsulation Mechanisms</title>
 <meta content="Deirdre Connolly" name="author">
+<meta content="Richard Barnes" name="author">
 <meta content="
-       PQ/T Hybrid Key Encapsulation Mechanisms (KEMs) combine &quot;post-quantum&quot; cryptographic
-algorithms, which are safe from attack by a quantum computer, with &quot;traditional&quot;
-algorithms, which are not.  CFRG has developed a general framework for creating
-hybrid KEMs.  In this document, we define concrete instantiations of this
-framework to illustrate certain properties of the framework and simplify
-implementors' choices. 
+       PQ/T Hybrid Key Encapsulation Mechanisms (KEMs) combine &quot;post-quantum&quot;
+cryptographic algorithms, which are safe from attack by a quantum computer,
+with &quot;traditional&quot; algorithms, which are not.  CFRG has developed a general
+framework for creating hybrid KEMs.  In this document, we define concrete
+instantiations of this framework to illustrate certain properties of the
+framework and simplify implementors' choices. 
     " name="description">
 <meta content="xml2rfc 3.29.0" name="generator">
 <meta content="post quantum" name="keyword">
@@ -1056,8 +1057,8 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <td class="right">June 2025</td>
 </tr></thead>
 <tfoot><tr>
-<td class="left">Connolly</td>
-<td class="center">Expires 20 December 2025</td>
+<td class="left">Connolly &amp; Barnes</td>
+<td class="center">Expires 22 December 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1070,17 +1071,21 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-concrete-hybrid-kems-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-06-18" class="published">18 June 2025</time>
+<time datetime="2025-06-20" class="published">20 June 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-12-20">20 December 2025</time></dd>
-<dt class="label-authors">Author:</dt>
+<dd class="expires"><time datetime="2025-12-22">22 December 2025</time></dd>
+<dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
       <div class="author-name">D. Connolly</div>
 <div class="org">SandboxAQ</div>
+</div>
+<div class="author">
+      <div class="author-name">R. Barnes</div>
+<div class="org">Cisco</div>
 </div>
 </dd>
 </dl>
@@ -1088,12 +1093,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <h1 id="title">Concrete Hybrid PQ/T Key Encapsulation Mechanisms</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">PQ/T Hybrid Key Encapsulation Mechanisms (KEMs) combine "post-quantum" cryptographic
-algorithms, which are safe from attack by a quantum computer, with "traditional"
-algorithms, which are not.  CFRG has developed a general framework for creating
-hybrid KEMs.  In this document, we define concrete instantiations of this
-framework to illustrate certain properties of the framework and simplify
-implementors' choices.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-1">PQ/T Hybrid Key Encapsulation Mechanisms (KEMs) combine "post-quantum"
+cryptographic algorithms, which are safe from attack by a quantum computer,
+with "traditional" algorithms, which are not.  CFRG has developed a general
+framework for creating hybrid KEMs.  In this document, we define concrete
+instantiations of this framework to illustrate certain properties of the
+framework and simplify implementors' choices.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-about-this-document">
@@ -1130,7 +1135,7 @@ implementors' choices.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 20 December 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 22 December 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1232,7 +1237,7 @@ implementors' choices.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
             <p id="section-toc.1-1.8.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
-            <p id="section-toc.1-1.9.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+            <p id="section-toc.1-1.9.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
 </li>
         </ul>
 </nav>
@@ -1243,21 +1248,21 @@ implementors' choices.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
       <h2 id="name-introduction">
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
-<p id="section-1-1">PQ/T Hybrid Key Encapsulation Mechanisms (KEMs) combine "post-quantum" cryptographic
-algorithms, which are safe from attack by a quantum computer, with "traditional"
-algorithms, which are not.  Such KEMs are secure against a quantum attacker as
-long as the PQ algorithm is secure, and remain secure against traditional
-attackers even if the PQ algorithm is not secure.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2"><span>[<a href="#HYBRID-KEMS" class="cite xref">HYBRID-KEMS</a>]</span> defines a general framework for creating hybrid
-KEMs. It includes multiple specific mechanisms for combining a PQ algorithm with
-a traditional algorithm, with different performance properties and security
-requirements for the underlying algorithms.<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">In this document, we describe instances of these different specific combiners,
-with specific choices for the underlying algorithms.  The choices described here
-illustrate the security analysis required to make choices that meet the
-requirements of the general framework, and can serve as a baseline for
-application designers.  We also provide test vectors for these instances so that
-implementors can verify the correctness of their implementations.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-1">PQ/T Hybrid Key Encapsulation Mechanisms (KEMs) combine "post-quantum"
+cryptographic algorithms, which are safe from attack by a quantum computer,
+with "traditional" algorithms, which are not.  Such KEMs are secure against a
+quantum attacker as long as the PQ algorithm is secure, and remain secure
+against traditional attackers even if the PQ algorithm is not secure.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2"><span>[<a href="#HYBRID-KEMS" class="cite xref">HYBRID-KEMS</a>]</span> defines a general framework for
+creating hybrid KEMs. It includes multiple specific mechanisms for combining
+a PQ algorithm with a traditional algorithm, with different performance
+properties and security requirements for the underlying algorithms.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">In this document, we describe instances of these different specific
+combiners, with specific choices for the underlying algorithms.  The choices
+described here illustrate the security analysis required to make choices that
+meet the requirements of the general framework, and can serve as a baseline
+for application designers.  We also provide test vectors for these instances
+so that implementors can verify the correctness of their implementations.<a href="#section-1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-definitions">
@@ -1288,8 +1293,8 @@ the concrete nominal groups, and <a href="#nominal-kems" class="auto internal xr
 <a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-nominal-groups" class="section-name selfRef">Nominal Groups</a>
         </h3>
 <p id="section-3.1-1">This section specifies concrete nominal groups that implement the abstraction
-in <span>[<a href="#HYBRID-KEMS" class="cite xref">HYBRID-KEMS</a>]</span>. It includes groups based on the NIST curves P-256 and P-384 <span>[<a href="#FIPS186" class="cite xref">FIPS186</a>]</span>,
-as well as a group based on Curve25519 from <span>[<a href="#RFC7748" class="cite xref">RFC7748</a>]</span><a href="#section-3.1-1" class="pilcrow">¶</a></p>
+in <span>[<a href="#HYBRID-KEMS" class="cite xref">HYBRID-KEMS</a>]</span>. It includes groups based on the NIST curves P-256 and
+P-384 <span>[<a href="#FIPS186" class="cite xref">FIPS186</a>]</span>, as well as a group based on Curve25519 from <span>[<a href="#RFC7748" class="cite xref">RFC7748</a>]</span><a href="#section-3.1-1" class="pilcrow">¶</a></p>
 <div id="group-p256">
 <section id="section-3.1.1">
           <h4 id="name-p-256-nominal-group">
@@ -1298,20 +1303,22 @@ as well as a group based on Curve25519 from <span>[<a href="#RFC7748" class="cit
 <p id="section-3.1.1-1">The following functions for the P-256 nominal group are defined:<a href="#section-3.1.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.1.1-2.1">
-              <p id="section-3.1.1-2.1.1"><code>Exp(p, x) -&gt; q</code>: This function computes scalar multiplication between
-the input element (or point) <code>p</code> and the scalar <code>x</code> <span>[<a href="#FIPS186" class="cite xref">FIPS186</a>]</span>.<a href="#section-3.1.1-2.1.1" class="pilcrow">¶</a></p>
+              <p id="section-3.1.1-2.1.1"><code>Exp(p, x) -&gt; q</code>: This function computes scalar multiplication between the
+input element (or point) <code>p</code> and the scalar <code>x</code> <span>[<a href="#FIPS186" class="cite xref">FIPS186</a>]</span>.<a href="#section-3.1.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.1.1-2.2">
-              <p id="section-3.1.1-2.2.1"><code>RandomScalar(seed) -&gt; k</code>: Implemented by converting <code>seed</code> to an integer using
-OS2IP, and then reducing the resulting integer modulo the group order.<a href="#section-3.1.1-2.2.1" class="pilcrow">¶</a></p>
+              <p id="section-3.1.1-2.2.1"><code>RandomScalar(seed) -&gt; k</code>: Implemented by converting <code>seed</code> to an integer
+using OS2IP, and then reducing the resulting integer modulo the group
+order.<a href="#section-3.1.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.1.1-2.3">
               <p id="section-3.1.1-2.3.1"><code>ElementToSharedSecret(P) -&gt; ss</code>: Implemented using the compressed
-Elliptic-Curve-Point-to-Octet-String method according to <span>[<a href="#SEC1" class="cite xref">SEC1</a>]</span> with input <code>P</code>,
-yielding a Nelem-byte output. Additionally, this function validates that the
-input element is not the group identity element. Finally, this function outputs the
-encoding the X coordinate of the elliptic curve point corresponding to P to a
-little-endian Nss-byte string.<a href="#section-3.1.1-2.3.1" class="pilcrow">¶</a></p>
+Elliptic-Curve-Point-to-Octet-String method according to <span>[<a href="#SEC1" class="cite xref">SEC1</a>]</span> with
+input <code>P</code>, yielding a Nelem-byte output. Additionally, this function
+validates that the input element is not the group identity
+element. Finally, this function outputs the encoding the X coordinate of
+the elliptic curve point corresponding to P to a little-endian Nss-byte
+string.<a href="#section-3.1.1-2.3.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 <p id="section-3.1.1-3">The following constants are also defined.<a href="#section-3.1.1-3" class="pilcrow">¶</a></p>
@@ -1339,20 +1346,22 @@ little-endian Nss-byte string.<a href="#section-3.1.1-2.3.1" class="pilcrow">¶<
 <p id="section-3.1.2-1">The following functions for the P-384 nominal group are defined:<a href="#section-3.1.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.1.2-2.1">
-              <p id="section-3.1.2-2.1.1"><code>Exp(p, x) -&gt; q</code>: This function computes scalar multiplication between
-the input element (or point) <code>p</code> and the scalar <code>x</code> <span>[<a href="#FIPS186" class="cite xref">FIPS186</a>]</span>.<a href="#section-3.1.2-2.1.1" class="pilcrow">¶</a></p>
+              <p id="section-3.1.2-2.1.1"><code>Exp(p, x) -&gt; q</code>: This function computes scalar multiplication between the
+input element (or point) <code>p</code> and the scalar <code>x</code> <span>[<a href="#FIPS186" class="cite xref">FIPS186</a>]</span>.<a href="#section-3.1.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.1.2-2.2">
-              <p id="section-3.1.2-2.2.1"><code>RandomScalar(seed) -&gt; k</code>: Implemented by converting <code>seed</code> to an integer using
-OS2IP, and then reducing the resulting integer modulo the group order.<a href="#section-3.1.2-2.2.1" class="pilcrow">¶</a></p>
+              <p id="section-3.1.2-2.2.1"><code>RandomScalar(seed) -&gt; k</code>: Implemented by converting <code>seed</code> to an integer
+using OS2IP, and then reducing the resulting integer modulo the group
+order.<a href="#section-3.1.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.1.2-2.3">
               <p id="section-3.1.2-2.3.1"><code>ElementToSharedSecret(P) -&gt; ss</code>: Implemented using the compressed
-Elliptic-Curve-Point-to-Octet-String method according to <span>[<a href="#SEC1" class="cite xref">SEC1</a>]</span> with input <code>P</code>,
-yielding a Nelem-byte output. Additionally, this function validates that the
-input element is not the group identity element. Finally, this function outputs the
-encoding the X coordinate of the elliptic curve point corresponding to P to a
-little-endian Nss-byte string.<a href="#section-3.1.2-2.3.1" class="pilcrow">¶</a></p>
+Elliptic-Curve-Point-to-Octet-String method according to <span>[<a href="#SEC1" class="cite xref">SEC1</a>]</span> with
+input <code>P</code>, yielding a Nelem-byte output. Additionally, this function
+validates that the input element is not the group identity
+element. Finally, this function outputs the encoding the X coordinate of
+the elliptic curve point corresponding to P to a little-endian Nss-byte
+string.<a href="#section-3.1.2-2.3.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 <p id="section-3.1.2-3">The following constants are also defined.<a href="#section-3.1.2-3" class="pilcrow">¶</a></p>
@@ -1383,11 +1392,12 @@ little-endian Nss-byte string.<a href="#section-3.1.2-2.3.1" class="pilcrow">¶<
               <p id="section-3.1.3-2.1.1"><code>Exp(p, x) -&gt; q</code>: Implemented by X25519(x, p) from <span>[<a href="#RFC7748" class="cite xref">RFC7748</a>]</span>.<a href="#section-3.1.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.1.3-2.2">
-              <p id="section-3.1.3-2.2.1"><code>RandomScalar(seed) -&gt; k</code>: Implemented by sampling and outputting 32 random bytes
-from a cryptographically secure pseudorandom number generator.<a href="#section-3.1.3-2.2.1" class="pilcrow">¶</a></p>
+              <p id="section-3.1.3-2.2.1"><code>RandomScalar(seed) -&gt; k</code>: Implemented by sampling and outputting 32 random
+bytes from a cryptographically secure pseudorandom number generator.<a href="#section-3.1.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.1.3-2.3">
-              <p id="section-3.1.3-2.3.1"><code>ElementToSharedSecret(P) -&gt; ss</code>: Implemented by the identity function, i.e., by outputting P.<a href="#section-3.1.3-2.3.1" class="pilcrow">¶</a></p>
+              <p id="section-3.1.3-2.3.1"><code>ElementToSharedSecret(P) -&gt; ss</code>: Implemented by the identity function,
+i.e., by outputting P.<a href="#section-3.1.3-2.3.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 <p id="section-3.1.3-3">The following constants are also defined.<a href="#section-3.1.3-3" class="pilcrow">¶</a></p>
@@ -1414,28 +1424,33 @@ from a cryptographically secure pseudorandom number generator.<a href="#section-
         <h3 id="name-concrete-kem-instances">
 <a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-concrete-kem-instances" class="section-name selfRef">Concrete KEM Instances</a>
         </h3>
-<p id="section-3.2-1">This section specifies concrete KEM instances that implement the KEM abstraction from
-<span>[<a href="#HYBRID-KEMS" class="cite xref">HYBRID-KEMS</a>]</span>. It focuses solely on ML-KEM as specified in <span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-1">This section specifies concrete KEM instances that implement the KEM
+abstraction from <span>[<a href="#HYBRID-KEMS" class="cite xref">HYBRID-KEMS</a>]</span>. It focuses solely on ML-KEM as specified in
+<span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
 <div id="mlkem-768">
 <section id="section-3.2.1">
           <h4 id="name-ml-kem-768">
 <a href="#section-3.2.1" class="section-number selfRef">3.2.1. </a><a href="#name-ml-kem-768" class="section-name selfRef">ML-KEM-768</a>
           </h4>
-<p id="section-3.2.1-1">The ML-KEM-768 nominal KEM implements the KEM abstraction from <span>[<a href="#HYBRID-KEMS" class="cite xref">HYBRID-KEMS</a>]</span> with
-the following functions:<a href="#section-3.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.2.1-1">The ML-KEM-768 nominal KEM implements the KEM abstraction from
+<span>[<a href="#HYBRID-KEMS" class="cite xref">HYBRID-KEMS</a>]</span> with the following functions:<a href="#section-3.2.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.2.1-2.1">
-              <p id="section-3.2.1-2.1.1"><code>GenerateKeyPair() -&gt; (ek, dk)</code>: Implemented as KeyGen in Section 7.1 of <span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.<a href="#section-3.2.1-2.1.1" class="pilcrow">¶</a></p>
+              <p id="section-3.2.1-2.1.1"><code>GenerateKeyPair() -&gt; (ek, dk)</code>: Implemented as KeyGen in Section 7.1 of
+<span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.<a href="#section-3.2.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.2.1-2.2">
-              <p id="section-3.2.1-2.2.1"><code>DeriveKeyPair(seed) -&gt; (ek, dk)</code>: Implemented as KeyGen_internal(seed[0:32], seed[32:64]),
-where KeyGen_internal is defined in Section 6 of <span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.<a href="#section-3.2.1-2.2.1" class="pilcrow">¶</a></p>
+              <p id="section-3.2.1-2.2.1"><code>DeriveKeyPair(seed) -&gt; (ek, dk)</code>: Implemented as
+KeyGen_internal(seed[0:32], seed[32:64]), where KeyGen_internal is defined
+in Section 6 of <span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.<a href="#section-3.2.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.2.1-2.3">
-              <p id="section-3.2.1-2.3.1"><code>Encaps(ek) -&gt; (ct, ss)</code>: Implemented as Encaps in Section 7.2 of <span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.<a href="#section-3.2.1-2.3.1" class="pilcrow">¶</a></p>
+              <p id="section-3.2.1-2.3.1"><code>Encaps(ek) -&gt; (ct, ss)</code>: Implemented as Encaps in Section 7.2 of
+<span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.<a href="#section-3.2.1-2.3.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.2.1-2.4">
-              <p id="section-3.2.1-2.4.1"><code>Decaps(dk, ct) -&gt; ss</code>: Implemented as Encaps in Section 7.3 of <span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.<a href="#section-3.2.1-2.4.1" class="pilcrow">¶</a></p>
+              <p id="section-3.2.1-2.4.1"><code>Decaps(dk, ct) -&gt; ss</code>: Implemented as Encaps in Section 7.3 of
+<span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.<a href="#section-3.2.1-2.4.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.2.1-2.5">
               <p id="section-3.2.1-2.5.1"><code>EncapsDerand(ek, randomness) -&gt; (ct, shared_secret)</code>: [[TODO: citeme]<a href="#section-3.2.1-2.5.1" class="pilcrow">¶</a></p>
@@ -1466,21 +1481,25 @@ where KeyGen_internal is defined in Section 6 of <span>[<a href="#FIPS203" class
           <h4 id="name-ml-kem-1024">
 <a href="#section-3.2.2" class="section-number selfRef">3.2.2. </a><a href="#name-ml-kem-1024" class="section-name selfRef">ML-KEM-1024</a>
           </h4>
-<p id="section-3.2.2-1">The ML-KEM-1024 nominal KEM implements the KEM abstraction from <span>[<a href="#HYBRID-KEMS" class="cite xref">HYBRID-KEMS</a>]</span> with
-the following functions:<a href="#section-3.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2.2-1">The ML-KEM-1024 nominal KEM implements the KEM abstraction from
+<span>[<a href="#HYBRID-KEMS" class="cite xref">HYBRID-KEMS</a>]</span> with the following functions:<a href="#section-3.2.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.2.2-2.1">
-              <p id="section-3.2.2-2.1.1"><code>GenerateKeyPair() -&gt; (ek, dk)</code>: Implemented as KeyGen in Section 7.1 of <span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.<a href="#section-3.2.2-2.1.1" class="pilcrow">¶</a></p>
+              <p id="section-3.2.2-2.1.1"><code>GenerateKeyPair() -&gt; (ek, dk)</code>: Implemented as KeyGen in Section 7.1 of
+<span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.<a href="#section-3.2.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.2.2-2.2">
-              <p id="section-3.2.2-2.2.1"><code>DeriveKeyPair(seed) -&gt; (ek, dk)</code>: Implemented as KeyGen_internal(seed[0:32], seed[32:64]),
-where KeyGen_internal is defined in Section 6 of <span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.<a href="#section-3.2.2-2.2.1" class="pilcrow">¶</a></p>
+              <p id="section-3.2.2-2.2.1"><code>DeriveKeyPair(seed) -&gt; (ek, dk)</code>: Implemented as
+KeyGen_internal(seed[0:32], seed[32:64]), where KeyGen_internal is defined
+in Section 6 of <span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.<a href="#section-3.2.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.2.2-2.3">
-              <p id="section-3.2.2-2.3.1"><code>Encaps(ek) -&gt; (ct, ss)</code>: Implemented as Encaps in Section 7.2 of <span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.<a href="#section-3.2.2-2.3.1" class="pilcrow">¶</a></p>
+              <p id="section-3.2.2-2.3.1"><code>Encaps(ek) -&gt; (ct, ss)</code>: Implemented as Encaps in Section 7.2 of
+<span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.<a href="#section-3.2.2-2.3.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.2.2-2.4">
-              <p id="section-3.2.2-2.4.1"><code>Decaps(dk, ct) -&gt; ss</code>: Implemented as Encaps in Section 7.3 of <span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.<a href="#section-3.2.2-2.4.1" class="pilcrow">¶</a></p>
+              <p id="section-3.2.2-2.4.1"><code>Decaps(dk, ct) -&gt; ss</code>: Implemented as Encaps in Section 7.3 of
+<span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.<a href="#section-3.2.2-2.4.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.2.2-2.5">
               <p id="section-3.2.2-2.5.1"><code>EncapsDerand(ek, randomness) -&gt; (ct, shared_secret)</code>: [[TODO: citeme]<a href="#section-3.2.2-2.5.1" class="pilcrow">¶</a></p>
@@ -1519,33 +1538,34 @@ where KeyGen_internal is defined in Section 6 of <span>[<a href="#FIPS203" class
 <ol start="1" type="1" class="normal type-1" id="section-4-2">
 <li id="section-4-2.1">
           <p id="section-4-2.1.1"><code>HNN3</code> <a href="#qsf-p256" class="auto internal xref">Section 4.1</a>:
-A hybrid KEM composing ML-KEM-768 and P-256 using the HashTraditionalOnly combiner with
-SHA3-256 as the Combine KDF and SHAKE256 as the Expand KDF.<a href="#section-4-2.1.1" class="pilcrow">¶</a></p>
+A hybrid KEM composing ML-KEM-768 and P-256 using the QSF combiner with
+SHA3-256 as the KDF and SHAKE256 as the PRG.<a href="#section-4-2.1.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-4-2.2">
           <p id="section-4-2.2.1"><code>HNX</code> <a href="#xwing" class="auto internal xref">Section 4.2</a>:
-A hybrid KEM composing ML-KEM-768 and Curve25519 using the HashTraditionalOnly combiner with
-SHA3-256 as the Combine KDF and SHAKE256 as the Expand KDF. This variant is identical to X-Wing <span>[<a href="#XWING-SPEC" class="cite xref">XWING-SPEC</a>]</span>.<a href="#section-4-2.2.1" class="pilcrow">¶</a></p>
+A hybrid KEM composing ML-KEM-768 and Curve25519 using
+the QSF combiner with SHA3-256 as the KDF and SHAKE256 as the PRG. This
+construction is identical to X-Wing <span>[<a href="#XWING-SPEC" class="cite xref">XWING-SPEC</a>]</span>.<a href="#section-4-2.2.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-4-2.3">
           <p id="section-4-2.3.1"><code>HNN5</code> <a href="#qsf-p384" class="auto internal xref">Section 4.3</a>:
-A hybrid KEM composing ML-KEM-1024 and P-384 using the HashTraditionalOnly combiner with
-SHA3-256 as the Combine KDF and SHAKE256 as the Expand KDF.<a href="#section-4-2.3.1" class="pilcrow">¶</a></p>
+A hybrid KEM composing ML-KEM-1024 and P-384 using the QSF combiner with
+SHA3-256 as the KDF and SHAKE256 as the PRG.<a href="#section-4-2.3.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
 <p id="section-4-3">Each instance specifies the PQ and traditional KEMs being combined, the
 combiner construction from <span>[<a href="#HYBRID-KEMS" class="cite xref">HYBRID-KEMS</a>]</span>, the <code>label</code> to use for domain
-separation in the combiner function, as well as the XOF and KDF functions to
+separation in the combiner function, as well as the PRG and KDF functions to
 use throughout.<a href="#section-4-3" class="pilcrow">¶</a></p>
 <div id="qsf-p256">
 <section id="section-4.1">
         <h3 id="name-hnn3">
 <a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-hnn3" class="section-name selfRef"><code>HNN3</code></a>
         </h3>
-<p id="section-4.1-1">This hybrid KEM is heavily based on <span>[<a href="#XWING" class="cite xref">XWING</a>]</span>, using the HashTraditionalOnly combiner
-from <span>[<a href="#HYBRID-KEMS" class="cite xref">HYBRID-KEMS</a>]</span>. In particular, it has the same exact design but uses P-256
-instead of X25519 as the the traditional component of the algorithm. It has the
-following parameters.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1-1">This hybrid KEM is heavily based on <span>[<a href="#XWING" class="cite xref">XWING</a>]</span>, using the QSF combiner from
+<span>[<a href="#HYBRID-KEMS" class="cite xref">HYBRID-KEMS</a>]</span>. In particular, it has the same exact design but uses P-256
+instead of X25519 as the the traditional component of the algorithm. It has
+the following parameters.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.1-2.1">
             <p id="section-4.1-2.1.1"><code>Group_T</code>: P-256 <a href="#group-p256" class="auto internal xref">Section 3.1.1</a><a href="#section-4.1-2.1.1" class="pilcrow">¶</a></p>
@@ -1554,10 +1574,10 @@ following parameters.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
             <p id="section-4.1-2.2.1"><code>KEM_PQ</code>: ML-KEM-768 <a href="#mlkem-768" class="auto internal xref">Section 3.2.1</a><a href="#section-4.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.1-2.3">
-            <p id="section-4.1-2.3.1"><code>Expand</code>: SHAKE-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.1-2.3.1" class="pilcrow">¶</a></p>
+            <p id="section-4.1-2.3.1"><code>PRG</code>: SHAKE-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.1-2.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.1-2.4">
-            <p id="section-4.1-2.4.1"><code>Combine</code>: SHA3-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.1-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-4.1-2.4.1"><code>KDF</code>: SHA3-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.1-2.4.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.1-2.5">
             <p id="section-4.1-2.5.1"><code>Label</code> - <code>HNN3</code><a href="#section-4.1-2.5.1" class="pilcrow">¶</a></p>
@@ -1589,7 +1609,7 @@ def GenerateKeyPair():
     return DeriveKeyPair(seed)
 
 def DeriveKeyPair(seed):
-    seed_full = Expand(seed)
+    seed_full = PRG(seed)
     (seed_T, seed_PQ) = split(Group_T.Nseed, KEM_PQ.Nseed, seed)
 
     dk_T = Group_T.RandomScalar(seed_T)
@@ -1608,7 +1628,7 @@ def Encaps(ek):
     ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ek_T, sk_E))
     (ss_PQ, ct_PQ) = KEM_PQ.Encap(ek_PQ)
 
-    ss_H = Combine(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
+    ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
     ct_H = concat(ct_T, ct_PQ)
     return (ss_H, ct_H)
 
@@ -1622,7 +1642,7 @@ def Decaps(dk, ct):
     ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ct_T, dk_T))
     ss_PQ = KEM_PQ.Decap(dk_PQ, ct_PQ)
 
-    ss_H = Combine(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
+    ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
     return ss_H
 </pre><a href="#section-4.1-6" class="pilcrow">¶</a>
 </div>
@@ -1633,7 +1653,8 @@ def Decaps(dk, ct):
         <h3 id="name-hnx">
 <a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-hnx" class="section-name selfRef"><code>HNX</code></a>
         </h3>
-<p id="section-4.2-1">This hybrid KEM is identical to X-Wing <span>[<a href="#XWING-SPEC" class="cite xref">XWING-SPEC</a>]</span>. It has the following parameters.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.2-1">This hybrid KEM is identical to X-Wing <span>[<a href="#XWING-SPEC" class="cite xref">XWING-SPEC</a>]</span>. It has the following
+parameters.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.2-2.1">
             <p id="section-4.2-2.1.1"><code>Group_T</code>: Curve25519 <a href="#group-curve25519" class="auto internal xref">Section 3.1.3</a><a href="#section-4.2-2.1.1" class="pilcrow">¶</a></p>
@@ -1642,10 +1663,10 @@ def Decaps(dk, ct):
             <p id="section-4.2-2.2.1"><code>KEM_PQ</code>: ML-KEM-768 <a href="#mlkem-768" class="auto internal xref">Section 3.2.1</a><a href="#section-4.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.2-2.3">
-            <p id="section-4.2-2.3.1"><code>Expand</code>: SHAKE-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.2-2.3.1" class="pilcrow">¶</a></p>
+            <p id="section-4.2-2.3.1"><code>PRG</code>: SHAKE-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.2-2.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.2-2.4">
-            <p id="section-4.2-2.4.1"><code>Combine</code>: SHA3-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.2-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-4.2-2.4.1"><code>KDF</code>: SHA3-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.2-2.4.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.2-2.5">
             <p id="section-4.2-2.5.1"><code>Label</code> - <code>\.//^\</code><a href="#section-4.2-2.5.1" class="pilcrow">¶</a></p>
@@ -1677,7 +1698,7 @@ def GenerateKeyPair():
     return DeriveKeyPair(seed)
 
 def DeriveKeyPair(seed):
-    seed_full = Expand(seed)
+    seed_full = PRG(seed)
     (seed_T, seed_PQ) = split(Group_T.Nseed, KEM_PQ.Nseed, seed)
 
     dk_T = Group_T.RandomScalar(seed_T)
@@ -1696,7 +1717,7 @@ def Encaps(ek):
     ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ek_T, sk_E))
     (ss_PQ, ct_PQ) = KEM_PQ.Encap(ek_PQ)
 
-    ss_H = Combine(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
+    ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
     ct_H = concat(ct_T, ct_PQ)
     return (ss_H, ct_H)
 
@@ -1710,7 +1731,7 @@ def Decaps(dk, ct):
     ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ct_T, dk_T))
     ss_PQ = KEM_PQ.Decap(dk_PQ, ct_PQ)
 
-    ss_H = Combine(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
+    ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
     return ss_H
 </pre><a href="#section-4.2-6" class="pilcrow">¶</a>
 </div>
@@ -1730,10 +1751,10 @@ def Decaps(dk, ct):
             <p id="section-4.3-2.2.1"><code>KEM_PQ</code>: ML-KEM-1024 <a href="#mlkem-1024" class="auto internal xref">Section 3.2.2</a><a href="#section-4.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.3-2.3">
-            <p id="section-4.3-2.3.1"><code>Expand</code>: SHAKE-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.3-2.3.1" class="pilcrow">¶</a></p>
+            <p id="section-4.3-2.3.1"><code>PRG</code>: SHAKE-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.3-2.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.3-2.4">
-            <p id="section-4.3-2.4.1"><code>Combine</code>: HKDF-SHA-256 <span>[<a href="#RFC5869" class="cite xref">RFC5869</a>]</span><a href="#section-4.3-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-4.3-2.4.1"><code>KDF</code>: HKDF-SHA-256 <span>[<a href="#RFC5869" class="cite xref">RFC5869</a>]</span><a href="#section-4.3-2.4.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.3-2.5">
             <p id="section-4.3-2.5.1"><code>Label</code> - <code>HNN3</code><a href="#section-4.3-2.5.1" class="pilcrow">¶</a></p>
@@ -1765,7 +1786,7 @@ def GenerateKeyPair():
     return DeriveKeyPair(seed)
 
 def DeriveKeyPair(seed):
-    seed_full = Expand(seed)
+    seed_full = PRG(seed)
     (seed_T, seed_PQ) = split(Group_T.Nseed, KEM_PQ.Nseed, seed)
 
     dk_T = Group_T.RandomScalar(seed_T))
@@ -1784,7 +1805,7 @@ def Encaps(ek):
     ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ek_T, sk_E))
     (ss_PQ, ct_PQ) = KEM_PQ.Encap(ek_PQ)
 
-    ss_H = Combine(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
+    ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
     ct_H = concat(ct_T, ct_PQ)
     return (ss_H, ct_H)
 
@@ -1798,7 +1819,7 @@ def Decaps(dk, ct):
     ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ct_T, dk_T))
     ss_PQ = KEM_PQ.Decap(dk_PQ, ct_PQ)
 
-    ss_H = Combine(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
+    ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
     return ss_H
 </pre><a href="#section-4.3-6" class="pilcrow">¶</a>
 </div>
@@ -1965,8 +1986,8 @@ security.<a href="#section-4.3.1-3" class="pilcrow">¶</a></p>
 </div>
 <div id="authors-addresses">
 <section id="appendix-B">
-      <h2 id="name-authors-address">
-<a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
       </h2>
 <address class="vcard">
         <div dir="auto" class="left"><span class="fn nameRole">Deirdre Connolly</span></div>
@@ -1974,6 +1995,14 @@ security.<a href="#section-4.3.1-3" class="pilcrow">¶</a></p>
 <div class="email">
 <span>Email:</span>
 <a href="mailto:durumcrustulum@gmail.com" class="email">durumcrustulum@gmail.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Richard Barnes</span></div>
+<div dir="auto" class="left"><span class="org">Cisco</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:rlb@ipv.sx" class="email">rlb@ipv.sx</a>
 </div>
 </address>
 </section>

@@ -4,8 +4,9 @@
 
 Crypto Forum                                                 D. Connolly
 Internet-Draft                                                 SandboxAQ
-Intended status: Informational                              18 June 2025
-Expires: 20 December 2025
+Intended status: Informational                                 R. Barnes
+Expires: 22 December 2025                                          Cisco
+                                                            20 June 2025
 
 
            Concrete Hybrid PQ/T Key Encapsulation Mechanisms
@@ -54,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 20 December 2025.
+   This Internet-Draft will expire on 22 December 2025.
 
 Copyright Notice
 
@@ -90,7 +91,7 @@ Table of Contents
      7.1.  Normative References
      7.2.  Informative References
    Acknowledgments
-   Author's Address
+   Authors' Addresses
 
 1.  Introduction
 
@@ -298,38 +299,36 @@ Table of Contents
    This section instantiates three concrete KEMs:
 
    1.  HNN3 Section 4.1: A hybrid KEM composing ML-KEM-768 and P-256
-       using the HashTraditionalOnly combiner with SHA3-256 as the
-       Combine KDF and SHAKE256 as the Expand KDF.
+       using the QSF combiner with SHA3-256 as the KDF and SHAKE256 as
+       the PRG.
 
    2.  HNX Section 4.2: A hybrid KEM composing ML-KEM-768 and Curve25519
-       using the HashTraditionalOnly combiner with SHA3-256 as the
-       Combine KDF and SHAKE256 as the Expand KDF.  This variant is
-       identical to X-Wing [XWING-SPEC].
+       using the QSF combiner with SHA3-256 as the KDF and SHAKE256 as
+       the PRG.  This construction is identical to X-Wing [XWING-SPEC].
 
    3.  HNN5 Section 4.3: A hybrid KEM composing ML-KEM-1024 and P-384
-       using the HashTraditionalOnly combiner with SHA3-256 as the
-       Combine KDF and SHAKE256 as the Expand KDF.
+       using the QSF combiner with SHA3-256 as the KDF and SHAKE256 as
+       the PRG.
 
    Each instance specifies the PQ and traditional KEMs being combined,
    the combiner construction from [HYBRID-KEMS], the label to use for
-   domain separation in the combiner function, as well as the XOF and
+   domain separation in the combiner function, as well as the PRG and
    KDF functions to use throughout.
 
 4.1.  HNN3
 
-   This hybrid KEM is heavily based on [XWING], using the
-   HashTraditionalOnly combiner from [HYBRID-KEMS].  In particular, it
-   has the same exact design but uses P-256 instead of X25519 as the the
-   traditional component of the algorithm.  It has the following
-   parameters.
+   This hybrid KEM is heavily based on [XWING], using the QSF combiner
+   from [HYBRID-KEMS].  In particular, it has the same exact design but
+   uses P-256 instead of X25519 as the the traditional component of the
+   algorithm.  It has the following parameters.
 
    *  Group_T: P-256 Section 3.1.1
 
    *  KEM_PQ: ML-KEM-768 Section 3.2.1
 
-   *  Expand: SHAKE-256 [FIPS202]
+   *  PRG: SHAKE-256 [FIPS202]
 
-   *  Combine: SHA3-256 [FIPS202]
+   *  KDF: SHA3-256 [FIPS202]
 
    *  Label - HNN3
 
@@ -353,7 +352,7 @@ Table of Contents
        return DeriveKeyPair(seed)
 
    def DeriveKeyPair(seed):
-       seed_full = Expand(seed)
+       seed_full = PRG(seed)
        (seed_T, seed_PQ) = split(Group_T.Nseed, KEM_PQ.Nseed, seed)
 
        dk_T = Group_T.RandomScalar(seed_T)
@@ -372,7 +371,7 @@ Table of Contents
        ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ek_T, sk_E))
        (ss_PQ, ct_PQ) = KEM_PQ.Encap(ek_PQ)
 
-       ss_H = Combine(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
+       ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
        ct_H = concat(ct_T, ct_PQ)
        return (ss_H, ct_H)
 
@@ -386,7 +385,7 @@ Table of Contents
        ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ct_T, dk_T))
        ss_PQ = KEM_PQ.Decap(dk_PQ, ct_PQ)
 
-       ss_H = Combine(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
+       ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
        return ss_H
 
 4.2.  HNX
@@ -398,9 +397,9 @@ Table of Contents
 
    *  KEM_PQ: ML-KEM-768 Section 3.2.1
 
-   *  Expand: SHAKE-256 [FIPS202]
+   *  PRG: SHAKE-256 [FIPS202]
 
-   *  Combine: SHA3-256 [FIPS202]
+   *  KDF: SHA3-256 [FIPS202]
 
    *  Label - \.//^\
 
@@ -424,7 +423,7 @@ Table of Contents
        return DeriveKeyPair(seed)
 
    def DeriveKeyPair(seed):
-       seed_full = Expand(seed)
+       seed_full = PRG(seed)
        (seed_T, seed_PQ) = split(Group_T.Nseed, KEM_PQ.Nseed, seed)
 
        dk_T = Group_T.RandomScalar(seed_T)
@@ -443,7 +442,7 @@ Table of Contents
        ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ek_T, sk_E))
        (ss_PQ, ct_PQ) = KEM_PQ.Encap(ek_PQ)
 
-       ss_H = Combine(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
+       ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
        ct_H = concat(ct_T, ct_PQ)
        return (ss_H, ct_H)
 
@@ -457,7 +456,7 @@ Table of Contents
        ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ct_T, dk_T))
        ss_PQ = KEM_PQ.Decap(dk_PQ, ct_PQ)
 
-       ss_H = Combine(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
+       ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
        return ss_H
 
 4.3.  HNN5
@@ -468,9 +467,9 @@ Table of Contents
 
    *  KEM_PQ: ML-KEM-1024 Section 3.2.2
 
-   *  Expand: SHAKE-256 [FIPS202]
+   *  PRG: SHAKE-256 [FIPS202]
 
-   *  Combine: HKDF-SHA-256 [RFC5869]
+   *  KDF: HKDF-SHA-256 [RFC5869]
 
    *  Label - HNN3
 
@@ -494,7 +493,7 @@ Table of Contents
        return DeriveKeyPair(seed)
 
    def DeriveKeyPair(seed):
-       seed_full = Expand(seed)
+       seed_full = PRG(seed)
        (seed_T, seed_PQ) = split(Group_T.Nseed, KEM_PQ.Nseed, seed)
 
        dk_T = Group_T.RandomScalar(seed_T))
@@ -513,7 +512,7 @@ Table of Contents
        ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ek_T, sk_E))
        (ss_PQ, ct_PQ) = KEM_PQ.Encap(ek_PQ)
 
-       ss_H = Combine(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
+       ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
        ct_H = concat(ct_T, ct_PQ)
        return (ss_H, ct_H)
 
@@ -527,7 +526,7 @@ Table of Contents
        ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ct_T, dk_T))
        ss_PQ = KEM_PQ.Decap(dk_PQ, ct_PQ)
 
-       ss_H = Combine(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
+       ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
        return ss_H
 
 4.3.1.  Security properties
@@ -656,8 +655,13 @@ Acknowledgments
 
    [[TODO: writeme]]
 
-Author's Address
+Authors' Addresses
 
    Deirdre Connolly
    SandboxAQ
    Email: durumcrustulum@gmail.com
+
+
+   Richard Barnes
+   Cisco
+   Email: rlb@ipv.sx
