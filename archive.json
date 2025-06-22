@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-19T01:44:51.125401+00:00",
+  "timestamp": "2025-06-22T01:51:54.637542+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -287,6 +287,32 @@
           ]
         }
       ]
+    },
+    {
+      "number": 5,
+      "id": "PR_kwDOMmh5WM6bekQE",
+      "title": "draft-00 Release Candidate 1",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/5",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This is fairly heavy edit to get the doc cleaned up for release.  There are no substantive changes, but the exposition is cleaned up in a few ways:\r\n\r\n* The separate sections for P-256/P-384 and ML-KEM-768/ML-KEM-1024 are combined to avoid duplication\r\n* The instantiations no longer recite the algorithms from the generic doc\r\n* Instead of the `HNN` names, I invented a new `{scheme}-{T}-{PQ}-{hash}` schema\r\n* The sketchy security notes at the end have been cut\r\n\r\nBefore release, we should make sure issues are filed for the TODOs.",
+      "createdAt": "2025-06-20T21:48:27Z",
+      "updatedAt": "2025-06-20T21:48:27Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
+      "baseRefName": "main",
+      "baseRefOid": "ba027e817dc93b50a015ada671cbc4c38ebe1bf3",
+      "headRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
+      "headRefName": "rc1",
+      "headRefOid": "5d4fbd8db8d14e86fa3f8d9f62d42b3b96218ebd",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
