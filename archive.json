@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-22T01:51:54.637542+00:00",
+  "timestamp": "2025-06-26T01:44:06.729143+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -63,6 +63,22 @@
       "body": "",
       "createdAt": "2025-05-29T16:49:10Z",
       "updatedAt": "2025-05-29T16:49:10Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 6,
+      "id": "I_kwDOMmh5WM69TN29",
+      "title": "port over support for curves from generic document that they meet nominal group requirements ",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/issues/6",
+      "state": "OPEN",
+      "author": "dconnolly",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2025-06-25T14:42:40Z",
+      "updatedAt": "2025-06-25T14:42:40Z",
       "closedAt": null,
       "comments": []
     }
@@ -300,7 +316,7 @@
       "labels": [],
       "body": "This is fairly heavy edit to get the doc cleaned up for release.  There are no substantive changes, but the exposition is cleaned up in a few ways:\r\n\r\n* The separate sections for P-256/P-384 and ML-KEM-768/ML-KEM-1024 are combined to avoid duplication\r\n* The instantiations no longer recite the algorithms from the generic doc\r\n* Instead of the `HNN` names, I invented a new `{scheme}-{T}-{PQ}-{hash}` schema\r\n* The sketchy security notes at the end have been cut\r\n\r\nBefore release, we should make sure issues are filed for the TODOs.",
       "createdAt": "2025-06-20T21:48:27Z",
-      "updatedAt": "2025-06-20T21:48:27Z",
+      "updatedAt": "2025-06-24T21:32:57Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "baseRefName": "main",
       "baseRefOid": "ba027e817dc93b50a015ada671cbc4c38ebe1bf3",
@@ -312,7 +328,48 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOMmh5WM6wHokb",
+          "commit": {
+            "abbreviatedOid": "5d4fbd8"
+          },
+          "author": "dconnolly",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-24T17:53:01Z",
+          "updatedAt": "2025-06-24T17:53:01Z",
+          "comments": [
+            {
+              "originalPosition": 193,
+              "body": "Maybe include the PRG function name too? It's relevant to the security of the whole scheme and it'd be unfortunate if the KDF named got used for the PRG function unnecessarily (it's probably not a cryptographic strength issue but it's definitely an interop and protocol confusion issue)\r\n\r\nAlso (_hello welcome to the bikeshed paint shop_) maybe PQ before T, left to right? It aligns with the order left-to-right when constructing the actual KDF preimages and it signals the PQ part first which is the primary objective of the these constructions (achieve quantum security while belt and suspenders'ing with traditional fallback) ",
+              "createdAt": "2025-06-24T17:53:01Z",
+              "updatedAt": "2025-06-24T17:53:26Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOMmh5WM6wKCbz",
+          "commit": {
+            "abbreviatedOid": "5d4fbd8"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-24T21:32:57Z",
+          "updatedAt": "2025-06-24T21:32:57Z",
+          "comments": [
+            {
+              "originalPosition": 193,
+              "body": "I could live with that shade of bikeshed paint.  Starting to get a little long, but not terrible:\r\n\r\n* QSF-MLKEM-P256-SHA3-SHAKE\r\n* QSF-MLKEM-X25519-SHA3-SHAKE\r\n* QSF-MLKEM-P384-SHA3-SHAKE",
+              "createdAt": "2025-06-24T21:32:57Z",
+              "updatedAt": "2025-06-24T21:32:57Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
