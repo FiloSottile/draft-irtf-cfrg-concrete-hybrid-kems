@@ -5,8 +5,8 @@
 Crypto Forum                                                 D. Connolly
 Internet-Draft                                                 SandboxAQ
 Intended status: Informational                                 R. Barnes
-Expires: 22 December 2025                                          Cisco
-                                                            20 June 2025
+Expires: 29 December 2025                                          Cisco
+                                                            27 June 2025
 
 
            Concrete Hybrid PQ/T Key Encapsulation Mechanisms
@@ -55,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 22 December 2025.
+   This Internet-Draft will expire on 29 December 2025.
 
 Copyright Notice
 
@@ -74,22 +74,24 @@ Table of Contents
    2.  Conventions and Definitions
    3.  Concrete Nominal Group and KEM Instances
      3.1.  Nominal Groups
-       3.1.1.  P-256 Nominal Group
-       3.1.2.  P-384 Nominal Group
-       3.1.3.  Curve25519 Nominal Group
+       3.1.1.  P-256 and P-384 Nominal Groups
+       3.1.2.  Curve25519 Nominal Group
      3.2.  Concrete KEM Instances
-       3.2.1.  ML-KEM-768
-       3.2.2.  ML-KEM-1024
+       3.2.1.  ML-KEM-768 and ML-KEM-1024
+     3.3.  Concrete PRG instances
+       3.3.1.  SHAKE256
+     3.4.  Concrete KDF instances
+       3.4.1.  SHA-3
    4.  Concrete Hybrid KEM Instances
-     4.1.  HNN3
-     4.2.  HNX
-     4.3.  HNN5
-       4.3.1.  Security properties
+     4.1.  QSF-P256-MLKEM768-SHAKE256-SHA3256
+     4.2.  QSF-X25519-MLKEM-SHA3
+     4.3.  QSF-P384-MLKEM1024-SHAKE256-SHA3256
    5.  Security Considerations
    6.  IANA Considerations
    7.  References
      7.1.  Normative References
      7.2.  Informative References
+   Appendix A.  Test Vectors
    Acknowledgments
    Authors' Addresses
 
@@ -138,29 +140,34 @@ Table of Contents
 
    This section specifies concrete nominal groups that implement the
    abstraction in [HYBRID-KEMS].  It includes groups based on the NIST
-   curves P-256 and P-384 [FIPS186], as well as a group based on
-   Curve25519 from [RFC7748]
+   curves P-256 and P-384, as well as a group based on Curve25519.
 
-3.1.1.  P-256 Nominal Group
+3.1.1.  P-256 and P-384 Nominal Groups
 
-   The following functions for the P-256 nominal group are defined:
+   The NIST P-256 and P-384 elliptic curves are defined in [SP800-186].
+   They are widely used for key agreement and digital signature.  In
+   this section, we define how they meet the Nominal Group interface
+   described in [HYBRID-KEMS].
+
+   Group elements are elliptic curve points, represented as byte strings
+   in the compressed representation defined by the Elliptic-Curve-Point-
+   to-Octet-String function in [SEC1].
+
+   The Nominal Group algorithms are the same for both groups:
 
    *  Exp(p, x) -> q: This function computes scalar multiplication
-      between the input element (or point) p and the scalar x [FIPS186].
+      between the input element (or point) p and the scalar x, according
+      to the group law for the curve specified in [SP800-186].
 
    *  RandomScalar(seed) -> k: Implemented by converting seed to an
-      integer using OS2IP, and then reducing the resulting integer
-      modulo the group order.
+      integer using the Octet-String-to-Integer function in [SEC1], and
+      then reducing the resulting integer modulo the group order.
 
-   *  ElementToSharedSecret(P) -> ss: Implemented using the compressed
-      Elliptic-Curve-Point-to-Octet-String method according to [SEC1]
-      with input P, yielding a Nelem-byte output.  Additionally, this
-      function validates that the input element is not the group
-      identity element.  Finally, this function outputs the encoding the
-      X coordinate of the elliptic curve point corresponding to P to a
-      little-endian Nss-byte string.
+   *  ElementToSharedSecret(p) -> ss: The shared secret is the X
+      coordinate of the elliptic curve point p, encoded as an Nss-byte
+      string using the Field-Element-to-Octet-String function in [SEC1].
 
-   The following constants are also defined.
+   The group constants for the P-256 group are as follows:
 
    *  Nseed: 48
 
@@ -170,36 +177,17 @@ Table of Contents
 
    *  Nss: 32
 
-3.1.2.  P-384 Nominal Group
-
-   The following functions for the P-384 nominal group are defined:
-
-   *  Exp(p, x) -> q: This function computes scalar multiplication
-      between the input element (or point) p and the scalar x [FIPS186].
-
-   *  RandomScalar(seed) -> k: Implemented by converting seed to an
-      integer using OS2IP, and then reducing the resulting integer
-      modulo the group order.
-
-   *  ElementToSharedSecret(P) -> ss: Implemented using the compressed
-      Elliptic-Curve-Point-to-Octet-String method according to [SEC1]
-      with input P, yielding a Nelem-byte output.  Additionally, this
-      function validates that the input element is not the group
-      identity element.  Finally, this function outputs the encoding the
-      X coordinate of the elliptic curve point corresponding to P to a
-      little-endian Nss-byte string.
-
-   The following constants are also defined.
+   The group constants for the P-384 group are as follows:
 
    *  Nseed: 72
 
    *  Nscalar: 48
 
-   *  Nelem: 48
+   *  Nelem: 49
 
-   *  Nss: 32
+   *  Nss: 48
 
-3.1.3.  Curve25519 Nominal Group
+3.1.2.  Curve25519 Nominal Group
 
    The following functions for the Curve25519 nominal group are defined:
 
@@ -209,7 +197,7 @@ Table of Contents
       random bytes from a cryptographically secure pseudorandom number
       generator.
 
-   *  ElementToSharedSecret(P) -> ss: Implemented by the identity
+   *  ElementToSharedSecret(p) -> ss: Implemented by the identity
       function, i.e., by outputting P.
 
    The following constants are also defined.
@@ -225,13 +213,13 @@ Table of Contents
 3.2.  Concrete KEM Instances
 
    This section specifies concrete KEM instances that implement the KEM
-   abstraction from [HYBRID-KEMS].  It focuses solely on ML-KEM as
-   specified in [FIPS203].
+   abstraction from [HYBRID-KEMS].
 
-3.2.1.  ML-KEM-768
+3.2.1.  ML-KEM-768 and ML-KEM-1024
 
-   The ML-KEM-768 nominal KEM implements the KEM abstraction from
-   [HYBRID-KEMS] with the following functions:
+   The ML-KEM-768 and ML-KEM-1024 KEMs are defined in [FIPS203].  The
+   algorithms defined in that specification map to the KEM abstraction
+   in [HYBRID-KEMS] as follows:
 
    *  GenerateKeyPair() -> (ek, dk): Implemented as KeyGen in
       Section 7.1 of [FIPS203].
@@ -246,10 +234,7 @@ Table of Contents
    *  Decaps(dk, ct) -> ss: Implemented as Encaps in Section 7.3 of
       [FIPS203].
 
-   *  EncapsDerand(ek, randomness) -> (ct, shared_secret): [[TODO:
-      citeme]
-
-   The following constants are also defined:
+   The KEM constants for ML-KEM-768 are as follows:
 
    *  Nseed: 64
 
@@ -261,28 +246,7 @@ Table of Contents
 
    *  Nss: 32
 
-3.2.2.  ML-KEM-1024
-
-   The ML-KEM-1024 nominal KEM implements the KEM abstraction from
-   [HYBRID-KEMS] with the following functions:
-
-   *  GenerateKeyPair() -> (ek, dk): Implemented as KeyGen in
-      Section 7.1 of [FIPS203].
-
-   *  DeriveKeyPair(seed) -> (ek, dk): Implemented as
-      KeyGen_internal(seed[0:32], seed[32:64]), where KeyGen_internal is
-      defined in Section 6 of [FIPS203].
-
-   *  Encaps(ek) -> (ct, ss): Implemented as Encaps in Section 7.2 of
-      [FIPS203].
-
-   *  Decaps(dk, ct) -> ss: Implemented as Encaps in Section 7.3 of
-      [FIPS203].
-
-   *  EncapsDerand(ek, randomness) -> (ct, shared_secret): [[TODO:
-      citeme]
-
-   The following constants are also defined:
+   The KEM constants for ML-KEM-1024 are as follows:
 
    *  Nseed: 64
 
@@ -294,28 +258,55 @@ Table of Contents
 
    *  Nss: 32
 
+3.3.  Concrete PRG instances
+
+   This section specifies concrete PRG instances that implement the PRG
+   abstraction from [HYBRID-KEMS] and meet the required security
+   definitions.
+
+3.3.1.  SHAKE256
+
+   SHAKE256 is an extendable-output function (XOF) defined in the SHA-3
+   specification [FIPS202].  It can be used as a PRG for arbitrary
+   values of Nout.  When SHAKE256 is used as the PRG component in a
+   hybrid KEM, it is implcit that Nout == KEM_T.Nseed + KEM_PQ.Nseed or
+   Nout == Group_T.Nseed + KEM_PQ.Nseed as appropriate.
+
+3.4.  Concrete KDF instances
+
+   This section specifies concrete KDF instances that implement the KDF
+   abstraction from [HYBRID-KEMS] and meet the required security
+   definitions.
+
+3.4.1.  SHA-3
+
+   The SHA-3 hash function is defined in [FIPS202].  It produces a
+   32-byte output, so it is appropriate for use in hybrid KEMs with Nss
+   = 32.
+
 4.  Concrete Hybrid KEM Instances
 
-   This section instantiates three concrete KEMs:
+   This section instantiates the following concrete KEMs:
 
-   1.  HNN3 Section 4.1: A hybrid KEM composing ML-KEM-768 and P-256
-       using the QSF combiner with SHA3-256 as the KDF and SHAKE256 as
-       the PRG.
+   QSF-P256-MLKEM768-SHAKE256-SHA3256:  A hybrid KEM composing ML-
+      KEM-768 and P-256 using the QSF scheme, with SHAKE256 as the PRG
+      and SHA3-256 as the KDF.
 
-   2.  HNX Section 4.2: A hybrid KEM composing ML-KEM-768 and Curve25519
-       using the QSF combiner with SHA3-256 as the KDF and SHAKE256 as
-       the PRG.  This construction is identical to X-Wing [XWING-SPEC].
+   QSF-X25519-MLKEM768-SHAKE256-SHA3256:  A hybrid KEM composing ML-
+      KEM-768 and Curve25519 using the QSF scheme, with SHAKE256 as the
+      PRG and SHA3-256 as the KDF.  This construction is identical to
+      the X-Wing construction in [XWING-SPEC].
 
-   3.  HNN5 Section 4.3: A hybrid KEM composing ML-KEM-1024 and P-384
-       using the QSF combiner with SHA3-256 as the KDF and SHAKE256 as
-       the PRG.
+   QSF-P384-MLKEM1024-SHAKE256-SHA3256:  A hybrid KEM composing ML-
+      KEM-1024 and P-384 using the QSF scheme, with SHAKE256 as the PRG
+      and SHA3-256 as the KDF.
 
    Each instance specifies the PQ and traditional KEMs being combined,
    the combiner construction from [HYBRID-KEMS], the label to use for
    domain separation in the combiner function, as well as the PRG and
    KDF functions to use throughout.
 
-4.1.  HNN3
+4.1.  QSF-P256-MLKEM768-SHAKE256-SHA3256
 
    This hybrid KEM is heavily based on [XWING], using the QSF combiner
    from [HYBRID-KEMS].  In particular, it has the same exact design but
@@ -330,9 +321,9 @@ Table of Contents
 
    *  KDF: SHA3-256 [FIPS202]
 
-   *  Label - HNN3
+   *  Label: QSF-P256-MLKEM768-SHAKE256-SHA3256
 
-   The following constants for the hybrid KEM are also defined:
+   The KEM constants for the resulting hybrid KEM are as follows:
 
    *  Nseed: 32
 
@@ -344,56 +335,12 @@ Table of Contents
 
    *  Nss: 32
 
-   With these parameters in place, this hybrid KEM is defined as
-   follows:
-
-   def GenerateKeyPair():
-       seed = random(Nseed)
-       return DeriveKeyPair(seed)
-
-   def DeriveKeyPair(seed):
-       seed_full = PRG(seed)
-       (seed_T, seed_PQ) = split(Group_T.Nseed, KEM_PQ.Nseed, seed)
-
-       dk_T = Group_T.RandomScalar(seed_T)
-       ek_T = Group_T.Exp(Group_T.g, dk_T)
-       (ek_PQ, dk_PQ) = KEM_PQ.DeriveKeyPair(seed_PQ)
-
-       ek_H = concat(ek_T, ek_PQ)
-       dk_H = concat(dk_T, dk_PQ)
-       return (ek_H, dk_H)
-
-   def Encaps(ek):
-       (ek_T, ek_PQ) = split(Group_T.Nek, KEM_PQ.Nek, ek)
-
-       sk_E = Group_T.RandomScalar(random(GroupT.nseed))
-       ct_T = Group_T.Exp(GroupT.g, sk_E)
-       ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ek_T, sk_E))
-       (ss_PQ, ct_PQ) = KEM_PQ.Encap(ek_PQ)
-
-       ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
-       ct_H = concat(ct_T, ct_PQ)
-       return (ss_H, ct_H)
-
-   def Decaps(dk, ct):
-       (dk_T, dk_PQ) = split(Group_T.Ndk, KEM_PQ.Ndk, dk)
-       (ct_T, ct_PQ) = split(Group_T.Nct, KEM_PQ.Nct, ct)
-
-       ek_T = Group_T.ToEncaps(dk_T)
-       ek_PQ = KEM_PQ.ToEncaps(dk_PQ)
-
-       ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ct_T, dk_T))
-       ss_PQ = KEM_PQ.Decap(dk_PQ, ct_PQ)
-
-       ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
-       return ss_H
-
-4.2.  HNX
+4.2.  QSF-X25519-MLKEM-SHA3
 
    This hybrid KEM is identical to X-Wing [XWING-SPEC].  It has the
    following parameters.
 
-   *  Group_T: Curve25519 Section 3.1.3
+   *  Group_T: Curve25519 Section 3.1.2
 
    *  KEM_PQ: ML-KEM-768 Section 3.2.1
 
@@ -401,7 +348,10 @@ Table of Contents
 
    *  KDF: SHA3-256 [FIPS202]
 
-   *  Label - \.//^\
+   *  Label: \.//^\
+
+   (This label does not follow the same pattern as the other KEMs here,
+   but was chosen for compatibility with the X-Wing specification.)
 
    The following constants for the hybrid KEM are also defined:
 
@@ -415,63 +365,19 @@ Table of Contents
 
    *  Nss: 32
 
-   With these parameters in place, this hybrid KEM is defined as
-   follows:
+4.3.  QSF-P384-MLKEM1024-SHAKE256-SHA3256
 
-   def GenerateKeyPair():
-       seed = random(Nseed)
-       return DeriveKeyPair(seed)
+   QSF-P384-MLKEM1024-SHAKE256-SHA3256 has the following parameters:
 
-   def DeriveKeyPair(seed):
-       seed_full = PRG(seed)
-       (seed_T, seed_PQ) = split(Group_T.Nseed, KEM_PQ.Nseed, seed)
+   *  Group_T: P-384 Section 3.1.1
 
-       dk_T = Group_T.RandomScalar(seed_T)
-       ek_T = Group_T.Exp(Group_T.g, dk_T)
-       (ek_PQ, dk_PQ) = KEM_PQ.DeriveKeyPair(seed_PQ)
-
-       ek_H = concat(ek_T, ek_PQ)
-       dk_H = concat(dk_T, dk_PQ)
-       return (ek_H, dk_H)
-
-   def Encaps(ek):
-       (ek_T, ek_PQ) = split(Group_T.Nek, KEM_PQ.Nek, ek)
-
-       sk_E = Group_T.RandomScalar(random(GroupT.nseed))
-       ct_T = Group_T.Exp(GroupT.g, sk_E)
-       ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ek_T, sk_E))
-       (ss_PQ, ct_PQ) = KEM_PQ.Encap(ek_PQ)
-
-       ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
-       ct_H = concat(ct_T, ct_PQ)
-       return (ss_H, ct_H)
-
-   def Decaps(dk, ct):
-       (dk_T, dk_PQ) = split(Group_T.Ndk, KEM_PQ.Ndk, dk)
-       (ct_T, ct_PQ) = split(Group_T.Nct, KEM_PQ.Nct, ct)
-
-       ek_T = Group_T.ToEncaps(dk_T)
-       ek_PQ = KEM_PQ.ToEncaps(dk_PQ)
-
-       ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ct_T, dk_T))
-       ss_PQ = KEM_PQ.Decap(dk_PQ, ct_PQ)
-
-       ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
-       return ss_H
-
-4.3.  HNN5
-
-   HNN5 has the following parameters.
-
-   *  Group_T: P-384 Section 3.1.2
-
-   *  KEM_PQ: ML-KEM-1024 Section 3.2.2
+   *  `KEM_PQ: ML-KEM-1024 Section 3.2.1
 
    *  PRG: SHAKE-256 [FIPS202]
 
    *  KDF: HKDF-SHA-256 [RFC5869]
 
-   *  Label - HNN3
+   *  Label: QSF-P384-MLKEM1024-SHAKE256-SHA3256
 
    The following constants for the hybrid KEM are also defined:
 
@@ -485,88 +391,9 @@ Table of Contents
 
    *  Nss: 32
 
-   With these parameters in place, this hybrid KEM is defined as
-   follows:
-
-   def GenerateKeyPair():
-       seed = random(Nseed)
-       return DeriveKeyPair(seed)
-
-   def DeriveKeyPair(seed):
-       seed_full = PRG(seed)
-       (seed_T, seed_PQ) = split(Group_T.Nseed, KEM_PQ.Nseed, seed)
-
-       dk_T = Group_T.RandomScalar(seed_T))
-       ek_T = Group_T.Exp(Group_T.g, dk_T)
-       (ek_PQ, dk_PQ) = KEM_PQ.DeriveKeyPair(seed_PQ)
-
-       ek_H = concat(ek_T, ek_PQ)
-       dk_H = concat(dk_T, dk_PQ)
-       return (ek_H, dk_H)
-
-   def Encaps(ek):
-       (ek_T, ek_PQ) = split(Group_T.Nek, KEM_PQ.Nek, ek)
-
-       sk_E = Group_T.RandomScalar(random(GroupT.nseed))
-       ct_T = Group_T.Exp(GroupT.g, sk_E)
-       ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ek_T, sk_E))
-       (ss_PQ, ct_PQ) = KEM_PQ.Encap(ek_PQ)
-
-       ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
-       ct_H = concat(ct_T, ct_PQ)
-       return (ss_H, ct_H)
-
-   def Decaps(dk, ct):
-       (dk_T, dk_PQ) = split(Group_T.Ndk, KEM_PQ.Ndk, dk)
-       (ct_T, ct_PQ) = split(Group_T.Nct, KEM_PQ.Nct, ct)
-
-       ek_T = Group_T.ToEncaps(dk_T)
-       ek_PQ = KEM_PQ.ToEncaps(dk_PQ)
-
-       ss_T = Group_T.ElementToSharedSecret(Group_T.Exp(ct_T, dk_T))
-       ss_PQ = KEM_PQ.Decap(dk_PQ, ct_PQ)
-
-       ss_H = KDF(concat(ss_PQ, ss_T, ct_T, ek_T, Label))
-       return ss_H
-
-4.3.1.  Security properties
-
-   The inlined DH-KEM is instantiated over the elliptic curve group
-   P-384: as shown in [CDM23], this gives the traditional KEM maximum
-   binding properties (MAL-BIND-K-CT, MAL-BIND-K-PK).
-
-   ML-KEM-1024 as standardized in [FIPS203], when using the 64-byte seed
-   key format as is here, provides MAL-BIND-K-CT security and LEAK-BIND-
-   K-PK security, as demonstrated in [SCHMIEG2024].
-
-   Therefore this concrete instance provides MAL-BIND-K-PK and MAL-BIND-
-   K-CT security.
-
-   This implies via [KSMW2024] that this instance also satisfies
-
-   *  MAL-BIND-K,CT-PK
-
-   *  MAL-BIND-K,PK-CT
-
-   *  LEAK-BIND-K-PK
-
-   *  LEAK-BIND-K-CT
-
-   *  LEAK-BIND-K,CT-PK
-
-   *  LEAK-BIND-K,PK-CT
-
-   *  HON-BIND-K-PK
-
-   *  HON-BIND-K-CT
-
-   *  HON-BIND-K,CT-PK
-
-   *  HON-BIND-K,PK-CT
-
 5.  Security Considerations
 
-   [[TODO: writeme]]
+   [[ TODO ]]
 
 6.  IANA Considerations
 
@@ -611,6 +438,14 @@ Table of Contents
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
 
+   [SP800-186]
+              Chen, L., Moody, D., Regenscheid, A., Robinson, A., and K.
+              Randall, "Recommendations for Discrete Logarithm-based
+              Cryptography:: Elliptic Curve Domain Parameters", National
+              Institute of Standards and Technology,
+              DOI 10.6028/nist.sp.800-186, February 2023,
+              <https://doi.org/10.6028/nist.sp.800-186>.
+
 7.2.  Informative References
 
    [ANSIX9.62]
@@ -622,11 +457,6 @@ Table of Contents
               the KEMs: Stronger Security Notions for KEMs and automated
               analysis of KEM-based protocols", 2023,
               <https://eprint.iacr.org/2023/1933.pdf>.
-
-   [FIPS186]  "Digital Signature Standard (DSS)", National Institute of
-              Standards and Technology (U.S.),
-              DOI 10.6028/nist.fips.186-5, February 2023,
-              <https://doi.org/10.6028/nist.fips.186-5>.
 
    [KSMW2024] Kraemer, J., Struck, P., and M. Weishaupl, "Binding
               Security of Implicitly-Rejecting KEMs and Application to
@@ -651,9 +481,13 @@ Table of Contents
               07, 3 May 2025, <https://datatracker.ietf.org/doc/html/
               draft-connolly-cfrg-xwing-kem-07>.
 
+Appendix A.  Test Vectors
+
+   [[ TODO ]]
+
 Acknowledgments
 
-   [[TODO: writeme]]
+   [[ TODO ]]
 
 Authors' Addresses
 
