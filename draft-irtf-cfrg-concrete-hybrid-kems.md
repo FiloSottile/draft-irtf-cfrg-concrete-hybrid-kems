@@ -237,45 +237,63 @@ The KEM constants for ML-KEM-1024 are as follows:
 - `Nct`: 1629
 - `Nss`: 32
 
-<!-- TODO: We need to define how SHA3 functions meet the PRG/KDF interfaces,
-though this should be trivial -->
+## Concrete PRG instances {#prgs}
+
+This section specifies concrete PRG instances that implement the PRG
+abstraction from {{HYBRID-KEMS}} and meet the required security definitions.
+
+### SHAKE256
+
+SHAKE256 is an extendable-output function (XOF) defined in the SHA-3
+specification {{FIPS202}}.  It can be used as a PRG for arbitrary values of
+`Nout`.  When SHAKE256 is used as the PRG component in a hybrid KEM, it is
+implcit that `Nout == KEM_T.Nseed + KEM_PQ.Nseed` or `Nout == Group_T.Nseed +
+KEM_PQ.Nseed` as appropriate.
+
+## Concrete KDF instances {#kdfs}
+
+This section specifies concrete KDF instances that implement the KDF
+abstraction from {{HYBRID-KEMS}} and meet the required security definitions.
+
+### SHA-3
+
+The SHA-3 hash function is defined in {{FIPS202}}.  It produces a 32-byte
+output, so it is appropriate for use in hybrid KEMs with `Nss = 32`.
 
 # Concrete Hybrid KEM Instances
 
 This section instantiates the following concrete KEMs:
 
-<!-- TODO: update names; what about these 'qsf-p256'-like names? -->
-
-QSF-P256-MLKEM-SHA3:
+QSF-P256-MLKEM768-SHAKE256-SHA3256:
 : A hybrid KEM composing ML-KEM-768 and P-256 using the QSF scheme, with
-  SHA3-256 as the KDF and SHAKE256 as the PRG.
+  SHAKE256 as the PRG and SHA3-256 as the KDF.
 
-QSF-X25519-MLKEM-SHA3:
-: A hybrid KEM composing ML-KEM-768 and Curve25519 using
-  the QSF scheme, with SHA3-256 as the KDF and SHAKE256 as the PRG. This
-  construction is identical to X-Wing {{XWING-SPEC}}.
+QSF-X25519-MLKEM768-SHAKE256-SHA3256:
+: A hybrid KEM composing ML-KEM-768 and Curve25519 using the QSF scheme, with
+  SHAKE256 as the PRG and SHA3-256 as the KDF. This construction is identical to
+  the X-Wing construction in {{XWING-SPEC}}.
 
-QSF-P384-MLKEM-SHA3:
+QSF-P384-MLKEM1024-SHAKE256-SHA3256:
 : A hybrid KEM composing ML-KEM-1024 and P-384 using the QSF scheme, with
-  SHA3-256 as the KDF and SHAKE256 as the PRG.
+  SHAKE256 as the PRG and SHA3-256 as the KDF.
 
 Each instance specifies the PQ and traditional KEMs being combined, the
 combiner construction from {{HYBRID-KEMS}}, the `label` to use for domain
 separation in the combiner function, as well as the PRG and KDF functions to
 use throughout.
 
-## `QSF-P256-MLKEM-SHA3` {#qsf-p256}
+## QSF-P256-MLKEM768-SHAKE256-SHA3256 {#qsf-p256}
 
 This hybrid KEM is heavily based on {{XWING}}, using the QSF combiner from
 {{HYBRID-KEMS}}. In particular, it has the same exact design but uses P-256
 instead of X25519 as the the traditional component of the algorithm. It has
 the following parameters.
 
-* Group_T: P-256 {{group-nist}}
-* KEM_PQ: ML-KEM-768 {{mlkem}}
-* PRG: SHAKE-256 {{FIPS202}}
-* KDF: SHA3-256 {{FIPS202}}
-* Label: `QSF-P256-MLKEM-SHA3`
+* `Group_T`: P-256 {{group-nist}}
+* `KEM_PQ`: ML-KEM-768 {{mlkem}}
+* `PRG`: SHAKE-256 {{FIPS202}}
+* `KDF`: SHA3-256 {{FIPS202}}
+* `Label`: `QSF-P256-MLKEM768-SHAKE256-SHA3256`
 
 The KEM constants for the resulting hybrid KEM are as follows:
 
@@ -290,11 +308,11 @@ The KEM constants for the resulting hybrid KEM are as follows:
 This hybrid KEM is identical to X-Wing {{XWING-SPEC}}. It has the following
 parameters.
 
-* Group_T: Curve25519 {{group-curve25519}}
-* KEM_PQ: ML-KEM-768 {{mlkem}}
-* PRG: SHAKE-256 {{FIPS202}}
-* KDF: SHA3-256 {{FIPS202}}
-* Label: `\.//^\`
+* `Group_T`: Curve25519 {{group-curve25519}}
+* `KEM_PQ`: ML-KEM-768 {{mlkem}}
+* `PRG`: SHAKE-256 {{FIPS202}}
+* `KDF`: SHA3-256 {{FIPS202}}
+* `Label`: `\.//^\`
 
 (This label does not follow the same pattern as the other KEMs here, but was
 chosen for compatibility with the X-Wing specification.)
@@ -307,15 +325,15 @@ The following constants for the hybrid KEM are also defined:
 - `Nct`: 1120
 - `Nss`: 32
 
-## QSF-P384-MLKEM-SHA3 {#qsf-p384}
+## QSF-P384-MLKEM1024-SHAKE256-SHA3256 {#qsf-p384}
 
-QSF-P384-MLKEM-SHA3 has the following parameters:
+QSF-P384-MLKEM1024-SHAKE256-SHA3256 has the following parameters:
 
-* Group_T: P-384 {{group-nist}}
-* KEM_PQ: ML-KEM-1024 {{mlkem}}
-* PRG: SHAKE-256 {{FIPS202}}
-* KDF: HKDF-SHA-256 {{!RFC5869}}
-* Label: `QSF-P384-MLKEM-SHA3`
+* `Group_T`: P-384 {{group-nist}}
+* `KEM_PQ: ML-KEM-1024 {{mlkem}}
+* `PRG`: SHAKE-256 {{FIPS202}}
+* `KDF`: HKDF-SHA-256 {{!RFC5869}}
+* `Label`: `QSF-P384-MLKEM1024-SHAKE256-SHA3256`
 
 The following constants for the hybrid KEM are also defined:
 
