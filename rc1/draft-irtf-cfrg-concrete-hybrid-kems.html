@@ -1058,7 +1058,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Connolly &amp; Barnes</td>
-<td class="center">Expires 22 December 2025</td>
+<td class="center">Expires 29 December 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1071,12 +1071,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-concrete-hybrid-kems-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-06-20" class="published">20 June 2025</time>
+<time datetime="2025-06-27" class="published">27 June 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-12-22">22 December 2025</time></dd>
+<dd class="expires"><time datetime="2025-12-29">29 December 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1135,7 +1135,7 @@ framework and simplify implementors' choices.<a href="#section-abstract-1" class
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 22 December 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 29 December 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1189,19 +1189,35 @@ framework and simplify implementors' choices.<a href="#section-abstract-1" class
 </li>
                 </ul>
 </li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
+                <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="auto internal xref">3.3</a>.  <a href="#name-concrete-prg-instances" class="internal xref">Concrete PRG instances</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3.2.1">
+                    <p id="section-toc.1-1.3.2.3.2.1.1"><a href="#section-3.3.1" class="auto internal xref">3.3.1</a>.  <a href="#name-shake256" class="internal xref">SHAKE256</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.4">
+                <p id="section-toc.1-1.3.2.4.1"><a href="#section-3.4" class="auto internal xref">3.4</a>.  <a href="#name-concrete-kdf-instances" class="internal xref">Concrete KDF instances</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.4.2.1">
+                    <p id="section-toc.1-1.3.2.4.2.1.1"><a href="#section-3.4.1" class="auto internal xref">3.4.1</a>.  <a href="#name-sha-3" class="internal xref">SHA-3</a></p>
+</li>
+                </ul>
+</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
             <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-concrete-hybrid-kem-instanc" class="internal xref">Concrete Hybrid KEM Instances</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
-                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-qsf-p256-mlkem-sha3" class="internal xref"><code>QSF-P256-MLKEM-SHA3</code></a></p>
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-qsf-p256-mlkem768-shake256-" class="internal xref">QSF-P256-MLKEM768-SHAKE256-SHA3256</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
                 <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-qsf-x25519-mlkem-sha3" class="internal xref"><code>QSF-X25519-MLKEM-SHA3</code></a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3">
-                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="auto internal xref">4.3</a>.  <a href="#name-qsf-p384-mlkem-sha3" class="internal xref">QSF-P384-MLKEM-SHA3</a></p>
+                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="auto internal xref">4.3</a>.  <a href="#name-qsf-p384-mlkem1024-shake256" class="internal xref">QSF-P384-MLKEM1024-SHAKE256-SHA3256</a></p>
 </li>
             </ul>
 </li>
@@ -1460,6 +1476,45 @@ in Section 6 of <span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.
 </div>
 </section>
 </div>
+<div id="prgs">
+<section id="section-3.3">
+        <h3 id="name-concrete-prg-instances">
+<a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-concrete-prg-instances" class="section-name selfRef">Concrete PRG instances</a>
+        </h3>
+<p id="section-3.3-1">This section specifies concrete PRG instances that implement the PRG
+abstraction from <span>[<a href="#HYBRID-KEMS" class="cite xref">HYBRID-KEMS</a>]</span> and meet the required security definitions.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
+<div id="shake256">
+<section id="section-3.3.1">
+          <h4 id="name-shake256">
+<a href="#section-3.3.1" class="section-number selfRef">3.3.1. </a><a href="#name-shake256" class="section-name selfRef">SHAKE256</a>
+          </h4>
+<p id="section-3.3.1-1">SHAKE256 is an extendable-output function (XOF) defined in the SHA-3
+specification <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span>.  It can be used as a PRG for arbitrary values of
+<code>Nout</code>.  When SHAKE256 is used as the PRG component in a hybrid KEM, it is
+implcit that <code>Nout == KEM_T.Nseed + KEM_PQ.Nseed</code> or <code>Nout == Group_T.Nseed +
+KEM_PQ.Nseed</code> as appropriate.<a href="#section-3.3.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="kdfs">
+<section id="section-3.4">
+        <h3 id="name-concrete-kdf-instances">
+<a href="#section-3.4" class="section-number selfRef">3.4. </a><a href="#name-concrete-kdf-instances" class="section-name selfRef">Concrete KDF instances</a>
+        </h3>
+<p id="section-3.4-1">This section specifies concrete KDF instances that implement the KDF
+abstraction from <span>[<a href="#HYBRID-KEMS" class="cite xref">HYBRID-KEMS</a>]</span> and meet the required security definitions.<a href="#section-3.4-1" class="pilcrow">¶</a></p>
+<div id="sha-3">
+<section id="section-3.4.1">
+          <h4 id="name-sha-3">
+<a href="#section-3.4.1" class="section-number selfRef">3.4.1. </a><a href="#name-sha-3" class="section-name selfRef">SHA-3</a>
+          </h4>
+<p id="section-3.4.1-1">The SHA-3 hash function is defined in <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span>.  It produces a 32-byte
+output, so it is appropriate for use in hybrid KEMs with <code>Nss = 32</code>.<a href="#section-3.4.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
 </section>
 </div>
 <div id="concrete-hybrid-kem-instances">
@@ -1469,23 +1524,23 @@ in Section 6 of <span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>.
       </h2>
 <p id="section-4-1">This section instantiates the following concrete KEMs:<a href="#section-4-1" class="pilcrow">¶</a></p>
 <span class="break"></span><dl class="dlParallel" id="section-4-2">
-        <dt id="section-4-2.1">QSF-P256-MLKEM-SHA3:</dt>
+        <dt id="section-4-2.1">QSF-P256-MLKEM768-SHAKE256-SHA3256:</dt>
         <dd style="margin-left: 1.5em" id="section-4-2.2">
           <p id="section-4-2.2.1">A hybrid KEM composing ML-KEM-768 and P-256 using the QSF scheme, with
-SHA3-256 as the KDF and SHAKE256 as the PRG.<a href="#section-4-2.2.1" class="pilcrow">¶</a></p>
+SHAKE256 as the PRG and SHA3-256 as the KDF.<a href="#section-4-2.2.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-4-2.3">QSF-X25519-MLKEM-SHA3:</dt>
+<dt id="section-4-2.3">QSF-X25519-MLKEM768-SHAKE256-SHA3256:</dt>
         <dd style="margin-left: 1.5em" id="section-4-2.4">
-          <p id="section-4-2.4.1">A hybrid KEM composing ML-KEM-768 and Curve25519 using
-the QSF scheme, with SHA3-256 as the KDF and SHAKE256 as the PRG. This
-construction is identical to X-Wing <span>[<a href="#XWING-SPEC" class="cite xref">XWING-SPEC</a>]</span>.<a href="#section-4-2.4.1" class="pilcrow">¶</a></p>
+          <p id="section-4-2.4.1">A hybrid KEM composing ML-KEM-768 and Curve25519 using the QSF scheme, with
+SHAKE256 as the PRG and SHA3-256 as the KDF. This construction is identical to
+the X-Wing construction in <span>[<a href="#XWING-SPEC" class="cite xref">XWING-SPEC</a>]</span>.<a href="#section-4-2.4.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-4-2.5">QSF-P384-MLKEM-SHA3:</dt>
+<dt id="section-4-2.5">QSF-P384-MLKEM1024-SHAKE256-SHA3256:</dt>
         <dd style="margin-left: 1.5em" id="section-4-2.6">
           <p id="section-4-2.6.1">A hybrid KEM composing ML-KEM-1024 and P-384 using the QSF scheme, with
-SHA3-256 as the KDF and SHAKE256 as the PRG.<a href="#section-4-2.6.1" class="pilcrow">¶</a></p>
+SHAKE256 as the PRG and SHA3-256 as the KDF.<a href="#section-4-2.6.1" class="pilcrow">¶</a></p>
 </dd>
       <dd class="break"></dd>
 </dl>
@@ -1495,8 +1550,8 @@ separation in the combiner function, as well as the PRG and KDF functions to
 use throughout.<a href="#section-4-3" class="pilcrow">¶</a></p>
 <div id="qsf-p256">
 <section id="section-4.1">
-        <h3 id="name-qsf-p256-mlkem-sha3">
-<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-qsf-p256-mlkem-sha3" class="section-name selfRef"><code>QSF-P256-MLKEM-SHA3</code></a>
+        <h3 id="name-qsf-p256-mlkem768-shake256-">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-qsf-p256-mlkem768-shake256-" class="section-name selfRef">QSF-P256-MLKEM768-SHAKE256-SHA3256</a>
         </h3>
 <p id="section-4.1-1">This hybrid KEM is heavily based on <span>[<a href="#XWING" class="cite xref">XWING</a>]</span>, using the QSF combiner from
 <span>[<a href="#HYBRID-KEMS" class="cite xref">HYBRID-KEMS</a>]</span>. In particular, it has the same exact design but uses P-256
@@ -1504,19 +1559,19 @@ instead of X25519 as the the traditional component of the algorithm. It has
 the following parameters.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.1-2.1">
-            <p id="section-4.1-2.1.1">Group_T: P-256 <a href="#group-nist" class="auto internal xref">Section 3.1.1</a><a href="#section-4.1-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-4.1-2.1.1"><code>Group_T</code>: P-256 <a href="#group-nist" class="auto internal xref">Section 3.1.1</a><a href="#section-4.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.1-2.2">
-            <p id="section-4.1-2.2.1">KEM_PQ: ML-KEM-768 <a href="#mlkem" class="auto internal xref">Section 3.2.1</a><a href="#section-4.1-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-4.1-2.2.1"><code>KEM_PQ</code>: ML-KEM-768 <a href="#mlkem" class="auto internal xref">Section 3.2.1</a><a href="#section-4.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.1-2.3">
-            <p id="section-4.1-2.3.1">PRG: SHAKE-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.1-2.3.1" class="pilcrow">¶</a></p>
+            <p id="section-4.1-2.3.1"><code>PRG</code>: SHAKE-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.1-2.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.1-2.4">
-            <p id="section-4.1-2.4.1">KDF: SHA3-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.1-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-4.1-2.4.1"><code>KDF</code>: SHA3-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.1-2.4.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.1-2.5">
-            <p id="section-4.1-2.5.1">Label: <code>QSF-P256-MLKEM-SHA3</code><a href="#section-4.1-2.5.1" class="pilcrow">¶</a></p>
+            <p id="section-4.1-2.5.1"><code>Label</code>: <code>QSF-P256-MLKEM768-SHAKE256-SHA3256</code><a href="#section-4.1-2.5.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-4.1-3">The KEM constants for the resulting hybrid KEM are as follows:<a href="#section-4.1-3" class="pilcrow">¶</a></p>
@@ -1548,19 +1603,19 @@ the following parameters.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
 parameters.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.2-2.1">
-            <p id="section-4.2-2.1.1">Group_T: Curve25519 <a href="#group-curve25519" class="auto internal xref">Section 3.1.2</a><a href="#section-4.2-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-4.2-2.1.1"><code>Group_T</code>: Curve25519 <a href="#group-curve25519" class="auto internal xref">Section 3.1.2</a><a href="#section-4.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.2-2.2">
-            <p id="section-4.2-2.2.1">KEM_PQ: ML-KEM-768 <a href="#mlkem" class="auto internal xref">Section 3.2.1</a><a href="#section-4.2-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-4.2-2.2.1"><code>KEM_PQ</code>: ML-KEM-768 <a href="#mlkem" class="auto internal xref">Section 3.2.1</a><a href="#section-4.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.2-2.3">
-            <p id="section-4.2-2.3.1">PRG: SHAKE-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.2-2.3.1" class="pilcrow">¶</a></p>
+            <p id="section-4.2-2.3.1"><code>PRG</code>: SHAKE-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.2-2.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.2-2.4">
-            <p id="section-4.2-2.4.1">KDF: SHA3-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.2-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-4.2-2.4.1"><code>KDF</code>: SHA3-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.2-2.4.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.2-2.5">
-            <p id="section-4.2-2.5.1">Label: <code>\.//^\</code><a href="#section-4.2-2.5.1" class="pilcrow">¶</a></p>
+            <p id="section-4.2-2.5.1"><code>Label</code>: <code>\.//^\</code><a href="#section-4.2-2.5.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-4.2-3">(This label does not follow the same pattern as the other KEMs here, but was
@@ -1587,25 +1642,25 @@ chosen for compatibility with the X-Wing specification.)<a href="#section-4.2-3"
 </div>
 <div id="qsf-p384">
 <section id="section-4.3">
-        <h3 id="name-qsf-p384-mlkem-sha3">
-<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-qsf-p384-mlkem-sha3" class="section-name selfRef">QSF-P384-MLKEM-SHA3</a>
+        <h3 id="name-qsf-p384-mlkem1024-shake256">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-qsf-p384-mlkem1024-shake256" class="section-name selfRef">QSF-P384-MLKEM1024-SHAKE256-SHA3256</a>
         </h3>
-<p id="section-4.3-1">QSF-P384-MLKEM-SHA3 has the following parameters:<a href="#section-4.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.3-1">QSF-P384-MLKEM1024-SHAKE256-SHA3256 has the following parameters:<a href="#section-4.3-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.3-2.1">
-            <p id="section-4.3-2.1.1">Group_T: P-384 <a href="#group-nist" class="auto internal xref">Section 3.1.1</a><a href="#section-4.3-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-4.3-2.1.1"><code>Group_T</code>: P-384 <a href="#group-nist" class="auto internal xref">Section 3.1.1</a><a href="#section-4.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.3-2.2">
-            <p id="section-4.3-2.2.1">KEM_PQ: ML-KEM-1024 <a href="#mlkem" class="auto internal xref">Section 3.2.1</a><a href="#section-4.3-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-4.3-2.2.1">`KEM_PQ: ML-KEM-1024 <a href="#mlkem" class="auto internal xref">Section 3.2.1</a><a href="#section-4.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.3-2.3">
-            <p id="section-4.3-2.3.1">PRG: SHAKE-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.3-2.3.1" class="pilcrow">¶</a></p>
+            <p id="section-4.3-2.3.1"><code>PRG</code>: SHAKE-256 <span>[<a href="#FIPS202" class="cite xref">FIPS202</a>]</span><a href="#section-4.3-2.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.3-2.4">
-            <p id="section-4.3-2.4.1">KDF: HKDF-SHA-256 <span>[<a href="#RFC5869" class="cite xref">RFC5869</a>]</span><a href="#section-4.3-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-4.3-2.4.1"><code>KDF</code>: HKDF-SHA-256 <span>[<a href="#RFC5869" class="cite xref">RFC5869</a>]</span><a href="#section-4.3-2.4.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.3-2.5">
-            <p id="section-4.3-2.5.1">Label: <code>QSF-P384-MLKEM-SHA3</code><a href="#section-4.3-2.5.1" class="pilcrow">¶</a></p>
+            <p id="section-4.3-2.5.1"><code>Label</code>: <code>QSF-P384-MLKEM1024-SHAKE256-SHA3256</code><a href="#section-4.3-2.5.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-4.3-3">The following constants for the hybrid KEM are also defined:<a href="#section-4.3-3" class="pilcrow">¶</a></p>

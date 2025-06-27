@@ -5,8 +5,8 @@
 Crypto Forum                                                 D. Connolly
 Internet-Draft                                                 SandboxAQ
 Intended status: Informational                                 R. Barnes
-Expires: 22 December 2025                                          Cisco
-                                                            20 June 2025
+Expires: 29 December 2025                                          Cisco
+                                                            27 June 2025
 
 
            Concrete Hybrid PQ/T Key Encapsulation Mechanisms
@@ -55,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 22 December 2025.
+   This Internet-Draft will expire on 29 December 2025.
 
 Copyright Notice
 
@@ -78,10 +78,14 @@ Table of Contents
        3.1.2.  Curve25519 Nominal Group
      3.2.  Concrete KEM Instances
        3.2.1.  ML-KEM-768 and ML-KEM-1024
+     3.3.  Concrete PRG instances
+       3.3.1.  SHAKE256
+     3.4.  Concrete KDF instances
+       3.4.1.  SHA-3
    4.  Concrete Hybrid KEM Instances
-     4.1.  QSF-P256-MLKEM-SHA3
+     4.1.  QSF-P256-MLKEM768-SHAKE256-SHA3256
      4.2.  QSF-X25519-MLKEM-SHA3
-     4.3.  QSF-P384-MLKEM-SHA3
+     4.3.  QSF-P384-MLKEM1024-SHAKE256-SHA3256
    5.  Security Considerations
    6.  IANA Considerations
    7.  References
@@ -254,29 +258,55 @@ Table of Contents
 
    *  Nss: 32
 
+3.3.  Concrete PRG instances
+
+   This section specifies concrete PRG instances that implement the PRG
+   abstraction from [HYBRID-KEMS] and meet the required security
+   definitions.
+
+3.3.1.  SHAKE256
+
+   SHAKE256 is an extendable-output function (XOF) defined in the SHA-3
+   specification [FIPS202].  It can be used as a PRG for arbitrary
+   values of Nout.  When SHAKE256 is used as the PRG component in a
+   hybrid KEM, it is implcit that Nout == KEM_T.Nseed + KEM_PQ.Nseed or
+   Nout == Group_T.Nseed + KEM_PQ.Nseed as appropriate.
+
+3.4.  Concrete KDF instances
+
+   This section specifies concrete KDF instances that implement the KDF
+   abstraction from [HYBRID-KEMS] and meet the required security
+   definitions.
+
+3.4.1.  SHA-3
+
+   The SHA-3 hash function is defined in [FIPS202].  It produces a
+   32-byte output, so it is appropriate for use in hybrid KEMs with Nss
+   = 32.
+
 4.  Concrete Hybrid KEM Instances
 
    This section instantiates the following concrete KEMs:
 
-   QSF-P256-MLKEM-SHA3:  A hybrid KEM composing ML-KEM-768 and P-256
-      using the QSF scheme, with SHA3-256 as the KDF and SHAKE256 as the
-      PRG.
+   QSF-P256-MLKEM768-SHAKE256-SHA3256:  A hybrid KEM composing ML-
+      KEM-768 and P-256 using the QSF scheme, with SHAKE256 as the PRG
+      and SHA3-256 as the KDF.
 
-   QSF-X25519-MLKEM-SHA3:  A hybrid KEM composing ML-KEM-768 and
-      Curve25519 using the QSF scheme, with SHA3-256 as the KDF and
-      SHAKE256 as the PRG.  This construction is identical to X-Wing
-      [XWING-SPEC].
+   QSF-X25519-MLKEM768-SHAKE256-SHA3256:  A hybrid KEM composing ML-
+      KEM-768 and Curve25519 using the QSF scheme, with SHAKE256 as the
+      PRG and SHA3-256 as the KDF.  This construction is identical to
+      the X-Wing construction in [XWING-SPEC].
 
-   QSF-P384-MLKEM-SHA3:  A hybrid KEM composing ML-KEM-1024 and P-384
-      using the QSF scheme, with SHA3-256 as the KDF and SHAKE256 as the
-      PRG.
+   QSF-P384-MLKEM1024-SHAKE256-SHA3256:  A hybrid KEM composing ML-
+      KEM-1024 and P-384 using the QSF scheme, with SHAKE256 as the PRG
+      and SHA3-256 as the KDF.
 
    Each instance specifies the PQ and traditional KEMs being combined,
    the combiner construction from [HYBRID-KEMS], the label to use for
    domain separation in the combiner function, as well as the PRG and
    KDF functions to use throughout.
 
-4.1.  QSF-P256-MLKEM-SHA3
+4.1.  QSF-P256-MLKEM768-SHAKE256-SHA3256
 
    This hybrid KEM is heavily based on [XWING], using the QSF combiner
    from [HYBRID-KEMS].  In particular, it has the same exact design but
@@ -291,7 +321,7 @@ Table of Contents
 
    *  KDF: SHA3-256 [FIPS202]
 
-   *  Label: QSF-P256-MLKEM-SHA3
+   *  Label: QSF-P256-MLKEM768-SHAKE256-SHA3256
 
    The KEM constants for the resulting hybrid KEM are as follows:
 
@@ -335,19 +365,19 @@ Table of Contents
 
    *  Nss: 32
 
-4.3.  QSF-P384-MLKEM-SHA3
+4.3.  QSF-P384-MLKEM1024-SHAKE256-SHA3256
 
-   QSF-P384-MLKEM-SHA3 has the following parameters:
+   QSF-P384-MLKEM1024-SHAKE256-SHA3256 has the following parameters:
 
    *  Group_T: P-384 Section 3.1.1
 
-   *  KEM_PQ: ML-KEM-1024 Section 3.2.1
+   *  `KEM_PQ: ML-KEM-1024 Section 3.2.1
 
    *  PRG: SHAKE-256 [FIPS202]
 
    *  KDF: HKDF-SHA-256 [RFC5869]
 
-   *  Label: QSF-P384-MLKEM-SHA3
+   *  Label: QSF-P384-MLKEM1024-SHAKE256-SHA3256
 
    The following constants for the hybrid KEM are also defined:
 
