@@ -10,6 +10,7 @@ pub mod groups;
 pub mod instantiations;
 pub mod kems;
 pub mod primitives;
+pub mod test_vectors;
 
 #[cfg(test)]
 mod tests;

@@ -1,6 +1,6 @@
 //! Test vector to Markdown converter binary
 
-use serde_json::Value;
+use concrete_hybrid_kem::test_vectors::{HybridKemTestVector, TestVectors};
 use std::env;
 use std::fs;
 use std::process;
@@ -11,7 +11,7 @@ fn main() {
         eprintln!("Usage: {} <test_vectors.json>", args[0]);
         process::exit(1);
     }
-    
+
     let filename = &args[1];
     let content = match fs::read_to_string(filename) {
         Ok(content) => content,
@@ -20,158 +20,75 @@ fn main() {
             process::exit(1);
         }
     };
-    
-    let test_vectors: Value = match serde_json::from_str(&content) {
+
+    let test_vectors: TestVectors = match serde_json::from_str(&content) {
         Ok(vectors) => vectors,
         Err(err) => {
             eprintln!("Error parsing JSON: {}", err);
             process::exit(1);
         }
     };
-    
+
     eprintln!("Converting test vectors from {} to Markdown...", filename);
-    
-    // Generate the Markdown content
-    println!("# Test Vectors");
+
+    // Convert QSF-P256-MLKEM768-SHAKE256-SHA3256
+    println!("## QSF-P256-MLKEM768-SHAKE256-SHA3256");
     println!();
-    
-    if let Some(metadata) = test_vectors["metadata"].as_object() {
-        if let Some(spec) = metadata["specification"].as_str() {
-            println!("Test vectors for {}.", spec);
-        }
-        if let Some(description) = metadata["description"].as_str() {
-            println!("{}", description);
-        }
-        if let Some(version) = metadata["version"].as_str() {
-            println!("Version: {}", version);
-        }
-        println!();
-    }
-    
-    // Convert nominal groups
-    if let Some(groups) = test_vectors["test_vectors"]["nominal_groups"].as_object() {
-        println!("## Nominal Groups");
-        println!();
-        
-        for (group_name, group_data) in groups {
-            println!("### {}", group_name);
-            println!();
-            
-            if let Some(constants) = group_data["constants"].as_object() {
-                println!("Constants:");
-                println!();
-                for (key, value) in constants {
-                    println!("- `{}`: {}", key, value);
-                }
-                println!();
-            }
-            
-            println!("Test Vector:");
-            println!();
-            println!("```");
-            if let Some(seed) = group_data["seed"].as_str() {
-                println!("seed = {}", seed);
-            }
-            if let Some(scalar) = group_data["scalar"].as_str() {
-                println!("scalar = {}", scalar);
-            }
-            if let Some(generator) = group_data["generator"].as_str() {
-                println!("generator = {}", generator);
-            }
-            if let Some(element) = group_data["element"].as_str() {
-                println!("element = {}", element);
-            }
-            if let Some(shared_secret) = group_data["shared_secret"].as_str() {
-                println!("shared_secret = {}", shared_secret);
-            }
-            println!("```");
-            println!();
-        }
-    }
-    
-    // Convert KEMs
-    if let Some(kems) = test_vectors["test_vectors"]["kems"].as_object() {
-        println!("## Key Encapsulation Mechanisms");
-        println!();
-        
-        for (kem_name, kem_data) in kems {
-            println!("### {}", kem_name);
-            println!();
-            
-            if let Some(constants) = kem_data["constants"].as_object() {
-                println!("Constants:");
-                println!();
-                for (key, value) in constants {
-                    println!("- `{}`: {}", key, value);
-                }
-                println!();
-            }
-            
-            println!("Test Vector:");
-            println!();
-            println!("```");
-            if let Some(ek) = kem_data["encapsulation_key"].as_str() {
-                println!("encapsulation_key = {}", truncate_hex(ek, 64));
-            }
-            if let Some(dk) = kem_data["decapsulation_key"].as_str() {
-                println!("decapsulation_key = {}", dk);
-            }
-            if let Some(ct) = kem_data["ciphertext"].as_str() {
-                println!("ciphertext = {}", truncate_hex(ct, 64));
-            }
-            if let Some(ss) = kem_data["shared_secret"].as_str() {
-                println!("shared_secret = {}", ss);
-            }
-            if let Some(ss_recovered) = kem_data["shared_secret_recovered"].as_str() {
-                println!("shared_secret_recovered = {}", ss_recovered);
-            }
-            println!("```");
-            println!();
-        }
-    }
-    
-    // Convert primitives
-    if let Some(primitives) = test_vectors["test_vectors"]["primitives"].as_object() {
-        println!("## Cryptographic Primitives");
-        println!();
-        
-        for (primitive_name, primitive_data) in primitives {
-            println!("### {}", primitive_name);
-            println!();
-            
-            if let Some(constants) = primitive_data["constants"].as_object() {
-                println!("Constants:");
-                println!();
-                for (key, value) in constants {
-                    println!("- `{}`: {}", key, value);
-                }
-                println!();
-            }
-            
-            println!("Test Vector:");
-            println!();
-            println!("```");
-            if let Some(input) = primitive_data["input"].as_str() {
-                println!("input = {}", input);
-            }
-            if let Some(seed) = primitive_data["seed"].as_str() {
-                println!("seed = {}", seed);
-            }
-            if let Some(output) = primitive_data["output"].as_str() {
-                println!("output = {}", output);
-            }
-            println!("```");
-            println!();
-        }
-    }
-    
+    convert_hybrid_kem_vectors(&test_vectors.qsf_p256_mlkem768_shake256_sha3256);
+
+    // Convert QSF-X25519-MLKEM768-SHAKE256-SHA3256 (X-Wing)
+    println!("## QSF-X25519-MLKEM768-SHAKE256-SHA3256 (X-Wing)");
+    println!();
+    convert_hybrid_kem_vectors(&test_vectors.qsf_x25519_mlkem768_shake256_sha3256);
+
+    // Convert QSF-P384-MLKEM1024-SHAKE256-SHA3256
+    println!("## QSF-P384-MLKEM1024-SHAKE256-SHA3256");
+    println!();
+    convert_hybrid_kem_vectors(&test_vectors.qsf_p384_mlkem1024_shake256_sha3256);
+
     eprintln!("Markdown conversion completed successfully!");
 }
 
-fn truncate_hex(hex_str: &str, max_len: usize) -> String {
-    if hex_str.len() <= max_len {
-        hex_str.to_string()
+fn convert_hybrid_kem_vectors(vectors: &[HybridKemTestVector]) {
+    for vector in vectors {
+        println!("~~~");
+        println!("{}", format_hex_field("seed", &hex::encode(&vector.seed)));
+        println!("{}", format_hex_field("randomness", &hex::encode(&vector.randomness)));
+        println!("{}", format_hex_field("encapsulation_key", &hex::encode(&vector.encapsulation_key)));
+        println!("{}", format_hex_field("decapsulation_key", &hex::encode(&vector.decapsulation_key)));
+        println!("{}", format_hex_field("ciphertext", &hex::encode(&vector.ciphertext)));
+        println!("{}", format_hex_field("shared_secret", &hex::encode(&vector.shared_secret)));
+        println!("~~~");
+        println!();
+    }
+}
+
+fn format_hex_field(label: &str, hex_str: &str) -> String {
+    let prefix = format!("{} = ", label);
+    let indent = " ".repeat(prefix.len());
+    
+    if hex_str.len() + prefix.len() <= 64 {
+        // Fits on one line
+        format!("{}{}", prefix, hex_str)
     } else {
-        format!("{}...", &hex_str[..max_len])
+        // Need to wrap
+        let mut result = prefix;
+        let mut remaining = hex_str;
+        let first_line_len = 64 - result.len();
+        
+        // First line
+        result.push_str(&remaining[..first_line_len]);
+        remaining = &remaining[first_line_len..];
+        
+        // Subsequent lines
+        while !remaining.is_empty() {
+            result.push('\n');
+            result.push_str(&indent);
+            let line_len = std::cmp::min(remaining.len(), 64 - indent.len());
+            result.push_str(&remaining[..line_len]);
+            remaining = &remaining[line_len..];
+        }
+        
+        result
     }
 }

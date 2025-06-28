@@ -7,8 +7,8 @@ use hybrid_kem_ref::{
 use p256::{
     AffinePoint, EncodedPoint, ProjectivePoint, Scalar,
     elliptic_curve::{
-        ops::Reduce,
         group::prime::PrimeCurveAffine,
+        ops::Reduce,
         sec1::{FromEncodedPoint, ToEncodedPoint},
     },
 };

@@ -94,7 +94,7 @@ impl Kem for MlKem1024 {
         // Placeholder implementation - will be replaced with actual ML-KEM
         let ek_bytes = vec![0u8; Self::ENCAPSULATION_KEY_LENGTH];
         let dk_bytes = vec![0u8; Self::DECAPSULATION_KEY_LENGTH];
-        
+
         Ok((
             MlKem1024EncapsulationKey { bytes: ek_bytes },
             MlKem1024DecapsulationKey { bytes: dk_bytes },
@@ -107,11 +107,11 @@ impl Kem for MlKem1024 {
         if seed.len() != Self::SEED_LENGTH {
             return Err(KemError::InvalidInputLength);
         }
-        
+
         // Placeholder implementation - will be replaced with actual ML-KEM
         let ek_bytes = vec![0u8; Self::ENCAPSULATION_KEY_LENGTH];
         let dk_bytes = vec![0u8; Self::DECAPSULATION_KEY_LENGTH];
-        
+
         Ok((
             MlKem1024EncapsulationKey { bytes: ek_bytes },
             MlKem1024DecapsulationKey { bytes: dk_bytes },
@@ -125,7 +125,7 @@ impl Kem for MlKem1024 {
         // Placeholder implementation - will be replaced with actual ML-KEM
         let ct_bytes = vec![0u8; Self::CIPHERTEXT_LENGTH];
         let ss_bytes = vec![0u8; Self::SHARED_SECRET_LENGTH];
-        
+
         Ok((
             MlKem1024Ciphertext { bytes: ct_bytes },
             MlKem1024SharedSecret { bytes: ss_bytes },
@@ -138,7 +138,7 @@ impl Kem for MlKem1024 {
     ) -> Result<Self::SharedSecret, KemError> {
         // Placeholder implementation - will be replaced with actual ML-KEM
         let ss_bytes = vec![0u8; Self::SHARED_SECRET_LENGTH];
-        
+
         Ok(MlKem1024SharedSecret { bytes: ss_bytes })
     }
 
@@ -147,7 +147,7 @@ impl Kem for MlKem1024 {
     ) -> Result<Self::EncapsulationKey, KemError> {
         // Placeholder implementation - will be replaced with actual ML-KEM
         let ek_bytes = vec![0u8; Self::ENCAPSULATION_KEY_LENGTH];
-        
+
         Ok(MlKem1024EncapsulationKey { bytes: ek_bytes })
     }
 }
@@ -162,11 +162,11 @@ impl EncapsDerand for MlKem1024 {
         if randomness.len() != Self::RANDOMNESS_LENGTH {
             return Err(KemError::InvalidInputLength);
         }
-        
+
         // Placeholder implementation - will be replaced with actual ML-KEM
         let ct_bytes = vec![0u8; Self::CIPHERTEXT_LENGTH];
         let ss_bytes = vec![0u8; Self::SHARED_SECRET_LENGTH];
-        
+
         Ok((
             MlKem1024Ciphertext { bytes: ct_bytes },
             MlKem1024SharedSecret { bytes: ss_bytes },

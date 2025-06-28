@@ -72,8 +72,8 @@ impl NominalGroup for X25519Group {
     fn generator() -> Self::Element {
         // X25519 generator is defined as 9
         let generator_bytes = [
-            9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0,
         ];
         let public = PublicKey::from(generator_bytes);
         let bytes = generator_bytes.to_vec();
