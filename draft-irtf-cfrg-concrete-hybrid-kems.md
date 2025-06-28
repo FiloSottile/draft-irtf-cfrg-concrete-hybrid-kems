@@ -42,6 +42,22 @@ normative:
   SP800-186: DOI.10.6028/NIST.SP.800-186
 
 informative:
+  ABH+21:
+    title: "Analysing the HPKE standard."
+    date: April, 2021
+    author:
+      -
+        ins: Joël Alwen
+      -
+        ins: Bruno Blanchet
+      -
+        ins: Eduard Hauck
+      -
+        ins: Eike Kiltz
+      -
+        ins: Benjamin Lipp
+      -
+        ins: Doreen Riepel
   ANSIX9.62:
     title: "Public Key Cryptography for the Financial Services Industry: the Elliptic Curve Digital Signature Algorithm (ECDSA)"
     date: Nov, 2005
@@ -132,6 +148,119 @@ so that implementors can verify the correctness of their implementations.
 {::boilerplate bcp14-tagged}
 
 We make extensive use of the terminology in {{HYBRID-KEMS}}.
+
+# Designing a Concrete Instantiation
+
+A hybrid KEM is typically assembled using a choice of constituents that meets
+the needs of a certain application.  Considerations include:
+
+* The security level required by the application.
+* The application's assessment of the security of constituent groups / KEMs.
+* Compliance requirements that mandate the use of certain algorithms.
+* The availability of algorithm implementations in deployment environments.
+* Application design patterns, e.g., whether the same key is used many times.
+* The application performance impact of factors such as computation time or
+  key/ciphertext size.
+
+In {{HYBRID-KEMS}}, three frameworks are provided for constructing hybrid KEMs.
+Given the specific trade-offs that these frameworks present, there is typically
+one framework that will be optimal for a given application situation.
+Essentially, the GHP framework should be considered the default, with the QSF
+and PRE frameworks used in cases where applications are suited to their
+trade-offs:
+
+* The QSF framework requires the least computation, but imposes additional
+  security requirements on the constituents.  If the constituents meet the
+  requirements, then a QSF-based hybrid KEM will perform better than the other
+  two frameworks.
+
+* The PRE framework is faster than GHP in the cases where (1) encapsulation keys
+  are reused multiple times, and (2) encapsulation keys are large, but slower
+  when these conditions are not true.  So PRE should be preferred in situations
+  that meet these requirements.
+
+This decision process is illustrated in {{fig-flowchart}}.
+
+~~~ aasvg
+     .-----------.
+    |    START    |
+     '-----+-----'
+           |
+           |
+           V
+   .---------------.
+  /  Nominal Group  \
+ /                   \            .-----------.
++         AND         +---YES--->|   Use QSF   |
+ \                   /            '-----------'
+  \ KEM_PQ is C2PRI /
+   '---------------'
+           |
+           |
+           NO
+           |
+           |
+           V
+   .---------------.
+  /  Enc Key Reuse  \
+ /                   \            .-----------.
++         AND         +---YES--->|   Use PRE   |
+ \                   /            '-----------'
+  \ Large Enc Keys  /
+   '---------------'
+           |
+           |
+           NO
+           |
+           |                      .-----------.
+           +-------------------->|   Use GHP   |
+                                  '-----------'
+~~~
+{: #fig-flowchart title="Selecting a hybrid KEM framework" }
+
+## This Document as an Example
+
+The concrete hybrid KEM instances defined in this document were selected using
+this logic.  Several factors went into the selected combinations of
+constituents:
+
+* For the classical groups: Certain implementors prefer NIST-defined
+  elliptic curves for compliance reasons, while other prefer the
+  implementation properties of X25519.  Together, these curves account for
+  most ECDH in the Internet today.
+
+* For the post-quantum KEM: ML-KEM is broadly trusted due to its selection
+  by the NIST PQ process.
+
+* Security levels:
+
+    * The security level provided by P-256 and X25519 is the de facto
+      standard for many applications today.
+
+    * Certain security-sensitive applications have moved to P-384.
+
+    * ML-KEM-768, though nominally providing security comparable to P-384,
+      is generally used in the same contexts as P-256 and X25519, because
+      its performance is acceptable, and because this provides a hedge
+      against incremental degradation to the security of ML-KEM.
+
+    * ML-KEM-1024 is paired with P-384 for similar reasons.
+
+    * X448, the higher-security parallel to X25519, has not seen very wide
+      usage, so there is no higher-security analogue to the X25519-based
+      hybrid KEM.
+
+* KDFs and PRGs: Since ML-KEM uses SHA-3 internally, a deployment environment
+  that provides ML-KEM will almost certainly provide SHA3-256 and SHAKE256.
+  Compliance requirements generally allow the use of SHA-3 in these ways.
+
+Based on these inputs, the decision process above indicates that QSF is the
+appropriate hybrid KEM framework:
+
+* The NIST elliptic-curve groups P-256 and P-384 and the X25519 group are
+  shown to be secure nominal groups in {{ABH+21}}.
+
+* ML-KEM is shown to satisfy the C2PRI security definition in {{XWING}}.
 
 # Concrete Nominal Group and KEM Instances
 
@@ -255,9 +384,9 @@ KEM_PQ.Nseed` as appropriate.
 This section specifies concrete KDF instances that implement the KDF
 abstraction from {{HYBRID-KEMS}} and meet the required security definitions.
 
-### SHA-3
+### SHA3-256
 
-The SHA-3 hash function is defined in {{FIPS202}}.  It produces a 32-byte
+The SHA3-256 hash function is defined in {{FIPS202}}.  It produces a 32-byte
 output, so it is appropriate for use in hybrid KEMs with `Nss = 32`.
 
 # Concrete Hybrid KEM Instances
@@ -291,8 +420,8 @@ the following parameters.
 
 * `Group_T`: P-256 {{group-nist}}
 * `KEM_PQ`: ML-KEM-768 {{mlkem}}
-* `PRG`: SHAKE-256 {{FIPS202}}
-* `KDF`: SHA3-256 {{FIPS202}}
+* `PRG`: SHAKE256 {{shake256}}
+* `KDF`: SHA3-256 {{sha3-256}}
 * `Label`: `QSF-P256-MLKEM768-SHAKE256-SHA3256`
 
 The KEM constants for the resulting hybrid KEM are as follows:
@@ -310,8 +439,8 @@ parameters.
 
 * `Group_T`: Curve25519 {{group-curve25519}}
 * `KEM_PQ`: ML-KEM-768 {{mlkem}}
-* `PRG`: SHAKE-256 {{FIPS202}}
-* `KDF`: SHA3-256 {{FIPS202}}
+* `PRG`: SHAKE256 {{shake256}}
+* `KDF`: SHA3-256 {{sha3-256}}
 * `Label`: `\.//^\`
 
 (This label does not follow the same pattern as the other KEMs here, but was
@@ -331,8 +460,8 @@ QSF-P384-MLKEM1024-SHAKE256-SHA3256 has the following parameters:
 
 * `Group_T`: P-384 {{group-nist}}
 * `KEM_PQ: ML-KEM-1024 {{mlkem}}
-* `PRG`: SHAKE-256 {{FIPS202}}
-* `KDF`: HKDF-SHA-256 {{!RFC5869}}
+* `PRG`: SHAKE256 {{shake256}}
+* `KDF`: SHA3-256 {{sha3-256}}
 * `Label`: `QSF-P384-MLKEM1024-SHAKE256-SHA3256`
 
 The following constants for the hybrid KEM are also defined:
