@@ -2,7 +2,7 @@
 
 use crate::{
     groups::{P256Group, P384Group, X25519Group},
-    kems::{MlKem768Kem, MlKem1024},
+    kems::{MlKem768Kem, MlKem1024Kem},
     primitives::{Sha3_256Kdf, Shake256Prg},
 };
 use hybrid_kem_ref::{qsf::QsfHybridKem, traits::HybridKemLabel};
@@ -55,7 +55,7 @@ impl HybridKemLabel for QsfP384MlKem1024Shake256Sha3256Label {
 /// QSF-P384-MLKEM1024-SHAKE256-SHA3256 hybrid KEM
 pub type QsfP384MlKem1024Shake256Sha3256 = QsfHybridKem<
     P384Group,
-    MlKem1024,
+    MlKem1024Kem,
     Sha3_256Kdf,
     Shake256Prg<P384_MLKEM1024_PRG_OUTPUT>,
     QsfP384MlKem1024Shake256Sha3256Label,

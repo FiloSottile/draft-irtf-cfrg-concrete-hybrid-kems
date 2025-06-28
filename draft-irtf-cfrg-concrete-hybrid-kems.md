@@ -303,7 +303,7 @@ The KEM constants for the resulting hybrid KEM are as follows:
 - `Nct`: 1121
 - `Nss`: 32
 
-## `QSF-X25519-MLKEM-SHA3` {#xwing}
+## `QSF-X25519-MLKEM768-SHAKE256-SHA3256` {#xwing}
 
 This hybrid KEM is identical to X-Wing {{XWING-SPEC}}. It has the following
 parameters.

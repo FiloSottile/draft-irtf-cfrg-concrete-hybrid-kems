@@ -4,7 +4,7 @@ pub mod ml_kem_1024;
 pub mod ml_kem_768;
 
 pub use ml_kem_768::MlKem768Kem;
-pub use ml_kem_1024::MlKem1024;
+pub use ml_kem_1024::MlKem1024Kem;
 
 #[cfg(test)]
 mod tests;
