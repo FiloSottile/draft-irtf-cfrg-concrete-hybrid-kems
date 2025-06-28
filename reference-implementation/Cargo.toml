@@ -1,0 +1,51 @@
+[package]
+name = "concrete-hybrid-kem"
+version = "0.1.0"
+edition = "2024"
+description = "Reference implementation of hybrid KEMs from draft-irtf-cfrg-concrete-hybrid-kems"
+license = "MIT OR Apache-2.0"
+authors = ["Deirdre Connolly <durumcrustulum@gmail.com>", "Richard Barnes <rlb@ipv.sx>"]
+repository = "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems"
+documentation = "https://docs.rs/hybrid-kem-ref"
+readme = "README.md"
+keywords = ["cryptography", "kem", "post-quantum", "hybrid"]
+categories = ["cryptography"]
+
+[dependencies]
+# Elliptic curve cryptography
+p256 = { version = "0.13", features = ["arithmetic"] }
+p384 = { version = "0.13", features = ["arithmetic"] }
+x25519-dalek = { version = "2.0", features = ["static_secrets"] }
+
+# Post-quantum cryptography
+ml-kem = "0.2"
+
+# Hash functions and XOFs
+sha3 = "0.10"
+
+# Utilities
+rand = "0.9"
+hex = "0.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Import the generic hybrid KEM crate
+hybrid-kem-ref = { path = "../../draft-irtf-cfrg-hybrid-kems/reference-implementation" }
+
+[dev-dependencies]
+rand = "0.9"
+
+[lib]
+name = "concrete_hybrid_kem"
+
+[[bin]]
+name = "generate_vectors"
+path = "src/bin/generate_vectors.rs"
+
+[[bin]]
+name = "verify_vectors"
+path = "src/bin/verify_vectors.rs"
+
+[[bin]]
+name = "vectors_to_markdown"
+path = "src/bin/vectors_to_markdown.rs"
