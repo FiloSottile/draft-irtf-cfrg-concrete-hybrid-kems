@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-26T01:44:06.729143+00:00",
+  "timestamp": "2025-06-29T01:54:01.561880+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -55,16 +55,24 @@
       "id": "I_kwDOMmh5WM641BZ1",
       "title": "concrete instance of 'prehash' generic scheme?",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/issues/2",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "dconnolly",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "",
       "createdAt": "2025-05-29T16:49:10Z",
-      "updatedAt": "2025-05-29T16:49:10Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2025-06-28T22:02:57Z",
+      "closedAt": "2025-06-28T22:02:57Z",
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Closing in favor of the more general #9 ",
+          "createdAt": "2025-06-28T22:02:57Z",
+          "updatedAt": "2025-06-28T22:02:57Z"
+        }
+      ]
     },
     {
       "number": 6,
@@ -79,6 +87,22 @@
       "body": "",
       "createdAt": "2025-06-25T14:42:40Z",
       "updatedAt": "2025-06-25T14:42:40Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 9,
+      "id": "I_kwDOMmh5WM693yJc",
+      "title": "Additional concrete instances",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/issues/9",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The document currently defines three concrete hybrid KEMs.  All of these hybrid KEMs are based on ML-KEM, and all of them use the QSF generic framework.\n\nOn the one hand, it could be helpful to define additional concrete hybrid KEMs to demonstrate when the other frameworks would be preferred.  For example:\n\n* A X25519 + Classic McEleice combination, for use in an environment where public keys are reused, would provide a case where PRE is clearly superior to GHP, since Classic McEliece does not have C2PRI, but does have giant public keys.\n* An RSA-OAEP + HQC combination would show the need for GHP, since RSA-OAEP is not a nominal group, and HQC does not have C2PRI resistance, but HQC keys are not big enough for pre-hashing to provide a significant advantage.\n\nOn the other hand, we should not create concrete hybrid KEMs that nobody is going to use.  If there is not a requirement by applications for all of the frameworks in the generic document, we could remove any frameworks that are not needed.\n",
+      "createdAt": "2025-06-28T22:02:23Z",
+      "updatedAt": "2025-06-28T22:02:23Z",
       "closedAt": null,
       "comments": []
     }
@@ -309,24 +333,26 @@
       "id": "PR_kwDOMmh5WM6bekQE",
       "title": "draft-00 Release Candidate 1",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/5",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "This is fairly heavy edit to get the doc cleaned up for release.  There are no substantive changes, but the exposition is cleaned up in a few ways:\r\n\r\n* The separate sections for P-256/P-384 and ML-KEM-768/ML-KEM-1024 are combined to avoid duplication\r\n* The instantiations no longer recite the algorithms from the generic doc\r\n* Instead of the `HNN` names, I invented a new `{scheme}-{T}-{PQ}-{hash}` schema\r\n* The sketchy security notes at the end have been cut\r\n\r\nBefore release, we should make sure issues are filed for the TODOs.",
       "createdAt": "2025-06-20T21:48:27Z",
-      "updatedAt": "2025-06-24T21:32:57Z",
+      "updatedAt": "2025-06-27T22:18:36Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "baseRefName": "main",
       "baseRefOid": "ba027e817dc93b50a015ada671cbc4c38ebe1bf3",
       "headRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "headRefName": "rc1",
-      "headRefOid": "5d4fbd8db8d14e86fa3f8d9f62d42b3b96218ebd",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "561f2c1969f2b554643cafbb1f7ad2adf390d98a",
+      "closedAt": "2025-06-27T22:18:36Z",
+      "mergedAt": "2025-06-27T22:18:36Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "bc349c5b009d2245dfa925a85b915208fa48f9ea"
+      },
       "comments": [],
       "reviews": [
         {
@@ -370,6 +396,58 @@
           ]
         }
       ]
+    },
+    {
+      "number": 7,
+      "id": "PR_kwDOMmh5WM6cimPS",
+      "title": "Add a section explaining how to select a framework",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/7",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This PR adds a section about how concrete instantiations should be selected generally, and uses the framework to justify the instantiations in the document.\r\n\r\nFixes #6 ",
+      "createdAt": "2025-06-28T17:07:23Z",
+      "updatedAt": "2025-06-28T21:53:10Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
+      "baseRefName": "main",
+      "baseRefOid": "bc349c5b009d2245dfa925a85b915208fa48f9ea",
+      "headRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
+      "headRefName": "why",
+      "headRefOid": "eca283609b0f30ec02970d6b8ad8fc0ce548aa07",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 8,
+      "id": "PR_kwDOMmh5WM6cjB2z",
+      "title": "Add a reference implementation and test vectors",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/8",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This PR adds a Claude-coded reference implementation of the primitives and uses it to generate test vectors that go into the document.",
+      "createdAt": "2025-06-28T19:33:12Z",
+      "updatedAt": "2025-06-28T19:33:13Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
+      "baseRefName": "main",
+      "baseRefOid": "bc349c5b009d2245dfa925a85b915208fa48f9ea",
+      "headRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
+      "headRefName": "ref-impl",
+      "headRefOid": "980fddfcd9c407fa6587eceec96c27c04a060904",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
