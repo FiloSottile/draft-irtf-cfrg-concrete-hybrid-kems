@@ -30,5 +30,5 @@ pub use instantiations::{
     QsfP256MlKem768Shake256Sha3256, QsfP384MlKem1024Shake256Sha3256,
     QsfX25519MlKem768Shake256Sha3256,
 };
-pub use kems::{MlKem768Kem, MlKem1024Kem};
+pub use kems::{MlKem1024Kem, MlKem512Kem, MlKem768Kem};
 pub use primitives::{Sha3_256Kdf, Shake256Prg};
