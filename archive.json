@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-29T01:54:01.561880+00:00",
+  "timestamp": "2025-07-01T01:55:07.507157+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -102,7 +102,76 @@
       "labels": [],
       "body": "The document currently defines three concrete hybrid KEMs.  All of these hybrid KEMs are based on ML-KEM, and all of them use the QSF generic framework.\n\nOn the one hand, it could be helpful to define additional concrete hybrid KEMs to demonstrate when the other frameworks would be preferred.  For example:\n\n* A X25519 + Classic McEleice combination, for use in an environment where public keys are reused, would provide a case where PRE is clearly superior to GHP, since Classic McEliece does not have C2PRI, but does have giant public keys.\n* An RSA-OAEP + HQC combination would show the need for GHP, since RSA-OAEP is not a nominal group, and HQC does not have C2PRI resistance, but HQC keys are not big enough for pre-hashing to provide a significant advantage.\n\nOn the other hand, we should not create concrete hybrid KEMs that nobody is going to use.  If there is not a requirement by applications for all of the frameworks in the generic document, we could remove any frameworks that are not needed.\n",
       "createdAt": "2025-06-28T22:02:23Z",
-      "updatedAt": "2025-06-28T22:02:23Z",
+      "updatedAt": "2025-06-30T12:50:44Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "bwesterb",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Classic McEliece does not have C2PRI\n\n>  HQC does not have C2PRI resistance\n\nDo you have a reference for those claims?",
+          "createdAt": "2025-06-30T10:02:17Z",
+          "updatedAt": "2025-06-30T10:02:17Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I do not.  I thought that I had heard people claim that on the CFRG mailing list.",
+          "createdAt": "2025-06-30T12:50:43Z",
+          "updatedAt": "2025-06-30T12:50:43Z"
+        }
+      ]
+    },
+    {
+      "number": 10,
+      "id": "I_kwDOMmh5WM6-Gop1",
+      "title": "Update instance `Decaps()`'s to match seed expansion in -generic",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/issues/10",
+      "state": "OPEN",
+      "author": "dconnolly",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "dconnolly"
+      ],
+      "labels": [],
+      "body": "Depends on https://github.com/cfrg/draft-irtf-cfrg-hybrid-kems/issues/58",
+      "createdAt": "2025-06-30T18:06:32Z",
+      "updatedAt": "2025-06-30T18:07:34Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 11,
+      "id": "I_kwDOMmh5WM6-Go7N",
+      "title": "Update implementation and test vectors",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/issues/11",
+      "state": "OPEN",
+      "author": "dconnolly",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "dconnolly"
+      ],
+      "labels": [],
+      "body": "",
+      "createdAt": "2025-06-30T18:07:02Z",
+      "updatedAt": "2025-06-30T18:07:13Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 12,
+      "id": "I_kwDOMmh5WM6-GpgZ",
+      "title": "Update I-D pseudocode",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/issues/12",
+      "state": "OPEN",
+      "author": "dconnolly",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "dconnolly"
+      ],
+      "labels": [],
+      "body": "",
+      "createdAt": "2025-06-30T18:08:06Z",
+      "updatedAt": "2025-06-30T18:08:06Z",
       "closedAt": null,
       "comments": []
     }
@@ -409,7 +478,7 @@
       "labels": [],
       "body": "This PR adds a section about how concrete instantiations should be selected generally, and uses the framework to justify the instantiations in the document.\r\n\r\nFixes #6 ",
       "createdAt": "2025-06-28T17:07:23Z",
-      "updatedAt": "2025-06-28T21:53:10Z",
+      "updatedAt": "2025-06-30T12:56:30Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "baseRefName": "main",
       "baseRefOid": "bc349c5b009d2245dfa925a85b915208fa48f9ea",
@@ -420,8 +489,218 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
-      "reviews": []
+      "comments": [
+        {
+          "author": "dconnolly",
+          "authorAssociation": "COLLABORATOR",
+          "body": "i'm not sure if i love this because it only works if all the other things that affect choices like this (regulation/other standards on combiners, what component algorithms you are allowed to use / MUST use / have available, the trusted literature on security properties beyond IND-CCA for PQ KEMs, etc) are moot or not that salient, when they often can be the blocker to ever getting to the decision tree. I would pair this back a bunch, to more of a pros/cons vibe, than a 'follow this flow chart' vibe",
+          "createdAt": "2025-06-30T06:51:32Z",
+          "updatedAt": "2025-06-30T06:51:32Z"
+        },
+        {
+          "author": "dconnolly",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@br-hale wdyt? I may be pickled by the recent reviews on hybrid-signature-spectrums against the flow chart vibe but",
+          "createdAt": "2025-06-30T07:48:59Z",
+          "updatedAt": "2025-06-30T07:49:23Z"
+        },
+        {
+          "author": "br-hale",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> @br-hale wdyt? I may be pickled by the recent reviews on hybrid-signature-spectrums against the flow chart vibe but\r\n\r\nYes, I concur that there isn't a logical basis for this pathway. I like the idea of a flowchart, but this one does not account for the decision variables. My concern is also that there isn't a research basis for this. There are claims of one performing better or security being good enough, but not a breakdown or backing for those claims.\r\n\r\nMy suggestion would be to take the bullet list that is at the start of the commit, and build out the logic that goes into each item in the list. E.g., if the claim is one is more efficient than the others, there should be a citation for that claim. If we are going to say the security fits the needs, then a list of security properties and why the selection is made that seems to fit most needs.",
+          "createdAt": "2025-06-30T12:35:26Z",
+          "updatedAt": "2025-06-30T12:35:26Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I honestly don't know what there would be to cite / prove about efficiency.  The only difference is that some variants do more or less hashing.  Less hashing consumes fewer cycles, full stop.  We could provide some numbers to back this up in an appendix if you want, as we did [with SFrame](https://rfcs.online/rfcs/rfc9605.html#name-overhead-analysis).  But that wouldn't be rigorous, and in any case, it's not going to get done by the I-D deadline.\r\n\r\nI agree we should be sharper on the security trade-offs.  I was thinking that that would mainly get captured in the generic doc, since these are properties of the frameworks.\r\n\r\nThe flow-chart / guide here isn't meant to be normative (you MUST do this).  It's meant to guide people toward the right solutions.  If there are other considerations, by all means take them into account.  We're never going to address all the constraints people ever come up with.",
+          "createdAt": "2025-06-30T12:48:26Z",
+          "updatedAt": "2025-06-30T12:49:53Z"
+        },
+        {
+          "author": "br-hale",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think the issue right now isn't that there is a basis at all for the claims stated. It is said that this is the decision process used, but it is not clear that 1) there is grounding for this decision process and 2) that we even used it. ",
+          "createdAt": "2025-06-30T12:56:30Z",
+          "updatedAt": "2025-06-30T12:56:30Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOMmh5WM6w_QZ_",
+          "commit": {
+            "abbreviatedOid": "eca2836"
+          },
+          "author": "rohanmahy",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-06-29T18:42:21Z",
+          "updatedAt": "2025-06-29T18:42:21Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOMmh5WM6xFWPF",
+          "commit": {
+            "abbreviatedOid": "eca2836"
+          },
+          "author": "br-hale",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-30T12:02:01Z",
+          "updatedAt": "2025-06-30T12:02:01Z",
+          "comments": [
+            {
+              "originalPosition": 29,
+              "body": "\"constituents\" => components? Components is the more common term for the parts of a hybrid.",
+              "createdAt": "2025-06-30T12:02:01Z",
+              "updatedAt": "2025-06-30T12:02:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOMmh5WM6xFdvs",
+          "commit": {
+            "abbreviatedOid": "eca2836"
+          },
+          "author": "br-hale",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-30T12:13:16Z",
+          "updatedAt": "2025-06-30T12:13:16Z",
+          "comments": [
+            {
+              "originalPosition": 29,
+              "body": "Same update throughout",
+              "createdAt": "2025-06-30T12:13:16Z",
+              "updatedAt": "2025-06-30T12:13:16Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOMmh5WM6xFes_",
+          "commit": {
+            "abbreviatedOid": "eca2836"
+          },
+          "author": "br-hale",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-30T12:14:41Z",
+          "updatedAt": "2025-06-30T12:14:41Z",
+          "comments": [
+            {
+              "originalPosition": 43,
+              "body": "Why should it be considered the default?",
+              "createdAt": "2025-06-30T12:14:41Z",
+              "updatedAt": "2025-06-30T12:14:41Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOMmh5WM6xFfZu",
+          "commit": {
+            "abbreviatedOid": "eca2836"
+          },
+          "author": "br-hale",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-30T12:15:39Z",
+          "updatedAt": "2025-06-30T12:15:39Z",
+          "comments": [
+            {
+              "originalPosition": 48,
+              "body": "What additional security requirements? (Again, this is information I think needs to be explicit in the draft to avoid raising such questions.)",
+              "createdAt": "2025-06-30T12:15:39Z",
+              "updatedAt": "2025-06-30T12:15:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOMmh5WM6xFfpb",
+          "commit": {
+            "abbreviatedOid": "eca2836"
+          },
+          "author": "br-hale",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-30T12:16:00Z",
+          "updatedAt": "2025-06-30T12:16:00Z",
+          "comments": [
+            {
+              "originalPosition": 50,
+              "body": "We need citations to back up these claims.",
+              "createdAt": "2025-06-30T12:16:00Z",
+              "updatedAt": "2025-06-30T12:16:00Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOMmh5WM6xFgfT",
+          "commit": {
+            "abbreviatedOid": "eca2836"
+          },
+          "author": "br-hale",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-30T12:17:13Z",
+          "updatedAt": "2025-06-30T12:17:13Z",
+          "comments": [
+            {
+              "originalPosition": 54,
+              "body": "Clarification on punctuation: \"The PRE framework is faster than GHP in the cases where (1) encapsulation keys\r\n  are reused multiple times and (2) encapsulation keys are large; however it is slower\r\n  when these conditions are not true [XXXX].\" \r\nCitation needed.",
+              "createdAt": "2025-06-30T12:17:13Z",
+              "updatedAt": "2025-06-30T12:17:13Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOMmh5WM6xFi6E",
+          "commit": {
+            "abbreviatedOid": "eca2836"
+          },
+          "author": "br-hale",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-30T12:20:54Z",
+          "updatedAt": "2025-06-30T12:20:55Z",
+          "comments": [
+            {
+              "originalPosition": 57,
+              "body": "The flowchart makes for a pretty visualization, but it needs to be backed up by research. It is built from claims but those claims are unsubstantiated as the document currently stands. ",
+              "createdAt": "2025-06-30T12:20:55Z",
+              "updatedAt": "2025-06-30T12:20:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOMmh5WM6xFqNp",
+          "commit": {
+            "abbreviatedOid": "eca2836"
+          },
+          "author": "br-hale",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-30T12:31:17Z",
+          "updatedAt": "2025-06-30T12:31:17Z",
+          "comments": [
+            {
+              "originalPosition": 133,
+              "body": "I am not seeing a logical basis for this statement. ",
+              "createdAt": "2025-06-30T12:31:17Z",
+              "updatedAt": "2025-06-30T12:31:17Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 8,
