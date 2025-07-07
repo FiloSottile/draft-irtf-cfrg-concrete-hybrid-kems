@@ -149,9 +149,10 @@ P-384, as well as a group based on Curve25519.
 
 ### P-256 and P-384 Nominal Groups {#group-nist}
 
-The NIST P-256 and P-384 elliptic curves are defined in {{SP800-186}}.  They are
-widely used for key agreement and digital signature.  In this section, we define
-how they meet the Nominal Group interface described in {{HYBRID-KEMS}}.
+The NIST P-256 and P-384 elliptic curves are defined in {{SP800-186}}.  They
+are widely used for key agreement and digital signature.  In this section, we
+define how they meet the Nominal Group interface described in
+{{HYBRID-KEMS}}.
 
 Group elements are elliptic curve points, represented as byte strings in the
 compressed representation defined by the Elliptic-Curve-Point-to-Octet-String
@@ -163,10 +164,10 @@ The Nominal Group algorithms are the same for both groups:
   input element (or point) `p` and the scalar `x`, according to the group law
   for the curve specified in {{SP800-186}}.
 - `RandomScalar(seed) -> k`: Implemented by converting `seed` to an integer
-  using the Octet-String-to-Integer function in {{SEC1}}, and then reducing the
-  resulting integer modulo the group order.
-- `ElementToSharedSecret(p) -> ss`: The shared secret is the X coordinate of the
-  elliptic curve point `p`, encoded as an `Nss`-byte string using the
+  using the Octet-String-to-Integer function in {{SEC1}}, and then reducing
+  the resulting integer modulo the group order.
+- `ElementToSharedSecret(p) -> ss`: The shared secret is the X coordinate of
+  the elliptic curve point `p`, encoded as an `Nss`-byte string using the
   Field-Element-to-Octet-String function in {{SEC1}}.
 
 The group constants for the P-256 group are as follows:
@@ -207,9 +208,9 @@ abstraction from {{HYBRID-KEMS}}.
 
 ### ML-KEM-768 and ML-KEM-1024 {#mlkem}
 
-The ML-KEM-768 and ML-KEM-1024 KEMs are defined in {{FIPS203}}.  The algorithms
-defined in that specification map to the KEM abstraction in {{HYBRID-KEMS}} as
-follows:
+The ML-KEM-768 and ML-KEM-1024 KEMs are defined in {{FIPS203}}.  The
+algorithms defined in that specification map to the KEM abstraction in
+{{HYBRID-KEMS}} as follows:
 
 - `GenerateKeyPair() -> (ek, dk)`: Implemented as KeyGen in Section 7.1 of
   {{FIPS203}}.
@@ -264,16 +265,16 @@ output, so it is appropriate for use in hybrid KEMs with `Nss = 32`.
 
 This section instantiates the following concrete KEMs:
 
-QSF-P256-MLKEM768-SHAKE256-SHA3256:
+QSF-MLKEM768-P256-SHA3256-SHAKE256:
 : A hybrid KEM composing ML-KEM-768 and P-256 using the QSF scheme, with
   SHAKE256 as the PRG and SHA3-256 as the KDF.
 
-QSF-X25519-MLKEM768-SHAKE256-SHA3256:
+QSF-MLKEM768-X25519-SHA3256-SHAKE256:
 : A hybrid KEM composing ML-KEM-768 and Curve25519 using the QSF scheme, with
-  SHAKE256 as the PRG and SHA3-256 as the KDF. This construction is identical to
-  the X-Wing construction in {{XWING-SPEC}}.
+  SHAKE256 as the PRG and SHA3-256 as the KDF. This construction is identical
+  to the X-Wing construction in {{XWING-SPEC}}.
 
-QSF-P384-MLKEM1024-SHAKE256-SHA3256:
+QSF-MLKEM1024-P384-SHA3256-SHAKE256:
 : A hybrid KEM composing ML-KEM-1024 and P-384 using the QSF scheme, with
   SHAKE256 as the PRG and SHA3-256 as the KDF.
 
@@ -282,7 +283,7 @@ combiner construction from {{HYBRID-KEMS}}, the `label` to use for domain
 separation in the combiner function, as well as the PRG and KDF functions to
 use throughout.
 
-## QSF-P256-MLKEM768-SHAKE256-SHA3256 {#qsf-p256}
+## QSF-MLKEM768-P256-SHA3256-SHAKE256 {#qsf-p256}
 
 This hybrid KEM is heavily based on {{XWING}}, using the QSF combiner from
 {{HYBRID-KEMS}}. In particular, it has the same exact design but uses P-256
@@ -303,7 +304,7 @@ The KEM constants for the resulting hybrid KEM are as follows:
 - `Nct`: 1121
 - `Nss`: 32
 
-## `QSF-X25519-MLKEM-SHA3` {#xwing}
+## QSF-MLKEM768-X25519-SHA3256-SHAKE256 {#xwing}
 
 This hybrid KEM is identical to X-Wing {{XWING-SPEC}}. It has the following
 parameters.
@@ -325,9 +326,9 @@ The following constants for the hybrid KEM are also defined:
 - `Nct`: 1120
 - `Nss`: 32
 
-## QSF-P384-MLKEM1024-SHAKE256-SHA3256 {#qsf-p384}
+## QSF-MLKEM1024-P384-SHA3256-SHAKE256 {#qsf-p384}
 
-QSF-P384-MLKEM1024-SHAKE256-SHA3256 has the following parameters:
+QSF-MLKEM1024-P384-SHA3256-SHAKE256 has the following parameters:
 
 * `Group_T`: P-384 {{group-nist}}
 * `KEM_PQ: ML-KEM-1024 {{mlkem}}
