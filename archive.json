@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-07-01T01:55:07.507157+00:00",
+  "timestamp": "2025-07-08T01:45:30.079985+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -409,7 +409,7 @@
       "labels": [],
       "body": "This is fairly heavy edit to get the doc cleaned up for release.  There are no substantive changes, but the exposition is cleaned up in a few ways:\r\n\r\n* The separate sections for P-256/P-384 and ML-KEM-768/ML-KEM-1024 are combined to avoid duplication\r\n* The instantiations no longer recite the algorithms from the generic doc\r\n* Instead of the `HNN` names, I invented a new `{scheme}-{T}-{PQ}-{hash}` schema\r\n* The sketchy security notes at the end have been cut\r\n\r\nBefore release, we should make sure issues are filed for the TODOs.",
       "createdAt": "2025-06-20T21:48:27Z",
-      "updatedAt": "2025-06-27T22:18:36Z",
+      "updatedAt": "2025-07-07T23:37:51Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "baseRefName": "main",
       "baseRefOid": "ba027e817dc93b50a015ada671cbc4c38ebe1bf3",
@@ -725,6 +725,34 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 13,
+      "id": "PR_kwDOMmh5WM6d1y3U",
+      "title": "Name alignment and wrapping",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/13",
+      "state": "MERGED",
+      "author": "dconnolly",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2025-07-07T23:38:20Z",
+      "updatedAt": "2025-07-07T23:38:47Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
+      "baseRefName": "main",
+      "baseRefOid": "bc349c5b009d2245dfa925a85b915208fa48f9ea",
+      "headRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
+      "headRefName": "name-alignment",
+      "headRefOid": "13e496da9ec9509a0ff9615225606a2c2486528a",
+      "closedAt": "2025-07-07T23:38:47Z",
+      "mergedAt": "2025-07-07T23:38:47Z",
+      "mergedBy": "dconnolly",
+      "mergeCommit": {
+        "oid": "4f6ce977f57a54c51d5814f76a2b48dfb3bb4ce8"
+      },
       "comments": [],
       "reviews": []
     }
