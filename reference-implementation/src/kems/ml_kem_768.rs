@@ -1,14 +1,14 @@
 //! ML-KEM-768 implementation
 
-use hybrid_kem_ref::{
+use crate::generic::{
     error::KemError,
     traits::{AsBytes, EncapsDerand, Kem},
 };
+use crate::utils::RngWrapper;
 use ml_kem::{
     kem::{Decapsulate, DecapsulationKey, Encapsulate, EncapsulationKey},
     Ciphertext, EncapsulateDeterministic, EncodedSizeUser, KemCore, MlKem768, MlKem768Params,
 };
-use crate::utils::RngWrapper;
 
 /// ML-KEM-768 KEM implementation
 pub struct MlKem768Kem;

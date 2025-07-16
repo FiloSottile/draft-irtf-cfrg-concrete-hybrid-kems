@@ -2,8 +2,8 @@
 
 #[cfg(test)]
 mod tests {
+    use crate::generic::test_utils::test_kem_all;
     use crate::kems::{MlKem1024Kem, MlKem512Kem, MlKem768Kem};
-    use hybrid_kem_ref::test_utils::test_kem_all;
 
     #[test]
     fn test_ml_kem_512() {

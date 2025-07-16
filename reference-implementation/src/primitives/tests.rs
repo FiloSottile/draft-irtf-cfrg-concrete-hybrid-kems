@@ -2,8 +2,8 @@
 
 #[cfg(test)]
 mod tests {
+    use crate::generic::test_utils::{test_kdf_all, test_prg_all};
     use crate::primitives::{Sha3_256Kdf, Shake256Prg};
-    use hybrid_kem_ref::test_utils::{test_kdf_all, test_prg_all};
 
     #[test]
     fn test_sha3_256_kdf() {

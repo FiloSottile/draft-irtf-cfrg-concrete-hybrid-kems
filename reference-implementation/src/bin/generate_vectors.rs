@@ -1,13 +1,13 @@
 //! Test vector generation binary
 
 use concrete_hybrid_kem::{
+    generic::traits::{AsBytes, EncapsDerand, Kem},
     instantiations::{
         QsfP256MlKem768Shake256Sha3256, QsfP384MlKem1024Shake256Sha3256,
         QsfX25519MlKem768Shake256Sha3256,
     },
     test_vectors::{HybridKemTestVector, TestVectors},
 };
-use hybrid_kem_ref::traits::{AsBytes, EncapsDerand, Kem};
 
 fn main() {
     eprintln!("Generating test vectors for concrete hybrid KEMs...");

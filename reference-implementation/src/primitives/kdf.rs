@@ -1,6 +1,6 @@
 //! SHA3-256 KDF implementation
 
-use hybrid_kem_ref::traits::Kdf;
+use crate::generic::traits::Kdf;
 use sha3::{Digest, Sha3_256};
 
 /// SHA3-256 based KDF

@@ -1,6 +1,6 @@
 //! X25519 nominal group implementation
 
-use hybrid_kem_ref::{
+use crate::generic::{
     error::KemError,
     traits::{AsBytes, NominalGroup},
 };

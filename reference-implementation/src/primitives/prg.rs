@@ -1,9 +1,9 @@
 //! SHAKE256 PRG implementation
 
-use hybrid_kem_ref::traits::Prg;
+use crate::generic::traits::Prg;
 use sha3::{
-    Shake256,
     digest::{ExtendableOutput, Update, XofReader},
+    Shake256,
 };
 
 /// SHAKE256 based PRG with generic output length

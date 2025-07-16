@@ -1,16 +1,16 @@
 //! P-384 nominal group implementation
 
-use hybrid_kem_ref::{
+use crate::generic::{
     error::KemError,
     traits::{AsBytes, NominalGroup},
 };
 use p384::{
-    AffinePoint, EncodedPoint, ProjectivePoint, Scalar,
     elliptic_curve::{
         group::prime::PrimeCurveAffine,
         ops::Reduce,
         sec1::{FromEncodedPoint, ToEncodedPoint},
     },
+    AffinePoint, EncodedPoint, ProjectivePoint, Scalar,
 };
 
 /// P-384 nominal group

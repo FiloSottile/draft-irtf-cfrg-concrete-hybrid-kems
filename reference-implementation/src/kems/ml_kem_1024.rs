@@ -1,14 +1,14 @@
 //! ML-KEM-1024 implementation
 
-use hybrid_kem_ref::{
+use crate::generic::{
     error::KemError,
     traits::{AsBytes, EncapsDerand, Kem},
 };
+use crate::utils::RngWrapper;
 use ml_kem::{
     kem::{Decapsulate, DecapsulationKey, Encapsulate, EncapsulationKey},
     Ciphertext, EncapsulateDeterministic, EncodedSizeUser, KemCore, MlKem1024, MlKem1024Params,
 };
-use crate::utils::RngWrapper;
 
 /// ML-KEM-1024 KEM implementation
 pub struct MlKem1024Kem;

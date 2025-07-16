@@ -6,6 +6,7 @@
 //! It builds on the generic hybrid KEM framework to provide specific instantiations
 //! with well-defined cryptographic primitives.
 
+pub mod generic;
 pub mod groups;
 pub mod instantiations;
 pub mod kems;
@@ -17,7 +18,7 @@ pub mod utils;
 mod tests;
 
 // Re-export the generic hybrid KEM traits and types
-pub use hybrid_kem_ref::{
+pub use generic::{
     error::KemError,
     qsf::QsfHybridKem,
     traits::{AsBytes, EncapsDerand, HybridKemLabel, Kdf, Kem, NominalGroup, Prg},

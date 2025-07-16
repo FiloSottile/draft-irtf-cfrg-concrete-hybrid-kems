@@ -2,8 +2,8 @@
 
 #[cfg(test)]
 mod tests {
+    use crate::generic::test_utils::test_group_all;
     use crate::groups::{P256Group, P384Group, X25519Group};
-    use hybrid_kem_ref::test_utils::test_group_all;
 
     #[test]
     fn test_p256_group() {

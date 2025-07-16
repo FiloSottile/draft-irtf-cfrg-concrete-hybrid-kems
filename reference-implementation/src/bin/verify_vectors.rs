@@ -1,13 +1,13 @@
 //! Test vector verification binary
 
 use concrete_hybrid_kem::{
+    generic::traits::{AsBytes, EncapsDerand, Kem},
     instantiations::{
         QsfP256MlKem768Shake256Sha3256, QsfP384MlKem1024Shake256Sha3256,
         QsfX25519MlKem768Shake256Sha3256,
     },
     test_vectors::{HybridKemTestVector, TestVectors},
 };
-use hybrid_kem_ref::traits::{AsBytes, EncapsDerand, Kem};
 use std::env;
 use std::fs;
 use std::process;
@@ -73,18 +73,18 @@ where
 {
     println!("Verifying {} hybrid KEM...", name);
     let mut local_success = true;
-    
+
     for (i, test_vector) in vectors.iter().enumerate() {
         if !verify_hybrid_kem::<T>(test_vector) {
             println!("  ❌ Test vector {} failed", i);
             local_success = false;
         }
     }
-    
+
     if local_success {
         println!("  ✅ All {} test vectors passed", vectors.len());
     }
-    
+
     local_success
 }
 
@@ -102,7 +102,8 @@ where
     }
 
     // Verify deterministic encapsulation
-    let (ct_regenerated, ss_regenerated) = T::encaps_derand(&ek_regenerated, &data.randomness).unwrap();
+    let (ct_regenerated, ss_regenerated) =
+        T::encaps_derand(&ek_regenerated, &data.randomness).unwrap();
     if ct_regenerated.as_bytes() != data.ciphertext || ss_regenerated != data.shared_secret {
         return false;
     }

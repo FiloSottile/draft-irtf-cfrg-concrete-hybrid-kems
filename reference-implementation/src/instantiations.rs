@@ -1,15 +1,15 @@
 //! Concrete hybrid KEM instantiations
 
 use crate::{
+    generic::{qsf::QsfHybridKem, traits::HybridKemLabel},
     groups::{P256Group, P384Group, X25519Group},
-    kems::{MlKem768Kem, MlKem1024Kem},
+    kems::{MlKem1024Kem, MlKem768Kem},
     primitives::{Sha3_256Kdf, Shake256Prg},
 };
-use hybrid_kem_ref::{qsf::QsfHybridKem, traits::HybridKemLabel};
 
 // Calculate output lengths for SHAKE256 PRG
 const P256_MLKEM768_PRG_OUTPUT: usize = 48 + 64; // P256::SEED_LENGTH + MlKem768::SEED_LENGTH
-const X25519_MLKEM768_PRG_OUTPUT: usize = 32 + 64; // X25519::SEED_LENGTH + MlKem768::SEED_LENGTH  
+const X25519_MLKEM768_PRG_OUTPUT: usize = 32 + 64; // X25519::SEED_LENGTH + MlKem768::SEED_LENGTH
 const P384_MLKEM1024_PRG_OUTPUT: usize = 72 + 64; // P384::SEED_LENGTH + MlKem1024::SEED_LENGTH
 
 /// Label for QSF-P256-MLKEM768-SHAKE256-SHA3256 hybrid KEM

@@ -2,11 +2,11 @@
 
 #[cfg(test)]
 mod tests {
+    use crate::generic::test_utils::test_kem_all;
     use crate::instantiations::{
         QsfP256MlKem768Shake256Sha3256, QsfP384MlKem1024Shake256Sha3256,
         QsfX25519MlKem768Shake256Sha3256,
     };
-    use hybrid_kem_ref::test_utils::test_kem_all;
 
     #[test]
     fn test_qsf_p256_mlkem768() {
