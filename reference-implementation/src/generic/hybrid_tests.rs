@@ -138,7 +138,7 @@ mod tests {
         );
 
         // QSF decapsulation key should include group scalar + KEM decapsulation key
-        let expected_dk_len = TestGroup::SCALAR_LENGTH + TestKem::DECAPSULATION_KEY_LENGTH;
+        let expected_dk_len = QsfTestKem::SEED_LENGTH;
         assert_eq!(
             qsf_dk.as_bytes().len(),
             expected_dk_len,
@@ -183,7 +183,7 @@ mod tests {
         );
         assert_eq!(
             QsfTestKem::DECAPSULATION_KEY_LENGTH,
-            TestGroup::SCALAR_LENGTH + TestKem::DECAPSULATION_KEY_LENGTH
+            QsfTestKem::SEED_LENGTH
         );
         assert_eq!(
             QsfTestKem::CIPHERTEXT_LENGTH,

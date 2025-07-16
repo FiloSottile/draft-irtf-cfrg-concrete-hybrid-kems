@@ -11,6 +11,39 @@ pub struct GhpHybridKem<KemT, KemPq, KdfImpl, PrgImpl, Label> {
     _phantom: std::marker::PhantomData<(KemT, KemPq, KdfImpl, PrgImpl, Label)>,
 }
 
+impl<KemT, KemPq, KdfImpl, PrgImpl, Label> GhpHybridKem<KemT, KemPq, KdfImpl, PrgImpl, Label>
+where
+    KemT: Kem,
+    KemPq: Kem,
+    KdfImpl: Kdf,
+    PrgImpl: Prg,
+    Label: HybridKemLabel,
+{
+    fn expand_decapsulation_key(
+        seed: &[u8],
+    ) -> Result<
+        (
+            KemT::EncapsulationKey,
+            KemPq::EncapsulationKey,
+            KemT::DecapsulationKey,
+            KemPq::DecapsulationKey,
+        ),
+        KemError,
+    > {
+        // Expand seed using PRG
+        let seed_full = PrgImpl::prg(seed);
+
+        // Split expanded seed into traditional and post-quantum portions
+        let (seed_t, seed_pq) = split(KemT::SEED_LENGTH, KemPq::SEED_LENGTH, &seed_full)?;
+
+        // Generate key pairs for each component
+        let (ek_t, dk_t) = KemT::derive_key_pair(seed_t).map_err(|_| KemError::Traditional)?;
+        let (ek_pq, dk_pq) = KemPq::derive_key_pair(seed_pq).map_err(|_| KemError::PostQuantum)?;
+
+        Ok((ek_t, ek_pq, dk_t, dk_pq))
+    }
+}
+
 impl<KemT, KemPq, KdfImpl, PrgImpl, Label> Kem
     for GhpHybridKem<KemT, KemPq, KdfImpl, PrgImpl, Label>
 where
@@ -21,19 +54,18 @@ where
     Label: HybridKemLabel,
 {
     // Hybrid constants derived from constituent KEMs
-    const SEED_LENGTH: usize = max(KemT::SEED_LENGTH, KemPq::SEED_LENGTH);
-
     const ENCAPSULATION_KEY_LENGTH: usize =
         KemT::ENCAPSULATION_KEY_LENGTH + KemPq::ENCAPSULATION_KEY_LENGTH;
-    const DECAPSULATION_KEY_LENGTH: usize =
-        KemT::DECAPSULATION_KEY_LENGTH + KemPq::DECAPSULATION_KEY_LENGTH;
     const CIPHERTEXT_LENGTH: usize = KemT::CIPHERTEXT_LENGTH + KemPq::CIPHERTEXT_LENGTH;
 
+    const SEED_LENGTH: usize = max(KemT::SEED_LENGTH, KemPq::SEED_LENGTH);
     const SHARED_SECRET_LENGTH: usize =
         min(KemT::SHARED_SECRET_LENGTH, KemPq::SHARED_SECRET_LENGTH);
 
+    const DECAPSULATION_KEY_LENGTH: usize = Self::SEED_LENGTH;
+
     type EncapsulationKey = HybridValue;
-    type DecapsulationKey = HybridValue;
+    type DecapsulationKey = Vec<u8>;
     type Ciphertext = HybridValue;
     type SharedSecret = Vec<u8>;
 
@@ -54,19 +86,9 @@ where
             return Err(KemError::InvalidInputLength);
         }
 
-        // Expand seed using PRG
-        let seed_full = PrgImpl::prg(seed);
-
-        // Split expanded seed into traditional and post-quantum portions
-        let (seed_t, seed_pq) = split(KemT::SEED_LENGTH, KemPq::SEED_LENGTH, &seed_full)?;
-
-        // Generate key pairs for each component
-        let (ek_t, dk_t) = KemT::derive_key_pair(seed_t).map_err(|_| KemError::Traditional)?;
-        let (ek_pq, dk_pq) = KemPq::derive_key_pair(seed_pq).map_err(|_| KemError::PostQuantum)?;
-
-        // Create hybrid keys
+        let (ek_t, ek_pq, _dk_t, _dk_pq) = Self::expand_decapsulation_key(seed)?;
         let ek_hybrid = Self::EncapsulationKey::new(&ek_t, &ek_pq);
-        let dk_hybrid = Self::DecapsulationKey::new(&dk_t, &dk_pq);
+        let dk_hybrid = seed.to_vec();
 
         Ok((ek_hybrid, dk_hybrid))
     }
@@ -114,14 +136,8 @@ where
         dk: &Self::DecapsulationKey,
         ct: &Self::Ciphertext,
     ) -> Result<Self::SharedSecret, KemError> {
-        // Deserialize component decapsulation keys
-        let (dk_t_bytes, dk_pq_bytes) = dk.split(
-            KemT::DECAPSULATION_KEY_LENGTH,
-            KemPq::DECAPSULATION_KEY_LENGTH,
-        )?;
-
-        let dk_t = KemT::DecapsulationKey::from(dk_t_bytes);
-        let dk_pq = KemPq::DecapsulationKey::from(dk_pq_bytes);
+        // Generate component decapsulation keys
+        let (_ek_t, _ek_pq, dk_t, dk_pq) = Self::expand_decapsulation_key(dk)?;
 
         // Deserialize component ciphertexts
         let (ct_t_bytes, ct_pq_bytes) =
@@ -160,22 +176,8 @@ where
     fn to_encapsulation_key(
         dk: &Self::DecapsulationKey,
     ) -> Result<Self::EncapsulationKey, KemError> {
-        // Deserialize component decapsulation keys
-        let (dk_t_bytes, dk_pq_bytes) = dk.split(
-            KemT::DECAPSULATION_KEY_LENGTH,
-            KemPq::DECAPSULATION_KEY_LENGTH,
-        )?;
-
-        let dk_t = KemT::DecapsulationKey::from(dk_t_bytes);
-        let dk_pq = KemPq::DecapsulationKey::from(dk_pq_bytes);
-
-        // Derive component encapsulation keys
-        let ek_t = KemT::to_encapsulation_key(&dk_t).map_err(|_| KemError::Traditional)?;
-        let ek_pq = KemPq::to_encapsulation_key(&dk_pq).map_err(|_| KemError::PostQuantum)?;
-
-        // Create hybrid encapsulation key
-        let ek_hybrid = Self::EncapsulationKey::new(&ek_t, &ek_pq);
-        Ok(ek_hybrid)
+        let (ek_t, ek_pq, _dk_t, _dk_pq) = Self::expand_decapsulation_key(dk)?;
+        Ok(Self::EncapsulationKey::new(&ek_t, &ek_pq))
     }
 }
 
