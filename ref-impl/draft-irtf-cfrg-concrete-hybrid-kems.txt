@@ -5,8 +5,8 @@
 Crypto Forum                                                 D. Connolly
 Internet-Draft                                                 SandboxAQ
 Intended status: Informational                                 R. Barnes
-Expires: 30 December 2025                                          Cisco
-                                                            28 June 2025
+Expires: 17 January 2026                                           Cisco
+                                                            16 July 2025
 
 
            Concrete Hybrid PQ/T Key Encapsulation Mechanisms
@@ -55,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 30 December 2025.
+   This Internet-Draft will expire on 17 January 2026.
 
 Copyright Notice
 
@@ -417,11 +417,11 @@ Table of Contents
               <https://doi.org/10.6028/nist.fips.203>.
 
    [HYBRID-KEMS]
-              Connolly, D., "Hybrid PQ/T Key Encapsulation Mechanisms",
-              Work in Progress, Internet-Draft, draft-irtf-cfrg-hybrid-
-              kems-03, 25 February 2025,
+              Connolly, D. and R. Barnes, "Hybrid PQ/T Key Encapsulation
+              Mechanisms", Work in Progress, Internet-Draft, draft-irtf-
+              cfrg-hybrid-kems-04, 7 July 2025,
               <https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-
-              hybrid-kems-03>.
+              hybrid-kems-04>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -481,8 +481,8 @@ Table of Contents
               Connolly, D., Schwabe, P., and B. Westerbaan, "X-Wing:
               general-purpose hybrid post-quantum KEM", Work in
               Progress, Internet-Draft, draft-connolly-cfrg-xwing-kem-
-              07, 3 May 2025, <https://datatracker.ietf.org/doc/html/
-              draft-connolly-cfrg-xwing-kem-07>.
+              08, 7 July 2025, <https://datatracker.ietf.org/doc/html/
+              draft-connolly-cfrg-xwing-kem-08>.
 
 Appendix A.  Test Vectors
 
