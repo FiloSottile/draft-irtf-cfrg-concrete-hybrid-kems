@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-07-08T01:45:30.079985+00:00",
+  "timestamp": "2025-07-17T01:50:21.288121+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -714,18 +714,26 @@
       "labels": [],
       "body": "This PR adds a Claude-coded reference implementation of the primitives and uses it to generate test vectors that go into the document.",
       "createdAt": "2025-06-28T19:33:12Z",
-      "updatedAt": "2025-06-28T19:33:13Z",
+      "updatedAt": "2025-07-16T22:18:13Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "baseRefName": "main",
       "baseRefOid": "bc349c5b009d2245dfa925a85b915208fa48f9ea",
       "headRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "headRefName": "ref-impl",
-      "headRefOid": "980fddfcd9c407fa6587eceec96c27c04a060904",
+      "headRefOid": "93b42a87291f7b5ca0d5601a30eb44295aa4979c",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "dconnolly",
+          "authorAssociation": "COLLABORATOR",
+          "body": "woohoo cheers on merging in the generic impl",
+          "createdAt": "2025-07-16T22:18:13Z",
+          "updatedAt": "2025-07-16T22:18:13Z"
+        }
+      ],
       "reviews": []
     },
     {
