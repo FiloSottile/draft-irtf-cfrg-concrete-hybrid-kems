@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-07-17T01:50:21.288121+00:00",
+  "timestamp": "2025-07-20T01:59:10.657233+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -478,7 +478,7 @@
       "labels": [],
       "body": "This PR adds a section about how concrete instantiations should be selected generally, and uses the framework to justify the instantiations in the document.\r\n\r\nFixes #6 ",
       "createdAt": "2025-06-28T17:07:23Z",
-      "updatedAt": "2025-06-30T12:56:30Z",
+      "updatedAt": "2025-07-17T14:00:20Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "baseRefName": "main",
       "baseRefOid": "bc349c5b009d2245dfa925a85b915208fa48f9ea",
@@ -524,6 +524,13 @@
           "body": "I think the issue right now isn't that there is a basis at all for the claims stated. It is said that this is the decision process used, but it is not clear that 1) there is grounding for this decision process and 2) that we even used it. ",
           "createdAt": "2025-06-30T12:56:30Z",
           "updatedAt": "2025-06-30T12:56:30Z"
+        },
+        {
+          "author": "ilaril",
+          "authorAssociation": "NONE",
+          "body": "The only claim I think is not correct is QSF construction needing nominal group. I think everything else is correct, but writing a proof looks like it is going to be very annoying.",
+          "createdAt": "2025-07-17T14:00:20Z",
+          "updatedAt": "2025-07-17T14:00:20Z"
         }
       ],
       "reviews": [
@@ -697,6 +704,46 @@
               "body": "I am not seeing a logical basis for this statement. ",
               "createdAt": "2025-06-30T12:31:17Z",
               "updatedAt": "2025-06-30T12:31:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOMmh5WM60k0Vk",
+          "commit": {
+            "abbreviatedOid": "eca2836"
+          },
+          "author": "ilaril",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-07-17T13:29:06Z",
+          "updatedAt": "2025-07-17T13:29:07Z",
+          "comments": [
+            {
+              "originalPosition": 48,
+              "body": "At minimum (to get IND-CCA), the PQ component needs to be ciphertext second pre-image resistant.\r\n\r\nTo get LEAK-BIND-K-PK, the PQ component additionally needs to be LEAK-BIND-K-PK.",
+              "createdAt": "2025-07-17T13:29:06Z",
+              "updatedAt": "2025-07-17T13:29:07Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOMmh5WM60lIq3",
+          "commit": {
+            "abbreviatedOid": "eca2836"
+          },
+          "author": "ilaril",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-07-17T13:51:07Z",
+          "updatedAt": "2025-07-17T13:51:07Z",
+          "comments": [
+            {
+              "originalPosition": 57,
+              "body": "AFAICT, The GHP paper does not even prove that if some combo is safe for QSF, it is also safe for GHP. One needs more general theorem to prove this statement. ",
+              "createdAt": "2025-07-17T13:51:07Z",
+              "updatedAt": "2025-07-17T13:51:07Z"
             }
           ]
         }
