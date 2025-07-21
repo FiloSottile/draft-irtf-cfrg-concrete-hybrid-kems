@@ -17,6 +17,14 @@ mod tests {
 
     use rand::rng;
 
+    const fn max(a: usize, b: usize) -> usize {
+        if a > b {
+            a
+        } else {
+            b
+        }
+    }
+
     // Label structs for test types
     struct GhpTestLabel;
     impl HybridKemLabel for GhpTestLabel {
@@ -36,7 +44,14 @@ mod tests {
     // Type aliases for easier testing
     type GhpTestKem = GhpHybridKem<TestKem, TestKem, TestKdf, TestPrgGhpPre, GhpTestLabel>;
     type PreTestKem = PreHybridKem<TestKem, TestKem, TestKdf, TestPrgGhpPre, TestKdf, PreTestLabel>;
-    type QsfTestKem = QsfHybridKem<TestGroup, TestKem, TestKdf, TestPrgQsf, QsfTestLabel>;
+    type QsfTestKem = QsfHybridKem<
+        TestGroup,
+        TestKem,
+        TestKdf,
+        TestPrgQsf,
+        QsfTestLabel,
+        { max(TestGroup::SEED_LENGTH, TestKem::SEED_LENGTH) },
+    >;
 
     #[test]
     fn test_ghp_hybrid_kem() {

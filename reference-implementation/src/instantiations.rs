@@ -26,6 +26,7 @@ pub type QsfP256MlKem768Shake256Sha3256 = QsfHybridKem<
     Sha3_256Kdf,
     Shake256Prg<P256_MLKEM768_PRG_OUTPUT>,
     QsfP256MlKem768Shake256Sha3256Label,
+    32,
 >;
 
 /// Label for QSF-X25519-MLKEM768-SHAKE256-SHA3256 hybrid KEM (X-Wing compatible)
@@ -43,6 +44,7 @@ pub type QsfX25519MlKem768Shake256Sha3256 = QsfHybridKem<
     Sha3_256Kdf,
     Shake256Prg<X25519_MLKEM768_PRG_OUTPUT>,
     QsfX25519MlKem768Shake256Sha3256Label,
+    32,
 >;
 
 /// Label for QSF-P384-MLKEM1024-SHAKE256-SHA3256 hybrid KEM
@@ -59,4 +61,5 @@ pub type QsfP384MlKem1024Shake256Sha3256 = QsfHybridKem<
     Sha3_256Kdf,
     Shake256Prg<P384_MLKEM1024_PRG_OUTPUT>,
     QsfP384MlKem1024Shake256Sha3256Label,
+    32,
 >;

@@ -1,17 +1,18 @@
 use super::error::KemError;
 use super::traits::{AsBytes, EncapsDerand, HybridKemLabel, Kdf, Kem, NominalGroup, Prg};
-use super::utils::{concat, max, min, split, HybridValue};
+use super::utils::{concat, min, split, HybridValue};
 
 /// QSF Hybrid KEM implementation
 ///
 /// Optimized construction for the case where the traditional component is a
 /// nominal group and the PQ component has strong binding properties.
 #[derive(Default)]
-pub struct QsfHybridKem<GroupT, KemPq, KdfImpl, PrgImpl, Label> {
+pub struct QsfHybridKem<GroupT, KemPq, KdfImpl, PrgImpl, Label, const SEED_LENGTH: usize> {
     _phantom: std::marker::PhantomData<(GroupT, KemPq, KdfImpl, PrgImpl, Label)>,
 }
 
-impl<GroupT, KemPq, KdfImpl, PrgImpl, Label> QsfHybridKem<GroupT, KemPq, KdfImpl, PrgImpl, Label>
+impl<GroupT, KemPq, KdfImpl, PrgImpl, Label, const SEED_LENGTH: usize>
+    QsfHybridKem<GroupT, KemPq, KdfImpl, PrgImpl, Label, SEED_LENGTH>
 where
     GroupT: NominalGroup,
     KemPq: Kem,
@@ -47,8 +48,8 @@ where
     }
 }
 
-impl<GroupT, KemPq, KdfImpl, PrgImpl, Label> Kem
-    for QsfHybridKem<GroupT, KemPq, KdfImpl, PrgImpl, Label>
+impl<GroupT, KemPq, KdfImpl, PrgImpl, Label, const SEED_LENGTH: usize> Kem
+    for QsfHybridKem<GroupT, KemPq, KdfImpl, PrgImpl, Label, SEED_LENGTH>
 where
     GroupT: NominalGroup,
     KemPq: Kem,
@@ -61,7 +62,7 @@ where
         GroupT::ELEMENT_LENGTH + KemPq::ENCAPSULATION_KEY_LENGTH;
     const CIPHERTEXT_LENGTH: usize = GroupT::ELEMENT_LENGTH + KemPq::CIPHERTEXT_LENGTH;
 
-    const SEED_LENGTH: usize = max(GroupT::SEED_LENGTH, KemPq::SEED_LENGTH);
+    const SEED_LENGTH: usize = SEED_LENGTH;
     const SHARED_SECRET_LENGTH: usize =
         min(GroupT::SHARED_SECRET_LENGTH, KemPq::SHARED_SECRET_LENGTH);
 
@@ -187,8 +188,8 @@ where
     }
 }
 
-impl<GroupT, KemPq, KdfImpl, PrgImpl, Label> EncapsDerand
-    for QsfHybridKem<GroupT, KemPq, KdfImpl, PrgImpl, Label>
+impl<GroupT, KemPq, KdfImpl, PrgImpl, Label, const SEED_LENGTH: usize> EncapsDerand
+    for QsfHybridKem<GroupT, KemPq, KdfImpl, PrgImpl, Label, SEED_LENGTH>
 where
     GroupT: NominalGroup,
     KemPq: Kem + EncapsDerand,
