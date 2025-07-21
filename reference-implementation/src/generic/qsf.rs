@@ -91,7 +91,7 @@ where
         }
 
         let (ek_t, ek_pq, _dk_t, _dk_pq) = Self::expand_decapsulation_key(seed)?;
-        let ek_hybrid = Self::EncapsulationKey::new(&ek_t, &ek_pq);
+        let ek_hybrid = Self::EncapsulationKey::new(&ek_pq, &ek_t);
         let dk_hybrid = seed.to_vec();
 
         Ok((ek_hybrid, dk_hybrid))
@@ -102,11 +102,11 @@ where
         rng: &mut R,
     ) -> Result<(Self::Ciphertext, Self::SharedSecret), KemError> {
         // Deserialize component encapsulation keys
-        let (ek_t_bytes, ek_pq_bytes) =
-            ek.split(GroupT::ELEMENT_LENGTH, KemPq::ENCAPSULATION_KEY_LENGTH)?;
+        let (ek_pq_bytes, ek_t_bytes) =
+            ek.split(KemPq::ENCAPSULATION_KEY_LENGTH, GroupT::ELEMENT_LENGTH)?;
 
-        let ek_t = GroupT::Element::from(ek_t_bytes);
         let ek_pq = KemPq::EncapsulationKey::from(ek_pq_bytes);
+        let ek_t = GroupT::Element::from(ek_t_bytes);
 
         // Generate ephemeral scalar for traditional component using secure randomness
         let mut ephemeral_seed = vec![0u8; GroupT::SEED_LENGTH];
@@ -122,7 +122,7 @@ where
         let (ct_pq, ss_pq) = KemPq::encaps(&ek_pq, rng).map_err(|_| KemError::PostQuantum)?;
 
         // Create hybrid ciphertext
-        let ct_hybrid = Self::Ciphertext::new(&ct_t, &ct_pq);
+        let ct_hybrid = Self::Ciphertext::new(&ct_pq, &ct_t);
 
         // Compute hybrid shared secret using KDF
         // QSF optimization: KDF input is concat(ss_PQ, ss_T, ct_T, ek_T, label)
@@ -148,11 +148,11 @@ where
         let (_ek_t, _ek_pq, dk_t, dk_pq) = Self::expand_decapsulation_key(dk)?;
 
         // Deserialize component ciphertexts
-        let (ct_t_bytes, ct_pq_bytes) =
-            ct.split(GroupT::ELEMENT_LENGTH, KemPq::CIPHERTEXT_LENGTH)?;
+        let (ct_pq_bytes, ct_t_bytes) =
+            ct.split(KemPq::CIPHERTEXT_LENGTH, GroupT::ELEMENT_LENGTH)?;
 
-        let ct_t = GroupT::Element::from(ct_t_bytes);
         let ct_pq = KemPq::Ciphertext::from(ct_pq_bytes);
+        let ct_t = GroupT::Element::from(ct_t_bytes);
 
         // Traditional component: Diffie-Hellman
         let shared_point = GroupT::exp(&ct_t, &dk_t);
@@ -183,7 +183,7 @@ where
         dk: &Self::DecapsulationKey,
     ) -> Result<Self::EncapsulationKey, KemError> {
         let (ek_t, ek_pq, _dk_t, _dk_pq) = Self::expand_decapsulation_key(dk)?;
-        Ok(Self::EncapsulationKey::new(&ek_t, &ek_pq))
+        Ok(Self::EncapsulationKey::new(&ek_pq, &ek_t))
     }
 }
 
@@ -203,8 +203,8 @@ where
         randomness: &[u8],
     ) -> Result<(Self::Ciphertext, Self::SharedSecret), KemError> {
         // Deserialize component encapsulation keys
-        let (ek_t_bytes, ek_pq_bytes) =
-            ek.split(GroupT::ELEMENT_LENGTH, KemPq::ENCAPSULATION_KEY_LENGTH)?;
+        let (ek_pq_bytes, ek_t_bytes) =
+            ek.split(KemPq::ENCAPSULATION_KEY_LENGTH, GroupT::ELEMENT_LENGTH)?;
 
         let ek_t = GroupT::Element::from(ek_t_bytes);
         let ek_pq = KemPq::EncapsulationKey::from(ek_pq_bytes);
@@ -225,7 +225,7 @@ where
             KemPq::encaps_derand(&ek_pq, rand_pq).map_err(|_| KemError::PostQuantum)?;
 
         // Create hybrid ciphertext
-        let ct_hybrid = Self::Ciphertext::new(&ct_t, &ct_pq);
+        let ct_hybrid = Self::Ciphertext::new(&ct_pq, &ct_t);
 
         // Compute hybrid shared secret using KDF
         // QSF optimization: KDF input is concat(ss_PQ, ss_T, ct_T, ek_T, label)
