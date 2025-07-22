@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-07-20T01:59:10.657233+00:00",
+  "timestamp": "2025-07-22T01:51:03.163684+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -102,7 +102,7 @@
       "labels": [],
       "body": "The document currently defines three concrete hybrid KEMs.  All of these hybrid KEMs are based on ML-KEM, and all of them use the QSF generic framework.\n\nOn the one hand, it could be helpful to define additional concrete hybrid KEMs to demonstrate when the other frameworks would be preferred.  For example:\n\n* A X25519 + Classic McEleice combination, for use in an environment where public keys are reused, would provide a case where PRE is clearly superior to GHP, since Classic McEliece does not have C2PRI, but does have giant public keys.\n* An RSA-OAEP + HQC combination would show the need for GHP, since RSA-OAEP is not a nominal group, and HQC does not have C2PRI resistance, but HQC keys are not big enough for pre-hashing to provide a significant advantage.\n\nOn the other hand, we should not create concrete hybrid KEMs that nobody is going to use.  If there is not a requirement by applications for all of the frameworks in the generic document, we could remove any frameworks that are not needed.\n",
       "createdAt": "2025-06-28T22:02:23Z",
-      "updatedAt": "2025-06-30T12:50:44Z",
+      "updatedAt": "2025-07-20T23:56:05Z",
       "closedAt": null,
       "comments": [
         {
@@ -118,6 +118,20 @@
           "body": "I do not.  I thought that I had heard people claim that on the CFRG mailing list.",
           "createdAt": "2025-06-30T12:50:43Z",
           "updatedAt": "2025-06-30T12:50:43Z"
+        },
+        {
+          "author": "ilaril",
+          "authorAssociation": "NONE",
+          "body": "The reason HQC does not trivially have C2PIR is that it does not hash the 16-byte salt into shared secret (it does hash in all the other parts of the ciphertext).\n\nHowever, not hashing that in causes other trouble as well (e.g., an oracle that tells if a ciphertext is valid or not), so I would not be surprised if that would get changed in standardization. And I think explicitly rejecting variant of HQC is C2PIR (changing the salt really screws with the re-encryption).\n\nAs for Classic McEliece, there are papers finding weird and unexpected behavior, so best not to assume anything beyond IND-CCA.\n\nAs for RSA-OEAP, QSF security proof can be extended to cover that too. However, the RSA public keys are annoying.",
+          "createdAt": "2025-07-20T14:27:27Z",
+          "updatedAt": "2025-07-20T14:27:27Z"
+        },
+        {
+          "author": "dconnolly",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> The reason HQC does not trivially have C2PIR is that it does not hash the 16-byte salt into shared secret (it does hash in all the other parts of the ciphertext).\n> \n> However, not hashing that in causes other trouble as well (e.g., an oracle that tells if a ciphertext is valid or not), so I would not be surprised if that would get changed in standardization. And I think explicitly rejecting variant of HQC is C2PIR (changing the salt really screws with the re-encryption).\n\n\nCorrect; the HQC team has stated they intend to fix the PKE salt hashing as part of turning the fourth round submission version into an IPD, so we'll see if that lands to affect these properties\n\n",
+          "createdAt": "2025-07-20T23:55:53Z",
+          "updatedAt": "2025-07-20T23:56:05Z"
         }
       ]
     },
@@ -172,6 +186,22 @@
       "body": "",
       "createdAt": "2025-06-30T18:08:06Z",
       "updatedAt": "2025-06-30T18:08:06Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 14,
+      "id": "I_kwDOMmh5WM7BteZD",
+      "title": "Bug in details for QSF-MLKEM1024-P384-SHA3256-SHAKE256",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/issues/14",
+      "state": "OPEN",
+      "author": "samuel-lee-msft",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Current code has the following:\nhttps://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/blob/4f6ce977f57a54c51d5814f76a2b48dfb3bb4ce8/draft-irtf-cfrg-concrete-hybrid-kems.md?plain=1#L329-L337\n\nThe name and label of the concrete instantiation refer to \"SHA3256\", but the specified KDF is HKDF-SHA-256, _not_ SHA3-256.\n\nI suspect the intent is that the KDF is SHA3-256 for this concrete instantiation?",
+      "createdAt": "2025-07-21T20:19:45Z",
+      "updatedAt": "2025-07-21T20:23:21Z",
       "closedAt": null,
       "comments": []
     }
