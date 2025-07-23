@@ -69,7 +69,7 @@ impl From<&[u8]> for P256Element {
 impl NominalGroup for P256Group {
     const SEED_LENGTH: usize = 48;
     const SCALAR_LENGTH: usize = 32;
-    const ELEMENT_LENGTH: usize = 33;
+    const ELEMENT_LENGTH: usize = 65;
     const SHARED_SECRET_LENGTH: usize = 32;
 
     type Scalar = P256Scalar;
@@ -77,7 +77,7 @@ impl NominalGroup for P256Group {
 
     fn generator() -> Self::Element {
         let point = AffinePoint::generator();
-        let encoded = point.to_encoded_point(true);
+        let encoded = point.to_encoded_point(false);
         let bytes = encoded.as_bytes().to_vec();
 
         P256Element { point, bytes }
@@ -90,7 +90,7 @@ impl NominalGroup for P256Group {
         let result_affine: AffinePoint = result_proj.into();
 
         // Encode in compressed form
-        let encoded = result_affine.to_encoded_point(true);
+        let encoded = result_affine.to_encoded_point(false);
         let bytes = encoded.as_bytes().to_vec();
 
         P256Element {

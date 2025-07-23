@@ -35,7 +35,7 @@ where
         let seed_full = PrgImpl::prg(seed);
 
         // Split expanded seed into group and post-quantum portions
-        let (seed_t, seed_pq) = split(GroupT::SEED_LENGTH, KemPq::SEED_LENGTH, &seed_full)?;
+        let (seed_pq, seed_t) = split(KemPq::SEED_LENGTH, GroupT::SEED_LENGTH, &seed_full)?;
 
         // Generate traditional component using group operations
         let dk_t = GroupT::random_scalar(seed_t).map_err(|_| KemError::Traditional)?;

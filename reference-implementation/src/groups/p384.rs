@@ -69,7 +69,7 @@ impl From<&[u8]> for P384Element {
 impl NominalGroup for P384Group {
     const SEED_LENGTH: usize = 72;
     const SCALAR_LENGTH: usize = 48;
-    const ELEMENT_LENGTH: usize = 49;
+    const ELEMENT_LENGTH: usize = 97;
     const SHARED_SECRET_LENGTH: usize = 48;
 
     type Scalar = P384Scalar;
@@ -77,7 +77,7 @@ impl NominalGroup for P384Group {
 
     fn generator() -> Self::Element {
         let point = AffinePoint::generator();
-        let encoded = point.to_encoded_point(true);
+        let encoded = point.to_encoded_point(false);
         let bytes = encoded.as_bytes().to_vec();
 
         P384Element { point, bytes }
@@ -90,7 +90,7 @@ impl NominalGroup for P384Group {
         let result_affine: AffinePoint = result_proj.into();
 
         // Encode in compressed form
-        let encoded = result_affine.to_encoded_point(true);
+        let encoded = result_affine.to_encoded_point(false);
         let bytes = encoded.as_bytes().to_vec();
 
         P384Element {
