@@ -4,13 +4,15 @@ use crate::generic::{
     error::KemError,
     traits::{AsBytes, NominalGroup},
 };
+use hex_literal::hex;
+use num_bigint::BigUint;
 use p384::{
     elliptic_curve::{
         group::prime::PrimeCurveAffine,
         ops::Reduce,
         sec1::{FromEncodedPoint, ToEncodedPoint},
     },
-    AffinePoint, EncodedPoint, ProjectivePoint, Scalar,
+    AffinePoint, EncodedPoint, FieldBytes, ProjectivePoint, Scalar,
 };
 
 /// P-384 nominal group
@@ -36,12 +38,16 @@ impl AsBytes for P384Scalar {
 
 impl From<&[u8]> for P384Scalar {
     fn from(bytes: &[u8]) -> Self {
-        // Take the first 48 bytes
-        let mut scalar_bytes = [0u8; 48];
-        scalar_bytes.copy_from_slice(&bytes[..48]);
+        // Manually reduce mod p
+        const MOD: &[u8] = &hex!("ffffffffffffffffffffffffffffffffffffffffffffffff"
+            "fffffffffffffffeffffffff0000000000000000ffffffff");
+        let q = BigUint::from_bytes_be(MOD);
+        let p = BigUint::from_bytes_be(bytes) % &q;
 
         // Use reduce_bytes for modular reduction
-        let scalar = Scalar::reduce_bytes(&scalar_bytes.into());
+        // XXX(RLB) This will fail if `p` is not large enough to render into 32 bytes
+        let bytes = p.to_bytes_be();
+        let scalar = Scalar::reduce_bytes(FieldBytes::from_slice(&bytes));
         let bytes = scalar.to_bytes().to_vec();
 
         P384Scalar { scalar, bytes }
@@ -104,16 +110,7 @@ impl NominalGroup for P384Group {
             return Err(KemError::InvalidInputLength);
         }
 
-        // Convert seed to scalar by reducing modulo the group order
-        // Using the first 48 bytes and reducing
-        let mut scalar_bytes = [0u8; 48];
-        scalar_bytes.copy_from_slice(&seed[..48]);
-
-        // Use reduce_bytes for modular reduction
-        let scalar = Scalar::reduce_bytes(&scalar_bytes.into());
-        let bytes = scalar.to_bytes().to_vec();
-
-        Ok(P384Scalar { scalar, bytes })
+        Ok(P384Scalar::from(seed))
     }
 
     fn element_to_shared_secret(p: &Self::Element) -> Vec<u8> {

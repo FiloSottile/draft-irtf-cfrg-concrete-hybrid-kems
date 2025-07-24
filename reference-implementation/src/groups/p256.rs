@@ -4,13 +4,15 @@ use crate::generic::{
     error::KemError,
     traits::{AsBytes, NominalGroup},
 };
+use hex_literal::hex;
+use num_bigint::BigUint;
 use p256::{
     elliptic_curve::{
         group::prime::PrimeCurveAffine,
         ops::Reduce,
         sec1::{FromEncodedPoint, ToEncodedPoint},
     },
-    AffinePoint, EncodedPoint, ProjectivePoint, Scalar,
+    AffinePoint, EncodedPoint, FieldBytes, ProjectivePoint, Scalar,
 };
 
 /// P-256 nominal group
@@ -36,12 +38,15 @@ impl AsBytes for P256Scalar {
 
 impl From<&[u8]> for P256Scalar {
     fn from(bytes: &[u8]) -> Self {
-        // Take the first 32 bytes
-        let mut scalar_bytes = [0u8; 32];
-        scalar_bytes.copy_from_slice(&bytes[..32]);
+        // Manually reduce mod p
+        const MOD: &[u8] = &hex!("ffffffff000000010000000000000000"
+            "00000000ffffffffffffffffffffffff");
+        let q = BigUint::from_bytes_be(MOD);
+        let p = BigUint::from_bytes_be(bytes) % &q;
 
         // Use reduce_bytes for modular reduction
-        let scalar = Scalar::reduce_bytes(&scalar_bytes.into());
+        let bytes = p.to_bytes_be();
+        let scalar = Scalar::reduce_bytes(FieldBytes::from_slice(&bytes));
         let bytes = scalar.to_bytes().to_vec();
 
         P256Scalar { scalar, bytes }
@@ -104,16 +109,7 @@ impl NominalGroup for P256Group {
             return Err(KemError::InvalidInputLength);
         }
 
-        // Convert seed to scalar by reducing modulo the group order
-        // Using the first 32 bytes and reducing
-        let mut scalar_bytes = [0u8; 32];
-        scalar_bytes.copy_from_slice(&seed[..32]);
-
-        // Use reduce_bytes for modular reduction
-        let scalar = Scalar::reduce_bytes(&scalar_bytes.into());
-        let bytes = scalar.to_bytes().to_vec();
-
-        Ok(P256Scalar { scalar, bytes })
+        Ok(P256Scalar::from(seed))
     }
 
     fn element_to_shared_secret(p: &Self::Element) -> Vec<u8> {
