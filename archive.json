@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-07-22T01:51:03.163684+00:00",
+  "timestamp": "2025-07-27T02:00:10.745981+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -791,13 +791,13 @@
       "labels": [],
       "body": "This PR adds a Claude-coded reference implementation of the primitives and uses it to generate test vectors that go into the document.",
       "createdAt": "2025-06-28T19:33:12Z",
-      "updatedAt": "2025-07-16T22:18:13Z",
+      "updatedAt": "2025-07-24T13:32:57Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "baseRefName": "main",
       "baseRefOid": "bc349c5b009d2245dfa925a85b915208fa48f9ea",
       "headRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "headRefName": "ref-impl",
-      "headRefOid": "93b42a87291f7b5ca0d5601a30eb44295aa4979c",
+      "headRefOid": "4119ec8d66f6fd6d2b4957923351a1ad8e10ae63",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -838,6 +838,32 @@
       "mergeCommit": {
         "oid": "4f6ce977f57a54c51d5814f76a2b48dfb3bb4ce8"
       },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 15,
+      "id": "PR_kwDOMmh5WM6geqj9",
+      "title": "Remove KDF and PRG names from the hybrid KEM name",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/15",
+      "state": "OPEN",
+      "author": "rohanmahy",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "All of the example hybrid KEMs here use SHAKE-256 for PRG and SHA3-256 for KDF, respectively. Rather than have a very long name KEM, we should have a shorter name for the hybrid KEM by omitting these parameters. If we end up generating more hybrid KEMs with the same traditional and PQ KEM components, but different KDF/PRF, we can assign a short suffix afterwards to identify the other hybrid KEM by PRG and KDF variations",
+      "createdAt": "2025-07-24T15:30:48Z",
+      "updatedAt": "2025-07-24T15:30:49Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
+      "baseRefName": "main",
+      "baseRefOid": "4f6ce977f57a54c51d5814f76a2b48dfb3bb4ce8",
+      "headRepository": "rohanmahy/draft-irtf-cfrg-concrete-hybrid-kems",
+      "headRefName": "patch-1",
+      "headRefOid": "e5359e722bda7e0cb930e97f16b416efe3f5df06",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
       "comments": [],
       "reviews": []
     }
