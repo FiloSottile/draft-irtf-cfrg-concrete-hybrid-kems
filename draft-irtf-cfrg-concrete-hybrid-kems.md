@@ -356,7 +356,18 @@ This document has no IANA actions.
 
 # Test Vectors
 
-[[ TODO ]]
+This section provides test vectors for the three concrete hybrid KEM
+instantiations defined in this document. Each test vector represents a single
+key generation followed by an encapsulation:
+
+* `seed` - the seed used for deterministic key generation
+* `decapsulation_key` - the derived decapsulation key
+* `encapsulation_key` - the derived encapsulation key
+* `randomness` - the randomness used for encapsulation
+* `ciphertext` - the ciphertext produced by the encapsulation operation
+* `shared_secret` - the shared secret produced by the encapsulation operation
+
+{::include reference-implementation/test_vectors.md}
 
 # Acknowledgments
 {:numbered="false"}
