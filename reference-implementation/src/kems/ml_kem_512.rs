@@ -6,7 +6,7 @@ use crate::generic::{
 };
 use crate::utils::RngWrapper;
 use ml_kem::{
-    kem::{Decapsulate, DecapsulationKey, Encapsulate, EncapsulationKey},
+    kem::{Decapsulate, Encapsulate, EncapsulationKey},
     Ciphertext, EncapsulateDeterministic, EncodedSizeUser, KemCore, MlKem512, MlKem512Params,
 };
 
@@ -20,7 +20,7 @@ pub struct MlKem512EncapsulationKey {
 
 /// Wrapper for ML-KEM-512 decapsulation key  
 pub struct MlKem512DecapsulationKey {
-    bytes: Vec<u8>,
+    seed: Vec<u8>,
 }
 
 /// Wrapper for ML-KEM-512 ciphertext
@@ -49,15 +49,31 @@ impl From<&[u8]> for MlKem512EncapsulationKey {
 
 impl AsBytes for MlKem512DecapsulationKey {
     fn as_bytes(&self) -> &[u8] {
-        &self.bytes
+        &self.seed
     }
 }
 
 impl From<&[u8]> for MlKem512DecapsulationKey {
-    fn from(bytes: &[u8]) -> Self {
+    fn from(seed: &[u8]) -> Self {
         MlKem512DecapsulationKey {
-            bytes: bytes.to_vec(),
+            seed: seed.to_vec(),
         }
+    }
+}
+
+impl MlKem512DecapsulationKey {
+    fn generate_keys_from_seed(&self) -> (ml_kem::kem::DecapsulationKey<MlKem512Params>, ml_kem::kem::EncapsulationKey<MlKem512Params>) {
+        let d = ml_kem::B32::try_from(&self.seed[..32]).unwrap();
+        let z = ml_kem::B32::try_from(&self.seed[32..]).unwrap();
+        MlKem512::generate_deterministic(&d, &z)
+    }
+
+    fn decapsulation_key(&self) -> ml_kem::kem::DecapsulationKey<MlKem512Params> {
+        self.generate_keys_from_seed().0
+    }
+
+    fn encapsulation_key(&self) -> ml_kem::kem::EncapsulationKey<MlKem512Params> {
+        self.generate_keys_from_seed().1
     }
 }
 
@@ -90,7 +106,7 @@ impl PartialEq<Vec<u8>> for MlKem512SharedSecret {
 impl Kem for MlKem512Kem {
     const SEED_LENGTH: usize = 64;
     const ENCAPSULATION_KEY_LENGTH: usize = 800;
-    const DECAPSULATION_KEY_LENGTH: usize = 1632;
+    const DECAPSULATION_KEY_LENGTH: usize = 64;
     const CIPHERTEXT_LENGTH: usize = 768;
     const SHARED_SECRET_LENGTH: usize = 32;
 
@@ -102,15 +118,9 @@ impl Kem for MlKem512Kem {
     fn generate_key_pair<R: rand::CryptoRng>(
         rng: &mut R,
     ) -> Result<(Self::EncapsulationKey, Self::DecapsulationKey), KemError> {
-        let (dk, ek) = MlKem512::generate(&mut RngWrapper(rng));
-        Ok((
-            MlKem512EncapsulationKey {
-                bytes: ek.as_bytes().to_vec(),
-            },
-            MlKem512DecapsulationKey {
-                bytes: dk.as_bytes().to_vec(),
-            },
-        ))
+        let mut seed = [0u8; 64];
+        rand::RngCore::fill_bytes(rng, &mut seed);
+        Self::derive_key_pair(&seed)
     }
 
     fn derive_key_pair(
@@ -120,17 +130,16 @@ impl Kem for MlKem512Kem {
             return Err(KemError::InvalidInputLength);
         }
 
-        let d = ml_kem::B32::try_from(&seed[..32]).unwrap();
-        let z = ml_kem::B32::try_from(&seed[32..]).unwrap();
-        let (dk, ek) = MlKem512::generate_deterministic(&d, &z);
+        let dk = MlKem512DecapsulationKey {
+            seed: seed.to_vec(),
+        };
+        let ek_inner = dk.encapsulation_key();
 
         Ok((
             MlKem512EncapsulationKey {
-                bytes: ek.as_bytes().to_vec(),
+                bytes: ek_inner.as_bytes().to_vec(),
             },
-            MlKem512DecapsulationKey {
-                bytes: dk.as_bytes().to_vec(),
-            },
+            dk,
         ))
     }
 
@@ -153,8 +162,7 @@ impl Kem for MlKem512Kem {
         dk: &Self::DecapsulationKey,
         ct: &Self::Ciphertext,
     ) -> Result<Self::SharedSecret, KemError> {
-        let dk_inner: DecapsulationKey<MlKem512Params> =
-            DecapsulationKey::from_bytes(dk.bytes.as_slice().try_into().unwrap());
+        let dk_inner = dk.decapsulation_key();
         let ct_array = ct.bytes.as_slice();
         let ct_inner = Ciphertext::<MlKem512>::try_from(ct_array).unwrap();
         let ss = dk_inner
@@ -166,9 +174,7 @@ impl Kem for MlKem512Kem {
     fn to_encapsulation_key(
         dk: &Self::DecapsulationKey,
     ) -> Result<Self::EncapsulationKey, KemError> {
-        let dk_inner: DecapsulationKey<MlKem512Params> =
-            DecapsulationKey::from_bytes(dk.bytes.as_slice().try_into().unwrap());
-        let ek_inner = dk_inner.encapsulation_key();
+        let ek_inner = dk.encapsulation_key();
         Ok(MlKem512EncapsulationKey {
             bytes: ek_inner.as_bytes().to_vec(),
         })
