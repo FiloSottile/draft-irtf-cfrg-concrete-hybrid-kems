@@ -155,7 +155,7 @@ define how they meet the Nominal Group interface described in
 {{HYBRID-KEMS}}.
 
 Group elements are elliptic curve points, represented as byte strings in the
-compressed representation defined by the Elliptic-Curve-Point-to-Octet-String
+uncompressed representation defined by the Elliptic-Curve-Point-to-Octet-String
 function in {{SEC1}}.
 
 The Nominal Group algorithms are the same for both groups:
