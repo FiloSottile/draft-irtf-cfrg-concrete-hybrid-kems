@@ -6,7 +6,7 @@ use crate::generic::{
 };
 use crate::utils::RngWrapper;
 use ml_kem::{
-    kem::{Decapsulate, DecapsulationKey, Encapsulate, EncapsulationKey},
+    kem::{Decapsulate, Encapsulate, EncapsulationKey},
     Ciphertext, EncapsulateDeterministic, EncodedSizeUser, KemCore, MlKem1024, MlKem1024Params,
 };
 
@@ -20,7 +20,7 @@ pub struct MlKem1024EncapsulationKey {
 
 /// Wrapper for ML-KEM-1024 decapsulation key  
 pub struct MlKem1024DecapsulationKey {
-    bytes: Vec<u8>,
+    seed: Vec<u8>,
 }
 
 /// Wrapper for ML-KEM-1024 ciphertext
@@ -49,15 +49,31 @@ impl From<&[u8]> for MlKem1024EncapsulationKey {
 
 impl AsBytes for MlKem1024DecapsulationKey {
     fn as_bytes(&self) -> &[u8] {
-        &self.bytes
+        &self.seed
     }
 }
 
 impl From<&[u8]> for MlKem1024DecapsulationKey {
-    fn from(bytes: &[u8]) -> Self {
+    fn from(seed: &[u8]) -> Self {
         MlKem1024DecapsulationKey {
-            bytes: bytes.to_vec(),
+            seed: seed.to_vec(),
         }
+    }
+}
+
+impl MlKem1024DecapsulationKey {
+    fn generate_keys_from_seed(&self) -> (ml_kem::kem::DecapsulationKey<MlKem1024Params>, ml_kem::kem::EncapsulationKey<MlKem1024Params>) {
+        let d = ml_kem::B32::try_from(&self.seed[..32]).unwrap();
+        let z = ml_kem::B32::try_from(&self.seed[32..]).unwrap();
+        MlKem1024::generate_deterministic(&d, &z)
+    }
+
+    fn decapsulation_key(&self) -> ml_kem::kem::DecapsulationKey<MlKem1024Params> {
+        self.generate_keys_from_seed().0
+    }
+
+    fn encapsulation_key(&self) -> ml_kem::kem::EncapsulationKey<MlKem1024Params> {
+        self.generate_keys_from_seed().1
     }
 }
 
@@ -84,7 +100,7 @@ impl AsBytes for MlKem1024SharedSecret {
 impl Kem for MlKem1024Kem {
     const SEED_LENGTH: usize = 64;
     const ENCAPSULATION_KEY_LENGTH: usize = 1568;
-    const DECAPSULATION_KEY_LENGTH: usize = 3168;
+    const DECAPSULATION_KEY_LENGTH: usize = 64;
     const CIPHERTEXT_LENGTH: usize = 1568;
     const SHARED_SECRET_LENGTH: usize = 32;
 
@@ -96,15 +112,9 @@ impl Kem for MlKem1024Kem {
     fn generate_key_pair<R: rand::CryptoRng>(
         rng: &mut R,
     ) -> Result<(Self::EncapsulationKey, Self::DecapsulationKey), KemError> {
-        let (dk, ek) = MlKem1024::generate(&mut RngWrapper(rng));
-        Ok((
-            MlKem1024EncapsulationKey {
-                bytes: ek.as_bytes().to_vec(),
-            },
-            MlKem1024DecapsulationKey {
-                bytes: dk.as_bytes().to_vec(),
-            },
-        ))
+        let mut seed = [0u8; 64];
+        rand::RngCore::fill_bytes(rng, &mut seed);
+        Self::derive_key_pair(&seed)
     }
 
     fn derive_key_pair(
@@ -114,17 +124,16 @@ impl Kem for MlKem1024Kem {
             return Err(KemError::InvalidInputLength);
         }
 
-        let d = ml_kem::B32::try_from(&seed[..32]).unwrap();
-        let z = ml_kem::B32::try_from(&seed[32..]).unwrap();
-        let (dk, ek) = MlKem1024::generate_deterministic(&d, &z);
+        let dk = MlKem1024DecapsulationKey {
+            seed: seed.to_vec(),
+        };
+        let ek_inner = dk.encapsulation_key();
 
         Ok((
             MlKem1024EncapsulationKey {
-                bytes: ek.as_bytes().to_vec(),
+                bytes: ek_inner.as_bytes().to_vec(),
             },
-            MlKem1024DecapsulationKey {
-                bytes: dk.as_bytes().to_vec(),
-            },
+            dk,
         ))
     }
 
@@ -147,8 +156,7 @@ impl Kem for MlKem1024Kem {
         dk: &Self::DecapsulationKey,
         ct: &Self::Ciphertext,
     ) -> Result<Self::SharedSecret, KemError> {
-        let dk_inner: DecapsulationKey<MlKem1024Params> =
-            DecapsulationKey::from_bytes(dk.bytes.as_slice().try_into().unwrap());
+        let dk_inner = dk.decapsulation_key();
         let ct_array = ct.bytes.as_slice();
         let ct_inner = Ciphertext::<MlKem1024>::try_from(ct_array).unwrap();
         let ss = dk_inner
@@ -160,9 +168,7 @@ impl Kem for MlKem1024Kem {
     fn to_encapsulation_key(
         dk: &Self::DecapsulationKey,
     ) -> Result<Self::EncapsulationKey, KemError> {
-        let dk_inner: DecapsulationKey<MlKem1024Params> =
-            DecapsulationKey::from_bytes(dk.bytes.as_slice().try_into().unwrap());
-        let ek_inner = dk_inner.encapsulation_key();
+        let ek_inner = dk.encapsulation_key();
         Ok(MlKem1024EncapsulationKey {
             bytes: ek_inner.as_bytes().to_vec(),
         })
