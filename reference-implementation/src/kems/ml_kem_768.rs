@@ -6,7 +6,7 @@ use crate::generic::{
 };
 use crate::utils::RngWrapper;
 use ml_kem::{
-    kem::{Decapsulate, DecapsulationKey, Encapsulate, EncapsulationKey},
+    kem::{Decapsulate, Encapsulate, EncapsulationKey},
     Ciphertext, EncapsulateDeterministic, EncodedSizeUser, KemCore, MlKem768, MlKem768Params,
 };
 
@@ -20,7 +20,7 @@ pub struct MlKem768EncapsulationKey {
 
 /// Wrapper for ML-KEM-768 decapsulation key  
 pub struct MlKem768DecapsulationKey {
-    bytes: Vec<u8>,
+    seed: Vec<u8>,
 }
 
 /// Wrapper for ML-KEM-768 ciphertext
@@ -49,15 +49,31 @@ impl From<&[u8]> for MlKem768EncapsulationKey {
 
 impl AsBytes for MlKem768DecapsulationKey {
     fn as_bytes(&self) -> &[u8] {
-        &self.bytes
+        &self.seed
     }
 }
 
 impl From<&[u8]> for MlKem768DecapsulationKey {
-    fn from(bytes: &[u8]) -> Self {
+    fn from(seed: &[u8]) -> Self {
         MlKem768DecapsulationKey {
-            bytes: bytes.to_vec(),
+            seed: seed.to_vec(),
         }
+    }
+}
+
+impl MlKem768DecapsulationKey {
+    fn generate_keys_from_seed(&self) -> (ml_kem::kem::DecapsulationKey<MlKem768Params>, ml_kem::kem::EncapsulationKey<MlKem768Params>) {
+        let d = ml_kem::B32::try_from(&self.seed[..32]).unwrap();
+        let z = ml_kem::B32::try_from(&self.seed[32..]).unwrap();
+        MlKem768::generate_deterministic(&d, &z)
+    }
+
+    fn decapsulation_key(&self) -> ml_kem::kem::DecapsulationKey<MlKem768Params> {
+        self.generate_keys_from_seed().0
+    }
+
+    fn encapsulation_key(&self) -> ml_kem::kem::EncapsulationKey<MlKem768Params> {
+        self.generate_keys_from_seed().1
     }
 }
 
@@ -90,7 +106,7 @@ impl PartialEq<Vec<u8>> for MlKem768SharedSecret {
 impl Kem for MlKem768Kem {
     const SEED_LENGTH: usize = 64;
     const ENCAPSULATION_KEY_LENGTH: usize = 1184;
-    const DECAPSULATION_KEY_LENGTH: usize = 2400;
+    const DECAPSULATION_KEY_LENGTH: usize = 64;
     const CIPHERTEXT_LENGTH: usize = 1088;
     const SHARED_SECRET_LENGTH: usize = 32;
 
@@ -102,15 +118,9 @@ impl Kem for MlKem768Kem {
     fn generate_key_pair<R: rand::CryptoRng>(
         rng: &mut R,
     ) -> Result<(Self::EncapsulationKey, Self::DecapsulationKey), KemError> {
-        let (dk, ek) = MlKem768::generate(&mut RngWrapper(rng));
-        Ok((
-            MlKem768EncapsulationKey {
-                bytes: ek.as_bytes().to_vec(),
-            },
-            MlKem768DecapsulationKey {
-                bytes: dk.as_bytes().to_vec(),
-            },
-        ))
+        let mut seed = [0u8; 64];
+        rand::RngCore::fill_bytes(rng, &mut seed);
+        Self::derive_key_pair(&seed)
     }
 
     fn derive_key_pair(
@@ -120,17 +130,16 @@ impl Kem for MlKem768Kem {
             return Err(KemError::InvalidInputLength);
         }
 
-        let d = ml_kem::B32::try_from(&seed[..32]).unwrap();
-        let z = ml_kem::B32::try_from(&seed[32..]).unwrap();
-        let (dk, ek) = MlKem768::generate_deterministic(&d, &z);
+        let dk = MlKem768DecapsulationKey {
+            seed: seed.to_vec(),
+        };
+        let ek_inner = dk.encapsulation_key();
 
         Ok((
             MlKem768EncapsulationKey {
-                bytes: ek.as_bytes().to_vec(),
+                bytes: ek_inner.as_bytes().to_vec(),
             },
-            MlKem768DecapsulationKey {
-                bytes: dk.as_bytes().to_vec(),
-            },
+            dk,
         ))
     }
 
@@ -153,8 +162,7 @@ impl Kem for MlKem768Kem {
         dk: &Self::DecapsulationKey,
         ct: &Self::Ciphertext,
     ) -> Result<Self::SharedSecret, KemError> {
-        let dk_inner: DecapsulationKey<MlKem768Params> =
-            DecapsulationKey::from_bytes(dk.bytes.as_slice().try_into().unwrap());
+        let dk_inner = dk.decapsulation_key();
         let ct_array = ct.bytes.as_slice();
         let ct_inner = Ciphertext::<MlKem768>::try_from(ct_array).unwrap();
         let ss = dk_inner
@@ -166,9 +174,7 @@ impl Kem for MlKem768Kem {
     fn to_encapsulation_key(
         dk: &Self::DecapsulationKey,
     ) -> Result<Self::EncapsulationKey, KemError> {
-        let dk_inner: DecapsulationKey<MlKem768Params> =
-            DecapsulationKey::from_bytes(dk.bytes.as_slice().try_into().unwrap());
-        let ek_inner = dk_inner.encapsulation_key();
+        let ek_inner = dk.encapsulation_key();
         Ok(MlKem768EncapsulationKey {
             bytes: ek_inner.as_bytes().to_vec(),
         })
