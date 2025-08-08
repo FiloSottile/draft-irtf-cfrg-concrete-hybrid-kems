@@ -94,7 +94,7 @@ impl NominalGroup for P256Group {
         let result_proj = proj_point * x.scalar;
         let result_affine: AffinePoint = result_proj.into();
 
-        // Encode in compressed form
+        // Encode in uncompressed form
         let encoded = result_affine.to_encoded_point(false);
         let bytes = encoded.as_bytes().to_vec();
 
