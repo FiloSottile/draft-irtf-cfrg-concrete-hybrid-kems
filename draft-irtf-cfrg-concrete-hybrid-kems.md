@@ -174,14 +174,14 @@ The group constants for the P-256 group are as follows:
 
 - `Nseed`: 48
 - `Nscalar`: 32
-- `Nelem`: 33
+- `Nelem`: 65
 - `Nss`: 32
 
 The group constants for the P-384 group are as follows:
 
 - `Nseed`: 72
 - `Nscalar`: 48
-- `Nelem`: 49
+- `Nelem`: 97
 - `Nss`: 48
 
 ### Curve25519 Nominal Group {#group-curve25519}
