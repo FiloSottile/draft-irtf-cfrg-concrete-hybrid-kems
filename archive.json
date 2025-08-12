@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-10T01:57:51.216335+00:00",
+  "timestamp": "2025-08-12T01:43:30.817418+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -914,13 +914,13 @@
       "labels": [],
       "body": "",
       "createdAt": "2025-08-08T01:33:57Z",
-      "updatedAt": "2025-08-08T21:00:56Z",
+      "updatedAt": "2025-08-11T20:31:23Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "baseRefName": "main",
       "baseRefOid": "ee686337b57917673d666c23eba79fecd7a539d0",
       "headRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "headRefName": "compress",
-      "headRefOid": "0a4e46de732afce16bbf5ca549a98dc6e06d6951",
+      "headRefOid": "ffa159142d1646ba3b82aa22e4a79fe2f677faf7",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -934,7 +934,28 @@
           "updatedAt": "2025-08-08T21:00:56Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOMmh5WM65EE9r",
+          "commit": {
+            "abbreviatedOid": "0a4e46d"
+          },
+          "author": "bwesterb",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-11T09:31:33Z",
+          "updatedAt": "2025-08-11T09:32:21Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "`Nelem` below needs an update. Perhaps also add parenthetical that this includes the type byte.",
+              "createdAt": "2025-08-11T09:31:33Z",
+              "updatedAt": "2025-08-11T09:32:22Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
