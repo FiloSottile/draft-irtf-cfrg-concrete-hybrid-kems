@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-12T01:43:30.817418+00:00",
+  "timestamp": "2025-08-19T01:40:22.142818+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -888,7 +888,7 @@
       "labels": [],
       "body": "Corresponds to https://github.com/cfrg/draft-irtf-cfrg-hybrid-kems/pull/70",
       "createdAt": "2025-08-08T00:49:33Z",
-      "updatedAt": "2025-08-08T00:56:36Z",
+      "updatedAt": "2025-08-18T10:06:44Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "baseRefName": "main",
       "baseRefOid": "ee686337b57917673d666c23eba79fecd7a539d0",
@@ -900,7 +900,28 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOMmh5WM66bTl0",
+          "commit": {
+            "abbreviatedOid": "1bbca40"
+          },
+          "author": "FiloSottile",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-08-18T10:06:44Z",
+          "updatedAt": "2025-08-18T10:06:44Z",
+          "comments": [
+            {
+              "originalPosition": 109,
+              "body": "The new order matches https://www.ietf.org/archive/id/draft-connolly-cfrg-xwing-kem-08.html#section-5.4.1 \ud83d\udc4d ",
+              "createdAt": "2025-08-18T10:06:44Z",
+              "updatedAt": "2025-08-18T10:06:44Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 17,
