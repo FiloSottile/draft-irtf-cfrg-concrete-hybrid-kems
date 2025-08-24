@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-19T01:40:22.142818+00:00",
+  "timestamp": "2025-08-24T01:47:27.717653+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -202,6 +202,22 @@
       "body": "Current code has the following:\nhttps://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/blob/4f6ce977f57a54c51d5814f76a2b48dfb3bb4ce8/draft-irtf-cfrg-concrete-hybrid-kems.md?plain=1#L329-L337\n\nThe name and label of the concrete instantiation refer to \"SHA3256\", but the specified KDF is HKDF-SHA-256, _not_ SHA3-256.\n\nI suspect the intent is that the KDF is SHA3-256 for this concrete instantiation?",
       "createdAt": "2025-07-21T20:19:45Z",
       "updatedAt": "2025-07-21T20:23:21Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 18,
+      "id": "I_kwDOMmh5WM7HibUX",
+      "title": "Suspect RandomScalar impl for P256/P384 in ref-impl",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/issues/18",
+      "state": "OPEN",
+      "author": "ilaril",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "According to the document, RandomScalar for P-256/P-384 reduces \"modulo the group order\".\n\nHowever, for P-256 that seems to be implemented in `<P256Scalar as From<&[u8]>>::from()` in `reference-implementation/src/groups/p256.rs`, which seems use modulus `ffffffff 00000001 00000000 00000000 00000000 ffffffff ffffffff ffffffff`, which is the P-256 base field size, not group order (Safecurves gives `ffffffff 00000000 ffffffff ffffffff bce6faad a7179e84 f3b9cac2 fc632551` as the group order)\n\nP-384 seems to have analogous issue: P-384 implementation seems to be `<P384Scalar as From<&[u8]>>::from()` in `reference-implementation/src/groups/p384.rs`, which seems to use modulus `ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe ffffffff 00000000 00000000 ffffffff`, which is the P-384 base field size, not group order (Safecurves gives `ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff c7634d81 f4372ddf 581a0db2 48b0a77a ecec196a ccc52973` as the group order).\n\nEdit: Changing the moduli does give something that is interoperable with my own implementation.",
+      "createdAt": "2025-08-23T07:01:32Z",
+      "updatedAt": "2025-08-23T07:27:19Z",
       "closedAt": null,
       "comments": []
     }
