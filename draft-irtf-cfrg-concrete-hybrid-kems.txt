@@ -5,8 +5,8 @@
 Crypto Forum                                                 D. Connolly
 Internet-Draft                                                 SandboxAQ
 Intended status: Informational                                 R. Barnes
-Expires: 8 February 2026                                           Cisco
-                                                           7 August 2025
+Expires: 1 March 2026                                              Cisco
+                                                          28 August 2025
 
 
            Concrete Hybrid PQ/T Key Encapsulation Mechanisms
@@ -55,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 February 2026.
+   This Internet-Draft will expire on 1 March 2026.
 
 Copyright Notice
 
@@ -153,8 +153,8 @@ Table of Contents
    described in [HYBRID-KEMS].
 
    Group elements are elliptic curve points, represented as byte strings
-   in the compressed representation defined by the Elliptic-Curve-Point-
-   to-Octet-String function in [SEC1].
+   in the uncompressed representation defined by the Elliptic-Curve-
+   Point-to-Octet-String function in [SEC1].
 
    The Nominal Group algorithms are the same for both groups:
 
@@ -176,7 +176,7 @@ Table of Contents
 
    *  Nscalar: 32
 
-   *  Nelem: 33
+   *  Nelem: 65
 
    *  Nss: 32
 
@@ -186,7 +186,7 @@ Table of Contents
 
    *  Nscalar: 48
 
-   *  Nelem: 49
+   *  Nelem: 97
 
    *  Nss: 48
 
