@@ -38,9 +38,9 @@ impl AsBytes for P384Scalar {
 
 impl From<&[u8]> for P384Scalar {
     fn from(bytes: &[u8]) -> Self {
-        // Manually reduce mod p
+        // Manually reduce mod n
         const MOD: &[u8] = &hex!("ffffffffffffffffffffffffffffffffffffffffffffffff"
-            "fffffffffffffffeffffffff0000000000000000ffffffff");
+            "c7634d81f4372ddf581a0db248b0a77aecec196accc52973");
         let q = BigUint::from_bytes_be(MOD);
         let p = BigUint::from_bytes_be(bytes) % &q;
 
