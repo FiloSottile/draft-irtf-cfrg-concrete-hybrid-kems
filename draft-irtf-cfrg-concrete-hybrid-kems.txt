@@ -5,8 +5,8 @@
 Crypto Forum                                                 D. Connolly
 Internet-Draft                                                 SandboxAQ
 Intended status: Informational                                 R. Barnes
-Expires: 1 March 2026                                              Cisco
-                                                          28 August 2025
+Expires: 4 March 2026                                              Cisco
+                                                          31 August 2025
 
 
            Concrete Hybrid PQ/T Key Encapsulation Mechanisms
@@ -55,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 1 March 2026.
+   This Internet-Draft will expire on 4 March 2026.
 
 Copyright Notice
 
@@ -378,7 +378,7 @@ Table of Contents
 
    *  PRG: SHAKE-256 [FIPS202]
 
-   *  KDF: HKDF-SHA-256 [RFC5869]
+   *  KDF: SHA3-256 [FIPS202]
 
    *  Label: QSF-P384-MLKEM1024-SHAKE256-SHA3256
 
@@ -427,11 +427,6 @@ Table of Contents
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
               <https://www.rfc-editor.org/rfc/rfc2119>.
-
-   [RFC5869]  Krawczyk, H. and P. Eronen, "HMAC-based Extract-and-Expand
-              Key Derivation Function (HKDF)", RFC 5869,
-              DOI 10.17487/RFC5869, May 2010,
-              <https://www.rfc-editor.org/rfc/rfc5869>.
 
    [RFC7748]  Langley, A., Hamburg, M., and S. Turner, "Elliptic Curves
               for Security", RFC 7748, DOI 10.17487/RFC7748, January
