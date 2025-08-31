@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-24T01:47:27.717653+00:00",
+  "timestamp": "2025-08-31T01:40:12.537624+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -194,16 +194,24 @@
       "id": "I_kwDOMmh5WM7BteZD",
       "title": "Bug in details for QSF-MLKEM1024-P384-SHA3256-SHAKE256",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/issues/14",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "samuel-lee-msft",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "Current code has the following:\nhttps://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/blob/4f6ce977f57a54c51d5814f76a2b48dfb3bb4ce8/draft-irtf-cfrg-concrete-hybrid-kems.md?plain=1#L329-L337\n\nThe name and label of the concrete instantiation refer to \"SHA3256\", but the specified KDF is HKDF-SHA-256, _not_ SHA3-256.\n\nI suspect the intent is that the KDF is SHA3-256 for this concrete instantiation?",
       "createdAt": "2025-07-21T20:19:45Z",
-      "updatedAt": "2025-07-21T20:23:21Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2025-08-31T00:21:03Z",
+      "closedAt": "2025-08-31T00:21:03Z",
+      "comments": [
+        {
+          "author": "dconnolly",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yes that HKDF mention is detritus from earlier drafts. All concrete instances use SHA3 as the hybrid KEM KDF. Will fix.",
+          "createdAt": "2025-08-30T00:17:01Z",
+          "updatedAt": "2025-08-30T00:17:01Z"
+        }
+      ]
     },
     {
       "number": 18,
@@ -220,6 +228,37 @@
       "updatedAt": "2025-08-23T07:27:19Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 19,
+      "id": "I_kwDOMmh5WM7Ix0sU",
+      "title": "The P-384 hybrid construction has Nss=32, but RFC 9180's P-384 construction has Nsecret=48",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/issues/19",
+      "state": "CLOSED",
+      "author": "bluegate010",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Is that a bug or intentional?",
+      "createdAt": "2025-08-29T23:57:32Z",
+      "updatedAt": "2025-08-30T00:13:38Z",
+      "closedAt": "2025-08-30T00:12:59Z",
+      "comments": [
+        {
+          "author": "bluegate010",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Same question for the pure ML-KEM-1024 construction, which also uses Nss=32.",
+          "createdAt": "2025-08-30T00:04:34Z",
+          "updatedAt": "2025-08-30T00:04:34Z"
+        },
+        {
+          "author": "dconnolly",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Nss for all concrete hybrids is 32 bytes as the current draft uses SHA3 as the KDF for all instances ",
+          "createdAt": "2025-08-30T00:13:38Z",
+          "updatedAt": "2025-08-30T00:13:38Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -897,24 +936,26 @@
       "id": "PR_kwDOMmh5WM6irgYR",
       "title": "Adjust reference implementation to use (PQ, T) ordering",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/16",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Corresponds to https://github.com/cfrg/draft-irtf-cfrg-hybrid-kems/pull/70",
       "createdAt": "2025-08-08T00:49:33Z",
-      "updatedAt": "2025-08-18T10:06:44Z",
+      "updatedAt": "2025-08-28T15:23:38Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "baseRefName": "main",
       "baseRefOid": "ee686337b57917673d666c23eba79fecd7a539d0",
       "headRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "headRefName": "pqt",
       "headRefOid": "1bbca4030d804939280c8636be0c414b436a4e8c",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-08-28T15:23:33Z",
+      "mergedAt": "2025-08-28T15:23:33Z",
+      "mergedBy": "dconnolly",
+      "mergeCommit": {
+        "oid": "af8e263ee22109c4768ee324ffe76ecb8167e44e"
+      },
       "comments": [],
       "reviews": [
         {
@@ -944,24 +985,26 @@
       "id": "PR_kwDOMmh5WM6irrEo",
       "title": "Use the uncompressed representation for NIST curve points",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/17",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "",
       "createdAt": "2025-08-08T01:33:57Z",
-      "updatedAt": "2025-08-11T20:31:23Z",
+      "updatedAt": "2025-08-28T15:22:06Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "baseRefName": "main",
       "baseRefOid": "ee686337b57917673d666c23eba79fecd7a539d0",
       "headRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "headRefName": "compress",
       "headRefOid": "ffa159142d1646ba3b82aa22e4a79fe2f677faf7",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-08-28T15:21:57Z",
+      "mergedAt": "2025-08-28T15:21:57Z",
+      "mergedBy": "dconnolly",
+      "mergeCommit": {
+        "oid": "9307a5299b77064b53401be11f6e8d218c86648b"
+      },
       "comments": [
         {
           "author": "bifurcation",
@@ -991,6 +1034,69 @@
               "updatedAt": "2025-08-11T09:32:22Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOMmh5WM68rAbN",
+          "commit": {
+            "abbreviatedOid": "ffa1591"
+          },
+          "author": "dconnolly",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-28T15:21:52Z",
+          "updatedAt": "2025-08-28T15:21:52Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 20,
+      "id": "PR_kwDOMmh5WM6mITKu",
+      "title": "s/HKDF-SHA-256/SHA3-256/",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/20",
+      "state": "MERGED",
+      "author": "bluegate010",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/issues/14.",
+      "createdAt": "2025-08-31T00:09:45Z",
+      "updatedAt": "2025-08-31T00:21:02Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
+      "baseRefName": "main",
+      "baseRefOid": "af8e263ee22109c4768ee324ffe76ecb8167e44e",
+      "headRepository": "bluegate010/draft-irtf-cfrg-concrete-hybrid-kems",
+      "headRefName": "patch-1",
+      "headRefOid": "f0ecb619bea1b94598751b8db83e21f5cb1f0ea9",
+      "closedAt": "2025-08-31T00:21:02Z",
+      "mergedAt": "2025-08-31T00:21:02Z",
+      "mergedBy": "dconnolly",
+      "mergeCommit": {
+        "oid": "9cb24a9829ae0c1df176a2c966dba72afe76787e"
+      },
+      "comments": [
+        {
+          "author": "dconnolly",
+          "authorAssociation": "COLLABORATOR",
+          "body": "This makes the spec correctly align with the reference impl ",
+          "createdAt": "2025-08-31T00:19:45Z",
+          "updatedAt": "2025-08-31T00:19:45Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOMmh5WM69Bd6x",
+          "commit": {
+            "abbreviatedOid": "f0ecb61"
+          },
+          "author": "dconnolly",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-31T00:19:21Z",
+          "updatedAt": "2025-08-31T00:19:21Z",
+          "comments": []
         }
       ]
     }
