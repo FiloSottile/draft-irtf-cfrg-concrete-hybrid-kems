@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-31T01:40:12.537624+00:00",
+  "timestamp": "2025-09-02T01:37:03.050536+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -225,9 +225,17 @@
       "labels": [],
       "body": "According to the document, RandomScalar for P-256/P-384 reduces \"modulo the group order\".\n\nHowever, for P-256 that seems to be implemented in `<P256Scalar as From<&[u8]>>::from()` in `reference-implementation/src/groups/p256.rs`, which seems use modulus `ffffffff 00000001 00000000 00000000 00000000 ffffffff ffffffff ffffffff`, which is the P-256 base field size, not group order (Safecurves gives `ffffffff 00000000 ffffffff ffffffff bce6faad a7179e84 f3b9cac2 fc632551` as the group order)\n\nP-384 seems to have analogous issue: P-384 implementation seems to be `<P384Scalar as From<&[u8]>>::from()` in `reference-implementation/src/groups/p384.rs`, which seems to use modulus `ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe ffffffff 00000000 00000000 ffffffff`, which is the P-384 base field size, not group order (Safecurves gives `ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff c7634d81 f4372ddf 581a0db2 48b0a77a ecec196a ccc52973` as the group order).\n\nEdit: Changing the moduli does give something that is interoperable with my own implementation.",
       "createdAt": "2025-08-23T07:01:32Z",
-      "updatedAt": "2025-08-23T07:27:19Z",
+      "updatedAt": "2025-09-01T22:03:42Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "FiloSottile",
+          "authorAssociation": "NONE",
+          "body": "Fixed by #21",
+          "createdAt": "2025-09-01T22:03:42Z",
+          "updatedAt": "2025-09-01T22:03:42Z"
+        }
+      ]
     },
     {
       "number": 19,
@@ -259,6 +267,22 @@
           "updatedAt": "2025-08-30T00:13:38Z"
         }
       ]
+    },
+    {
+      "number": 22,
+      "id": "I_kwDOMmh5WM7JGPsj",
+      "title": "Avoid wide reduction in P-256 and P-384 RandomScalar",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/issues/22",
+      "state": "OPEN",
+      "author": "FiloSottile",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Currently, an implementation of P-256 and P-384 QSF hybrids needs a wide reduction implementation to reduce a 48 or 72 byte value to a scalar. This is not obviously available in implementations.\n\nNote that when used in HPKE this is also inconsistent with how pure P-256 and P-384 keys are derived in DHKEM, which uses rejection sampling in DeriveKeyPair (RFC 9180 Section 7.1.3).\n\nI think there are arguments both for rejection sampling and for wide reduction, but having *both* in a HPKE implementation for the same curve is annoying. Since rejection sampling is fixed in RFC 9180, I suggest we change RandomScalar in this draft.\n\nNormally, the annoyance of rejection sampling is introducing a XOF or DRBG or KDF or whatever, which DHKEM solves with a built-in KDF, but here the RandomScalar input is already an arbitrary sized uniform PRG output from expandDecapsulationKey, so we can just request a \"seed\" which is wide enough to bring the probability of rejection down to the security level.\n\nFor P-256, that means a Nseed of 128, since the probability of rejection is [< 2\u207b\u00b3\u00b2](https://www.wolframalpha.com/input?i=log2%281+-+115792089210356248762697446949407573529996955224135760342422259061068512044369+%2F+2%5E256%29) and the security level is 128 bits-ish.\n\nThe RandomScalar algorithm would be to try seed[:32] and return it if < q, otherwise try seed[32:64], otherwise seed[64:96], otherwise seed[96:], otherwise fatal.\n\nFor P-384, that means Nseed of 48, since the probability of even a single rejection is [< 2\u207b\u00b9\u2079\u2074](https://www.wolframalpha.com/input?i=log2%281+-+39402006196394479212279040100143613805079739270465446667946905279627659399113263569398956308152294913554433653942643+%2F+2%5E384%29).\n\nWe will need to specify that the RandomScalar input needs to be uniformly distributed, but since it's only ever a PRG output, I don't expect that will be a problem.\n\nWhat do folks think?",
+      "createdAt": "2025-09-01T22:17:39Z",
+      "updatedAt": "2025-09-01T22:17:39Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -917,7 +941,7 @@
       "labels": [],
       "body": "All of the example hybrid KEMs here use SHAKE-256 for PRG and SHA3-256 for KDF, respectively. Rather than have a very long name KEM, we should have a shorter name for the hybrid KEM by omitting these parameters. If we end up generating more hybrid KEMs with the same traditional and PQ KEM components, but different KDF/PRF, we can assign a short suffix afterwards to identify the other hybrid KEM by PRG and KDF variations",
       "createdAt": "2025-07-24T15:30:48Z",
-      "updatedAt": "2025-07-24T15:30:49Z",
+      "updatedAt": "2025-09-01T04:41:09Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "baseRefName": "main",
       "baseRefOid": "4f6ce977f57a54c51d5814f76a2b48dfb3bb4ce8",
@@ -928,8 +952,30 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
-      "reviews": []
+      "comments": [
+        {
+          "author": "rohanmahy",
+          "authorAssociation": "NONE",
+          "body": "We've had several people suggest variations of this suggestion on the list.\r\nI believe there might even be rough consensus to do this. You have not\r\nprovided a concrete reason why we shouldn't do it. (ex: what could go\r\nwrong).\r\nThe point is that there is a high cost in terms of mental energy and\r\ncomplications in publication for very long, complicated KEM names.\r\nTherefore there needs to be a very strong motivation to use such long\r\ncomplicated names, and to date that motivation has not materialized.\r\n\r\nthanks,\r\n-rohan\r\n\r\nOn Mon, Sep 1, 2025, 00:09 Deirdre Connolly ***@***.***>\r\nwrote:\r\n\r\n> ***@***.**** requested changes on this pull request.\r\n>\r\n> I don't think we should do this\r\n>\r\n> \u2014\r\n> Reply to this email directly, view it on GitHub\r\n> <https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/15#pullrequestreview-3171815044>,\r\n> or unsubscribe\r\n> <https://github.com/notifications/unsubscribe-auth/AADSQPRPPCA65OVW6FHFXZ33QNXB7AVCNFSM6AAAAACCJGNGN2VHI2DSMVQWIX3LMV43YUDVNRWFEZLROVSXG5CSMV3GSZLXHMZTCNZRHAYTKMBUGQ>\r\n> .\r\n> You are receiving this because you authored the thread.Message ID:\r\n> <cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/15/review/3171815044@\r\n> github.com>\r\n>\r\n",
+          "createdAt": "2025-09-01T04:41:09Z",
+          "updatedAt": "2025-09-01T04:41:09Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOMmh5WM69Dg6E",
+          "commit": {
+            "abbreviatedOid": "e5359e7"
+          },
+          "author": "dconnolly",
+          "authorAssociation": "COLLABORATOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "I don't think we should do this",
+          "createdAt": "2025-08-31T22:09:15Z",
+          "updatedAt": "2025-08-31T22:09:15Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 16,
@@ -1096,6 +1142,46 @@
           "body": "",
           "createdAt": "2025-08-31T00:19:21Z",
           "updatedAt": "2025-08-31T00:19:21Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 21,
+      "id": "PR_kwDOMmh5WM6mLVFh",
+      "title": "Fix P-256/P-384 scalar moduli in reference implementation",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/21",
+      "state": "OPEN",
+      "author": "FiloSottile",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #18",
+      "createdAt": "2025-08-31T18:50:46Z",
+      "updatedAt": "2025-09-01T22:03:49Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
+      "baseRefName": "main",
+      "baseRefOid": "46ff59b532ed6bfd47777e4306269334f84ae776",
+      "headRepository": "FiloSottile/draft-irtf-cfrg-concrete-hybrid-kems",
+      "headRefName": "main",
+      "headRefOid": "9f25f46e12cb7e5c094b5772191d18d5088747ce",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOMmh5WM69JJFV",
+          "commit": {
+            "abbreviatedOid": "9f25f46"
+          },
+          "author": "bwesterb",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-09-01T11:32:05Z",
+          "updatedAt": "2025-09-01T11:32:05Z",
           "comments": []
         }
       ]
