@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-04T01:23:31.930038+00:00",
+  "timestamp": "2025-09-14T01:37:43.625863+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -956,7 +956,7 @@
       "labels": [],
       "body": "All of the example hybrid KEMs here use SHAKE-256 for PRG and SHA3-256 for KDF, respectively. Rather than have a very long name KEM, we should have a shorter name for the hybrid KEM by omitting these parameters. If we end up generating more hybrid KEMs with the same traditional and PQ KEM components, but different KDF/PRF, we can assign a short suffix afterwards to identify the other hybrid KEM by PRG and KDF variations",
       "createdAt": "2025-07-24T15:30:48Z",
-      "updatedAt": "2025-09-01T04:41:09Z",
+      "updatedAt": "2025-09-12T18:51:05Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "baseRefName": "main",
       "baseRefOid": "4f6ce977f57a54c51d5814f76a2b48dfb3bb4ce8",
@@ -974,6 +974,20 @@
           "body": "We've had several people suggest variations of this suggestion on the list.\r\nI believe there might even be rough consensus to do this. You have not\r\nprovided a concrete reason why we shouldn't do it. (ex: what could go\r\nwrong).\r\nThe point is that there is a high cost in terms of mental energy and\r\ncomplications in publication for very long, complicated KEM names.\r\nTherefore there needs to be a very strong motivation to use such long\r\ncomplicated names, and to date that motivation has not materialized.\r\n\r\nthanks,\r\n-rohan\r\n\r\nOn Mon, Sep 1, 2025, 00:09 Deirdre Connolly ***@***.***>\r\nwrote:\r\n\r\n> ***@***.**** requested changes on this pull request.\r\n>\r\n> I don't think we should do this\r\n>\r\n> \u2014\r\n> Reply to this email directly, view it on GitHub\r\n> <https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/15#pullrequestreview-3171815044>,\r\n> or unsubscribe\r\n> <https://github.com/notifications/unsubscribe-auth/AADSQPRPPCA65OVW6FHFXZ33QNXB7AVCNFSM6AAAAACCJGNGN2VHI2DSMVQWIX3LMV43YUDVNRWFEZLROVSXG5CSMV3GSZLXHMZTCNZRHAYTKMBUGQ>\r\n> .\r\n> You are receiving this because you authored the thread.Message ID:\r\n> <cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/15/review/3171815044@\r\n> github.com>\r\n>\r\n",
           "createdAt": "2025-09-01T04:41:09Z",
           "updatedAt": "2025-09-01T04:41:09Z"
+        },
+        {
+          "author": "dconnolly",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> We've had several people suggest variations of this suggestion on the list.\n> I believe there might even be rough consensus to do this. You have not\n> provided a concrete reason why we shouldn't do it. (ex: what could go\n> wrong).\n> The point is that there is a high cost in terms of mental energy and\n> complications in publication for very long, complicated KEM names.\n> Therefore there needs to be a very strong motivation to use such long\n> complicated names, and to date that motivation has not materialized.\n> \n> thanks,\n> -rohan\n> \n> On Mon, Sep 1, 2025, 00:09 Deirdre Connolly ***@***.***>\n> wrote:\n> \n> > ***@***.**** requested changes on this pull request.\n> >\n> > I don't think we should do this\n> >\n> > \u2014\n> > Reply to this email directly, view it on GitHub\n> > <https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/15#pullrequestreview-3171815044>,\n> > or unsubscribe\n> > <https://github.com/notifications/unsubscribe-auth/AADSQPRPPCA65OVW6FHFXZ33QNXB7AVCNFSM6AAAAACCJGNGN2VHI2DSMVQWIX3LMV43YUDVNRWFEZLROVSXG5CSMV3GSZLXHMZTCNZRHAYTKMBUGQ>\n> > .\n> > You are receiving this because you authored the thread.Message ID:\n> > <cfrg/draft-irtf-cfrg-concrete-hybrid-kems/pull/15/review/3171815044@\n> > github.com>\n> >\n> \n\nI have enumerated my objections to this in multiple places ",
+          "createdAt": "2025-09-12T18:12:43Z",
+          "updatedAt": "2025-09-12T18:12:43Z"
+        },
+        {
+          "author": "dconnolly",
+          "authorAssociation": "COLLABORATOR",
+          "body": "What about new uniquely-identifying names, such as 'T-65', 'T-70', etc?",
+          "createdAt": "2025-09-12T18:51:05Z",
+          "updatedAt": "2025-09-12T18:51:05Z"
         }
       ],
       "reviews": [
