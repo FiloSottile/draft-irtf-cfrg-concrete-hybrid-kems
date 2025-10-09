@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-21T01:40:34.505864+00:00",
+  "timestamp": "2025-10-09T01:25:57.179851+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -347,6 +347,22 @@
           "updatedAt": "2025-09-18T08:35:10Z"
         }
       ]
+    },
+    {
+      "number": 23,
+      "id": "I_kwDOMmh5WM7QXuF1",
+      "title": "Consistency in hybrid KEM name and label",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-concrete-hybrid-kems/issues/23",
+      "state": "OPEN",
+      "author": "danvangeest",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "QSF-MLKEM768-P256-SHA3256-SHAKE256 is called QSF-MLKEM768-P256-SHA3256-SHAKE256 but the label transposes the MLKEM768 and the P256: QSF-P256-MLKEM768-SHAKE256-SHA3256.  And I just realized it transposes the PRG and KDF too.  Same with QSF-MLKEM1024-P384-SHA3256-SHAKE256.  If you keep similar labels, please at least make the name and label consistent.\n\nDon't get me started about using backslash, a common escape character, in the label for X-Wing.\n",
+      "createdAt": "2025-10-08T15:16:28Z",
+      "updatedAt": "2025-10-08T15:16:28Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
