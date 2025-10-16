@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-12T01:36:58.521801+00:00",
+  "timestamp": "2025-10-16T01:27:31.970334+00:00",
   "repo": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
   "labels": [
     {
@@ -360,9 +360,17 @@
       "labels": [],
       "body": "QSF-MLKEM768-P256-SHA3256-SHAKE256 is called QSF-MLKEM768-P256-SHA3256-SHAKE256 but the label transposes the MLKEM768 and the P256: QSF-P256-MLKEM768-SHAKE256-SHA3256.  And I just realized it transposes the PRG and KDF too.  Same with QSF-MLKEM1024-P384-SHA3256-SHAKE256.  If you keep similar labels, please at least make the name and label consistent.\n\nDon't get me started about using backslash, a common escape character, in the label for X-Wing.\n",
       "createdAt": "2025-10-08T15:16:28Z",
-      "updatedAt": "2025-10-08T15:16:28Z",
+      "updatedAt": "2025-10-15T15:29:11Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "ounsworth",
+          "authorAssociation": "NONE",
+          "body": "Yes please.\n\nYou're feeding ML-KEM into the KEM Combiner first, so it should be first in the label.\n\n\n> Don't get me started about using backslash, a common escape character, in the label for X-Wing.\n\n+1.\nI know that X-Wing has deployed, and this ship has sailed, but this is going to cause YEARS of headaches.\nFun fact: if you do the naive thing and put this into python:\n\n```\nlabel = \"\\.//^\\\"\n```\nthen `\\.` is interpreted as a single character, and `\\\"` does something weird. You have to do:\n\n```\nlabel = \"\\\\.//^\\\\\"\n```\n\nI wasted an hour on this, and I'm relatively expert at this. The choice to use a backslash here is gonna lead to bugs and CVEs, no question in my mind. I know it's too late to change it, but .... grumble.",
+          "createdAt": "2025-10-15T15:29:11Z",
+          "updatedAt": "2025-10-15T15:29:11Z"
+        }
+      ]
     },
     {
       "number": 24,
@@ -1037,7 +1045,7 @@
       "labels": [],
       "body": "All of the example hybrid KEMs here use SHAKE-256 for PRG and SHA3-256 for KDF, respectively. Rather than have a very long name KEM, we should have a shorter name for the hybrid KEM by omitting these parameters. If we end up generating more hybrid KEMs with the same traditional and PQ KEM components, but different KDF/PRF, we can assign a short suffix afterwards to identify the other hybrid KEM by PRG and KDF variations",
       "createdAt": "2025-07-24T15:30:48Z",
-      "updatedAt": "2025-09-12T18:51:05Z",
+      "updatedAt": "2025-10-16T00:09:59Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-concrete-hybrid-kems",
       "baseRefName": "main",
       "baseRefOid": "4f6ce977f57a54c51d5814f76a2b48dfb3bb4ce8",
@@ -1069,6 +1077,13 @@
           "body": "What about new uniquely-identifying names, such as 'T-65', 'T-70', etc?",
           "createdAt": "2025-09-12T18:51:05Z",
           "updatedAt": "2025-09-12T18:51:05Z"
+        },
+        {
+          "author": "ounsworth",
+          "authorAssociation": "NONE",
+          "body": "We have been around this circle many times now. Deirdre has valiantly presented the arguments for why A) shared-seed keygen is important for security, and B) why it is so important for security that we should force incompatibility (via different labels) for things that do shared-seed-keygen and those that don't.\r\n\r\nI think it's fair to say that the community has spoken, and Deirdre is in the rough. And that's not through lack of effort or lack of good scientific justification. I respect Deirdre's position, and I am grateful to her for educating us, but I think as a community we have weighed the alternatives and decided that the MAL-BIND stuff just isn't important enough to justify the operational and interoperability headaches that this is gonna induce.\r\n\r\nSo I vote for \"Remove the keygen PRG from the label\". You need it, of course, as part of the alg definition so that you can successfully import a shared-seed private key and get back the correct expanded private key, and I would argue that anything required for interop should be explicit, but I don't think the KeyGen method should be in the KEM Combiner label where they will affect the Encaps / Decaps process.\r\n\r\nThat said, @rohanmahy the choice of KDF for the KEM Combiner does matter pretty importantly for interop of Encap / Decap. And I believe that anything that matters for interop should be in the name / label, cause that's where the domain separation vulnerability gremlins hang out.\r\n\r\nWe're going to submit LAMPS Composite KEMs for WGLC any day now, and we're gonna ship with labels like `QSF-MLKEM768-P256-SHA3256`. I guess, since LAMPS will publish first, the HPKE community gets to decide whether you want to align with LAMPS for compatibility, or intentionally not align to force non-compatibility; we've simply run out of time to align on this, gotta ship, so it's up to you.\r\n\r\n\r\n (Also, I would also love to do cross-compatibility testing of our test vectors, but it looks like this repo hasn't been updated since August when I last did unsuccessful cross-testing)",
+          "createdAt": "2025-10-15T23:18:27Z",
+          "updatedAt": "2025-10-16T00:09:59Z"
         }
       ],
       "reviews": [
