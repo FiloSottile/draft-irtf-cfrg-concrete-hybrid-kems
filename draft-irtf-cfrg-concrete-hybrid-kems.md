@@ -334,7 +334,7 @@ This hybrid KEM combines ML-KEM-768 with P-256 using the GC framework from
 * `KEM_PQ`: ML-KEM-768 {{mlkem}}
 * `PRG`: SHAKE-256 {{FIPS202}}
 * `KDF`: SHA3-256 {{FIPS202}}
-* `Label`: `GC-MP256`
+* `Label`: `|-()-|` (0x7C2D28292D7C)
 
 The KEM constants for the resulting hybrid KEM are as follows:
 
@@ -354,10 +354,7 @@ It has the following components:
 * `KEM_PQ`: ML-KEM-768 {{mlkem}}
 * `PRG`: SHAKE-256 {{FIPS202}}
 * `KDF`: SHA3-256 {{FIPS202}}
-* `Label`: `\.//^\`
-
-(This label does not follow the same pattern as the other KEMs here, but was
-chosen for compatibility with the X-Wing specification.)
+* `Label`: `\.//^\` (0x5C2E2F2F5E5C)
 
 The following constants for the hybrid KEM are also defined:
 
@@ -376,7 +373,7 @@ This hybrid KEM combines ML-KEM-1024 with P-384 using the GC framework from
 * `KEM_PQ: ML-KEM-1024 {{mlkem}}
 * `PRG`: SHAKE-256 {{FIPS202}}
 * `KDF`: SHA3-256 {{FIPS202}}
-* `Label`: `GC-MP384`
+* `Label`: ` \| /-\` (0x207C202F2D5C)
 
 The following constants for the hybrid KEM are also defined:
 
