@@ -294,7 +294,7 @@ the following parameters.
 * `KEM_PQ`: ML-KEM-768 {{mlkem}}
 * `PRG`: SHAKE-256 {{FIPS202}}
 * `KDF`: SHA3-256 {{FIPS202}}
-* `Label`: `|-()-|`
+* `Label`: `|-()-|` (0x7C2D28292D7C)
 
 The KEM constants for the resulting hybrid KEM are as follows:
 
