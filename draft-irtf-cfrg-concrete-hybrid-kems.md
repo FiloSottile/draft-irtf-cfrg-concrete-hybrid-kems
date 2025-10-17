@@ -325,7 +325,7 @@ combiner construction from {{HYBRID-KEMS}}, the `label` to use for domain
 separation in the combiner function, as well as the PRG and KDF functions to
 use throughout.
 
-## GC-MP256
+## MLKEM768-P256
 
 This hybrid KEM combines ML-KEM-768 with P-256 using the GC framework from
 {{HYBRID-KEMS}}. It has the following components:
@@ -344,7 +344,7 @@ The KEM constants for the resulting hybrid KEM are as follows:
 - `Nct`: 1121
 - `Nss`: 32
 
-## GC-MX25519
+## MLKEM768-X25519
 
 This hybrid KEM combines ML-KEM-768 with X25519 using the GC framework from
 {{HYBRID-KEMS}}. It is identical to the X-Wing construction from {{XWING-SPEC}}.
@@ -364,7 +364,7 @@ The following constants for the hybrid KEM are also defined:
 - `Nct`: 1120
 - `Nss`: 32
 
-## GC-MP384
+## MLKEM1024-P384
 
 This hybrid KEM combines ML-KEM-1024 with P-384 using the GC framework from
 {{HYBRID-KEMS}}. It has the following components:
