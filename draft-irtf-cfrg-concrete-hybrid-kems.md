@@ -42,6 +42,35 @@ normative:
   SP800-186: DOI.10.6028/NIST.SP.800-186
 
 informative:
+  ABH+21:
+    title: "Analysing the HPKE standard."
+    date: April, 2021
+    author:
+      -
+        fullname: Joël Alwen
+      -
+        fullname: Bruno Blanchet
+      -
+        fullname: Eduard Hauck
+      -
+        fullname: Eike Kiltz
+      -
+        fullname: Benjamin Lipp
+      -
+        fullname: Doreen Riepel
+  ACM+25:
+    title: "The Sponge is Quantum Indifferentiable"
+    target: https://eprint.iacr.org/2025/731.pdf
+    date: 2025
+    author:
+      -
+        fullname: Gorjan Alagic
+      -
+        fullname: Joseph Carolan
+      -
+        fullname: Christian Majenz
+      -
+        fullname: Saliha Tokat
   ANSIX9.62:
     title: "Public Key Cryptography for the Financial Services Industry: the Elliptic Curve Digital Signature Algorithm (ECDSA)"
     date: Nov, 2005
@@ -49,7 +78,20 @@ informative:
       "ANS": X9.62-2005
     author:
       -
-        org: ANS
+        org: ANSI
+  BDP+08:
+    title: "On the Indifferentiability of the Sponge Construction"
+    target: https://www.iacr.org/archive/eurocrypt2008/49650180/49650180.pdf
+    date: 2008
+    author:
+      -
+        fullname: Guido Bertoni
+      -
+        fullname: Joan Daemen
+      -
+        fullname: Michael Peeters
+      -
+        fullname: Gilles Van Assche
   SCHMIEG2024:
     title: "Unbindable Kemmy Schmidt: ML-KEM is neither MAL-BIND-K-CT nor MAL-BIND-K-PK"
     target: https://eprint.iacr.org/2024/523.pdf
@@ -288,7 +330,7 @@ use throughout.
 This hybrid KEM is heavily based on {{XWING}}, using the QSF combiner from
 {{HYBRID-KEMS}}. In particular, it has the same exact design but uses P-256
 instead of X25519 as the the traditional component of the algorithm. It has
-the following parameters.
+the following components:
 
 * `Group_T`: P-256 {{group-nist}}
 * `KEM_PQ`: ML-KEM-768 {{mlkem}}
@@ -307,7 +349,7 @@ The KEM constants for the resulting hybrid KEM are as follows:
 ## QSF-MLKEM768-X25519-SHA3256-SHAKE256 {#xwing}
 
 This hybrid KEM is identical to X-Wing {{XWING-SPEC}}. It has the following
-parameters.
+components.
 
 * `Group_T`: Curve25519 {{group-curve25519}}
 * `KEM_PQ`: ML-KEM-768 {{mlkem}}
@@ -328,7 +370,7 @@ The following constants for the hybrid KEM are also defined:
 
 ## QSF-MLKEM1024-P384-SHA3256-SHAKE256 {#qsf-p384}
 
-QSF-MLKEM1024-P384-SHA3256-SHAKE256 has the following parameters:
+QSF-MLKEM1024-P384-SHA3256-SHAKE256 has the following components:
 
 * `Group_T`: P-384 {{group-nist}}
 * `KEM_PQ: ML-KEM-1024 {{mlkem}}
@@ -346,7 +388,31 @@ The following constants for the hybrid KEM are also defined:
 
 # Security Considerations
 
-[[ TODO ]]
+The Security Considerations section in generic hybrid KEM framework lays out the
+requirements for component algorithms in order for a hybrid KEM constructed
+according to the framework to be secure {{HYBRID-KEMS}}.  In brief:
+
+* A nominal group needs to be one in which the Strong Diffie-Hellman problem is
+  hard.
+* A KEM need to be IND-CCA secure.
+* When the C2PRI combiner is used (as it is here), the PQ KEM also needs to
+  satisfy the C2PRI property.
+* KDFs need to be indifferentiable from a random oracle, even by a quantum
+  attacker.
+* A PRG needs to be a secure pseudo-random generator
+
+The components used in this document meet these requirements:
+
+* The security of X25519, P-256, and P-384 as nominal groups is shown in
+  {{ABH+21}}.
+* ML-KEM is shown to be IND-CCA in {{https://eprint.iacr.org/2024/843}} and
+  shown to be C2PRI in {{XWING}}.
+* The sponge construction used by SHA3-256 is shown to be indifferentiable from a
+  random oracle by a classical attacker in {{BDP+08}}.  Indifferentiability with
+  respect to quantum attackers is shown in {{ACM+25}}.
+* Since SHAKE256 is built on the same sponge construction as SHA3-256, it is
+  also indifferentiable from a random oracle, which is a sufficient condition
+  for being a secure pseudorandom generator.
 
 # IANA Considerations
 
