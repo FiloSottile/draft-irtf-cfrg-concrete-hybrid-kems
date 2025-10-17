@@ -205,23 +205,24 @@ The Nominal Group algorithms are the same for both groups:
 - `Exp(p, x) -> q`: This function computes scalar multiplication between the
   input element (or point) `p` and the scalar `x`, according to the group law
   for the curve specified in {{SP800-186}}.
-- `RandomScalar(seed) -> k`: Implemented using rejection sampling from an XOF,
+- `RandomScalar(seed) -> k`: Implemented using rejection sampling from a PRG,
   as described below.
 - `ElementToSharedSecret(p) -> ss`: The shared secret is the X coordinate of
   the elliptic curve point `p`, encoded as an `Nss`-byte string using the
   Field-Element-to-Octet-String function in {{SEC1}}.
 
-The RandomScalar algorithm depends on an XOF, with the following API:
+The RandomScalar algorithm depends on an pseudo-random generator (PRG), with the
+following API:
 
-- `Init(seed) -> state`: Provide the `seed` as input to the XOF, producing a
-  state of the XOF from which bytes can be read.
-- `Read(state, n) -> data`: Read `n` pseudo-random bytes from the XOF, updating
+- `Init(seed) -> state`: Initialize a new state of the pseudo-random generator
+  based on the provided seed.
+- `Read(state, n) -> data`: Read `n` pseudo-random bytes from the PRG, updating
   `state` to reflect that this read has happened.
 
-A hybrid KEM using these curves MUST specify the XOF that should be used.  All
+A hybrid KEM using these curves MUST specify the PRG that should be used.  All
 of the hybrid KEMs in this document use SHAKE256 {{FIPS202}}.
 
-Given an XOF, the RandomScalar algorithm is defined as follows:
+Given a PRG, the RandomScalar algorithm is defined as follows:
 
 ~~~ pseudocode
 def RandomScalar(seed):
