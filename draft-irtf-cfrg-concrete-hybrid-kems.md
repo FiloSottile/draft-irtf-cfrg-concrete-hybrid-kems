@@ -350,8 +350,8 @@ This hybrid KEM combines ML-KEM-768 with X25519 using the GC framework from
 {{HYBRID-KEMS}}. It is identical to the X-Wing construction from {{XWING-SPEC}}.
 It has the following components:
 
-* `Group_T`: Curve25519 {{group-curve25519}}
 * `KEM_PQ`: ML-KEM-768 {{mlkem}}
+* `Group_T`: Curve25519 {{group-curve25519}}
 * `PRG`: SHAKE-256 {{FIPS202}}
 * `KDF`: SHA3-256 {{FIPS202}}
 * `Label`: `\.//^\` (0x5C2E2F2F5E5C)
@@ -413,7 +413,17 @@ The components used in this document meet these requirements:
 
 # IANA Considerations
 
-This document has no IANA actions.
+This document requests that the following values be added to the "Hybrid KEM
+Labels" registry:
+
+| Label     | Fw | PQ Component | T Component | KDF      | PRG       | Nseed | Nss | Reference |
+|===========|====|==============|=============|==========|===========|=======|=====|===========|
+| "\|-()-\|"  | GC | ML-KEM-768   | Curve25519  | SHA3-256 | SHAKE-256 | 32    | 32  | [RFCXXXX] |
+| "\\.//^\\"  | GC | ML-KEM-768   | Curve25519  | SHA3-256 | SHAKE-256 | 32    | 32  | [RFCXXXX] |
+| " \| /-\\" | GC | ML-KEM-768   | Curve25519  | SHA3-256 | SHAKE-256 | 32    | 32  | [RFCXXXX] |
+{: #iana-table title="Hybrid KEM Labels" }
+
+[ RFC EDITOR: Please replace "XXXX" above with the number assigned to this RFC ]
 
 --- back
 
