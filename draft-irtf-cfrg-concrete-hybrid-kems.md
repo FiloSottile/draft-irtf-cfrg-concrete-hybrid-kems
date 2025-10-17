@@ -331,7 +331,7 @@ QSF-MLKEM1024-P384-SHA3256-SHAKE256 has the following parameters:
 * `KEM_PQ: ML-KEM-1024 {{mlkem}}
 * `PRG`: SHAKE-256 {{FIPS202}}
 * `KDF`: SHA3-256 {{FIPS202}}
-* `Label`: ` | /-\`
+* `Label`: ` \| /-\` (0x207C202F2D5C)
 
 The following constants for the hybrid KEM are also defined:
 
