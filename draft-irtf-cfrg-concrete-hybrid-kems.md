@@ -307,17 +307,17 @@ output, so it is appropriate for use in hybrid KEMs with `Nss = 32`.
 
 This section instantiates the following concrete KEMs:
 
-QSF-MLKEM768-P256-SHA3256-SHAKE256:
-: A hybrid KEM composing ML-KEM-768 and P-256 using the QSF scheme, with
+MLKEM768-P256:
+: A hybrid KEM composing ML-KEM-768 and P-256 using the GC framework, with
   SHAKE256 as the PRG and SHA3-256 as the KDF.
 
-QSF-MLKEM768-X25519-SHA3256-SHAKE256:
-: A hybrid KEM composing ML-KEM-768 and Curve25519 using the QSF scheme, with
+MLKEM768-X25519:
+: A hybrid KEM composing ML-KEM-768 and Curve25519 using the GC framework, with
   SHAKE256 as the PRG and SHA3-256 as the KDF. This construction is identical
   to the X-Wing construction in {{XWING-SPEC}}.
 
-QSF-MLKEM1024-P384-SHA3256-SHAKE256:
-: A hybrid KEM composing ML-KEM-1024 and P-384 using the QSF scheme, with
+MLKEM1024-P384:
+: A hybrid KEM composing ML-KEM-1024 and P-384 using the GC framework, with
   SHAKE256 as the PRG and SHA3-256 as the KDF.
 
 Each instance specifies the PQ and traditional KEMs being combined, the
@@ -325,12 +325,10 @@ combiner construction from {{HYBRID-KEMS}}, the `label` to use for domain
 separation in the combiner function, as well as the PRG and KDF functions to
 use throughout.
 
-## QSF-MLKEM768-P256-SHA3256-SHAKE256 {#qsf-p256}
+## MLKEM768-P256
 
-This hybrid KEM is heavily based on {{XWING}}, using the QSF combiner from
-{{HYBRID-KEMS}}. In particular, it has the same exact design but uses P-256
-instead of X25519 as the the traditional component of the algorithm. It has
-the following components:
+This hybrid KEM combines ML-KEM-768 with P-256 using the GC framework from
+{{HYBRID-KEMS}}. It has the following components:
 
 * `Group_T`: P-256 {{group-nist}}
 * `KEM_PQ`: ML-KEM-768 {{mlkem}}
@@ -346,10 +344,11 @@ The KEM constants for the resulting hybrid KEM are as follows:
 - `Nct`: 1121
 - `Nss`: 32
 
-## QSF-MLKEM768-X25519-SHA3256-SHAKE256 {#xwing}
+## MLKEM768-X25519
 
-This hybrid KEM is identical to X-Wing {{XWING-SPEC}}. It has the following
-components.
+This hybrid KEM combines ML-KEM-768 with X25519 using the GC framework from
+{{HYBRID-KEMS}}. It is identical to the X-Wing construction from {{XWING-SPEC}}.
+It has the following components:
 
 * `Group_T`: Curve25519 {{group-curve25519}}
 * `KEM_PQ`: ML-KEM-768 {{mlkem}}
@@ -365,9 +364,10 @@ The following constants for the hybrid KEM are also defined:
 - `Nct`: 1120
 - `Nss`: 32
 
-## QSF-MLKEM1024-P384-SHA3256-SHAKE256 {#qsf-p384}
+## MLKEM1024-P384
 
-QSF-MLKEM1024-P384-SHA3256-SHAKE256 has the following components:
+This hybrid KEM combines ML-KEM-1024 with P-384 using the GC framework from
+{{HYBRID-KEMS}}. It has the following components:
 
 * `Group_T`: P-384 {{group-nist}}
 * `KEM_PQ: ML-KEM-1024 {{mlkem}}
