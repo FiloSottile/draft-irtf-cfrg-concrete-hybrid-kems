@@ -307,16 +307,16 @@ output, so it is appropriate for use in hybrid KEMs with `Nss = 32`.
 
 This section instantiates the following concrete KEMs:
 
-GC-MP256:
+MLKEM768-P256:
 : A hybrid KEM composing ML-KEM-768 and P-256 using the GC framework, with
   SHAKE256 as the PRG and SHA3-256 as the KDF.
 
-GC-MX25519:
+MLKEM768-X25519:
 : A hybrid KEM composing ML-KEM-768 and Curve25519 using the GC framework, with
   SHAKE256 as the PRG and SHA3-256 as the KDF. This construction is identical
   to the X-Wing construction in {{XWING-SPEC}}.
 
-GC-MP384:
+MLKEM1024-P384:
 : A hybrid KEM composing ML-KEM-1024 and P-384 using the GC framework, with
   SHAKE256 as the PRG and SHA3-256 as the KDF.
 
