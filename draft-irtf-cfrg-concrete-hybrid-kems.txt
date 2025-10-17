@@ -5,8 +5,8 @@
 Crypto Forum                                                 D. Connolly
 Internet-Draft                                                 SandboxAQ
 Intended status: Informational                                 R. Barnes
-Expires: 19 April 2026                                             Cisco
-                                                         16 October 2025
+Expires: 20 April 2026                                             Cisco
+                                                         17 October 2025
 
 
            Concrete Hybrid PQ/T Key Encapsulation Mechanisms
@@ -55,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 19 April 2026.
+   This Internet-Draft will expire on 20 April 2026.
 
 Copyright Notice
 
@@ -314,7 +314,7 @@ Table of Contents
    This hybrid KEM is heavily based on [XWING], using the QSF combiner
    from [HYBRID-KEMS].  In particular, it has the same exact design but
    uses P-256 instead of X25519 as the the traditional component of the
-   algorithm.  It has the following parameters.
+   algorithm.  It has the following components:
 
    *  Group_T: P-256 Section 3.1.1
 
@@ -341,7 +341,7 @@ Table of Contents
 4.2.  QSF-MLKEM768-X25519-SHA3256-SHAKE256
 
    This hybrid KEM is identical to X-Wing [XWING-SPEC].  It has the
-   following parameters.
+   following components.
 
    *  Group_T: Curve25519 Section 3.1.2
 
@@ -370,7 +370,7 @@ Table of Contents
 
 4.3.  QSF-MLKEM1024-P384-SHA3256-SHAKE256
 
-   QSF-MLKEM1024-P384-SHA3256-SHAKE256 has the following parameters:
+   QSF-MLKEM1024-P384-SHA3256-SHAKE256 has the following components:
 
    *  Group_T: P-384 Section 3.1.1
 
@@ -396,7 +396,41 @@ Table of Contents
 
 5.  Security Considerations
 
-   [[ TODO ]]
+   The Security Considerations section in generic hybrid KEM framework
+   lays out the requirements for component algorithms in order for a
+   hybrid KEM constructed according to the framework to be secure
+   [HYBRID-KEMS].  In brief:
+
+   *  A nominal group needs to be one in which the Strong Diffie-Hellman
+      problem is hard.
+
+   *  A KEM need to be IND-CCA secure.
+
+   *  When the C2PRI combiner is used (as it is here), the PQ KEM also
+      needs to satisfy the C2PRI property.
+
+   *  KDFs need to be indifferentiable from a random oracle, even by a
+      quantum attacker.
+
+   *  A PRG needs to be a secure pseudo-random generator
+
+   The components used in this document meet these requirements:
+
+   *  The security of X25519, P-256, and P-384 as nominal groups is
+      shown in [ABH_21].
+
+   *  ML-KEM is shown to be IND-CCA in https://eprint.iacr.org/2024/843
+      and shown to be C2PRI in [XWING].
+
+   *  The sponge construction used by SHA3-256 is shown to be
+      indifferentiable from a random oracle by a classical attacker in
+      [BDP_08].  Indifferentiability with respect to quantum attackers
+      is shown in [ACM_25].
+
+   *  Since SHAKE256 is built on the same sponge construction as
+      SHA3-256, it is also indifferentiable from a random oracle, which
+      is a sufficient condition for being a secure pseudorandom
+      generator.
 
 6.  IANA Considerations
 
@@ -446,10 +480,22 @@ Table of Contents
 
 7.2.  Informative References
 
+   [ABH_21]   Alwen, J., Blanchet, B., Hauck, E., Kiltz, E., Lipp, B.,
+              and D. Riepel, "Analysing the HPKE standard.", April 2021.
+
+   [ACM_25]   Alagic, G., Carolan, J., Majenz, C., and S. Tokat, "The
+              Sponge is Quantum Indifferentiable", 2025,
+              <https://eprint.iacr.org/2025/731.pdf>.
+
    [ANSIX9.62]
-              ANS, "Public Key Cryptography for the Financial Services
+              ANSI, "Public Key Cryptography for the Financial Services
               Industry: the Elliptic Curve Digital Signature Algorithm
               (ECDSA)", ANS X9.62-2005, November 2005.
+
+   [BDP_08]   Bertoni, G., Daemen, J., Peeters, M., and G. V. Assche,
+              "On the Indifferentiability of the Sponge Construction",
+              2008, <https://www.iacr.org/archive/
+              eurocrypt2008/49650180/49650180.pdf>.
 
    [CDM23]    Cremers, C., Dax, A., and N. Medinger, "Keeping Up with
               the KEMs: Stronger Security Notions for KEMs and automated
