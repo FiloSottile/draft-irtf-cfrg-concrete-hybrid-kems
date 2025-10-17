@@ -16,7 +16,7 @@ const P384_MLKEM1024_PRG_OUTPUT: usize = 72 + 64; // P384::SEED_LENGTH + MlKem10
 pub struct QsfP256MlKem768Shake256Sha3256Label;
 
 impl HybridKemLabel for QsfP256MlKem768Shake256Sha3256Label {
-    const LABEL: &'static [u8] = b"QSF-P256-MLKEM768-SHAKE256-SHA3256";
+    const LABEL: &'static [u8] = b"|-()-|";
 }
 
 /// QSF-P256-MLKEM768-SHAKE256-SHA3256 hybrid KEM
@@ -51,7 +51,7 @@ pub type QsfX25519MlKem768Shake256Sha3256 = QsfHybridKem<
 pub struct QsfP384MlKem1024Shake256Sha3256Label;
 
 impl HybridKemLabel for QsfP384MlKem1024Shake256Sha3256Label {
-    const LABEL: &'static [u8] = b"QSF-P384-MLKEM1024-SHAKE256-SHA3256";
+    const LABEL: &'static [u8] = b" | /-\\";
 }
 
 /// QSF-P384-MLKEM1024-SHAKE256-SHA3256 hybrid KEM
