@@ -5,6 +5,7 @@ use crate::generic::{
     traits::{AsBytes, EncapsDerand, Kem},
 };
 use crate::utils::RngWrapper;
+use hybrid_array::typenum::{U32, U64};
 use ml_kem::{
     kem::{Decapsulate, Encapsulate, EncapsulationKey},
     Ciphertext, EncapsulateDeterministic, EncodedSizeUser, KemCore, MlKem512, MlKem512Params,
@@ -205,3 +206,69 @@ impl EncapsDerand for MlKem512Kem {
         ))
     }
 }
+
+// Implementation of the new bis traits
+impl crate::bis::SeedSize for MlKem512Kem {
+    type SeedSize = U64;
+}
+
+impl crate::bis::SharedSecretSize for MlKem512Kem {
+    type SharedSecretSize = U32;
+}
+
+impl crate::bis::Kem for MlKem512Kem {
+    type EncapsulationKeySize =
+        <ml_kem::kem::EncapsulationKey<MlKem512Params> as EncodedSizeUser>::EncodedSize;
+    type DecapsulationKeySize = U64;
+    type CiphertextSize = <MlKem512 as KemCore>::CiphertextSize;
+
+    fn derive_key_pair(
+        seed: crate::bis::Seed<Self>,
+    ) -> (
+        crate::bis::DecapsulationKey<Self>,
+        crate::bis::EncapsulationKey<Self>,
+    ) {
+        let d = ml_kem::B32::try_from(&seed[..32]).expect("Invalid seed slice");
+        let z = ml_kem::B32::try_from(&seed[32..]).expect("Invalid seed slice");
+        let (_dk_inner, ek_inner) = MlKem512::generate_deterministic(&d, &z);
+
+        let ek = crate::bis::EncapsulationKey::<Self>::try_from(ek_inner.as_bytes().as_slice())
+            .expect("Size mismatch");
+
+        (seed, ek)
+    }
+
+    fn encaps(
+        ek: &crate::bis::EncapsulationKey<Self>,
+        rng: &mut impl rand::CryptoRng,
+    ) -> (crate::bis::SharedSecret<Self>, crate::bis::Ciphertext<Self>) {
+        let ek_inner: EncapsulationKey<MlKem512Params> =
+            EncapsulationKey::from_bytes(ek.as_slice().try_into().expect("Invalid EK size"));
+        let (ct_inner, ss_inner) = ek_inner
+            .encapsulate(&mut RngWrapper(rng))
+            .expect("Encapsulation failed");
+
+        let ss = crate::bis::SharedSecret::<Self>::try_from(ss_inner.as_slice())
+            .expect("Size mismatch");
+        let ct = crate::bis::Ciphertext::<Self>::try_from(ct_inner.as_slice())
+            .expect("Size mismatch");
+
+        (ss, ct)
+    }
+
+    fn decaps(
+        dk: &crate::bis::DecapsulationKey<Self>,
+        ct: &crate::bis::Ciphertext<Self>,
+    ) -> crate::bis::SharedSecret<Self> {
+        let d = ml_kem::B32::try_from(&dk[..32]).expect("Invalid DK slice");
+        let z = ml_kem::B32::try_from(&dk[32..]).expect("Invalid DK slice");
+        let (dk_inner, _ek_inner) = MlKem512::generate_deterministic(&d, &z);
+
+        let ct_inner = Ciphertext::<MlKem512>::try_from(ct.as_slice()).expect("Invalid CT");
+        let ss_inner = dk_inner.decapsulate(&ct_inner).expect("Decapsulation failed");
+
+        crate::bis::SharedSecret::<Self>::try_from(ss_inner.as_slice()).expect("Size mismatch")
+    }
+}
+
+impl crate::bis::PqKem for MlKem512Kem {}

@@ -5,6 +5,7 @@ use crate::generic::{
     traits::{AsBytes, NominalGroup},
 };
 use hex_literal::hex;
+use hybrid_array::typenum::{U48, U72, U97};
 use num_bigint::BigUint;
 use p384::{
     elliptic_curve::{
@@ -44,10 +45,13 @@ impl From<&[u8]> for P384Scalar {
         let q = BigUint::from_bytes_be(MOD);
         let p = BigUint::from_bytes_be(bytes) % &q;
 
-        // Use reduce_bytes for modular reduction
-        // XXX(RLB) This will fail if `p` is not large enough to render into 32 bytes
-        let bytes = p.to_bytes_be();
-        let scalar = Scalar::reduce_bytes(FieldBytes::from_slice(&bytes));
+        // Convert to bytes and pad to 48 bytes
+        let mut bytes_be = p.to_bytes_be();
+        // Pad with leading zeros if necessary
+        while bytes_be.len() < 48 {
+            bytes_be.insert(0, 0);
+        }
+        let scalar = Scalar::reduce_bytes(FieldBytes::from_slice(&bytes_be));
         let bytes = scalar.to_bytes().to_vec();
 
         P384Scalar { scalar, bytes }
@@ -118,5 +122,60 @@ impl NominalGroup for P384Group {
         let encoded = p.point.to_encoded_point(false);
         let x_bytes = encoded.x().expect("Point at infinity");
         x_bytes.to_vec()
+    }
+}
+
+// Implementation of the new bis traits
+impl crate::bis::SeedSize for P384Group {
+    type SeedSize = U72;
+}
+
+impl crate::bis::SharedSecretSize for P384Group {
+    type SharedSecretSize = U48;
+}
+
+impl crate::bis::NominalGroup for P384Group {
+    type ScalarSize = U48;
+    type ElementSize = U97;
+
+    const G: crate::bis::Element<Self> = {
+        // P-384 generator in uncompressed form (0x04 || x || y)
+        hybrid_array::Array(*b"\x04\xaa\x87\xca\x22\xbe\x8b\x05\x37\x8e\xb1\xc7\x1e\xf3\x20\xad\x74\x6e\x1d\x3b\x62\x8b\xa7\x9b\x98\x59\xf7\x41\xe0\x82\x54\x2a\x38\x55\x02\xf2\x5d\xbf\x55\x29\x6c\x3a\x54\x5e\x38\x72\x76\x0a\xb7\x36\x17\xde\x4a\x96\x26\x2c\x6f\x5d\x9e\x98\xbf\x92\x92\xdc\x29\xf8\xf4\x1d\xbd\x28\x9a\x14\x7c\xe9\xda\x31\x13\xb5\xf0\xb8\xc0\x0a\x60\xb1\xce\x1d\x7e\x81\x9d\x7a\x43\x1d\x7c\x90\xea\x0e\x5f")
+    };
+
+    fn random_scalar(seed: crate::bis::Seed<Self>) -> crate::bis::Scalar<Self> {
+        let scalar_wrapper = P384Scalar::from(seed.as_slice());
+        let mut result = crate::bis::Scalar::<Self>::default();
+        result.copy_from_slice(scalar_wrapper.as_bytes());
+        result
+    }
+
+    fn exp(
+        element: &crate::bis::Element<Self>,
+        scalar: &crate::bis::Scalar<Self>,
+    ) -> crate::bis::Element<Self> {
+        let element_wrapper = P384Element::from(element.as_slice());
+        let scalar_wrapper = P384Scalar::from(scalar.as_slice());
+
+        // Convert to projective for scalar multiplication
+        let proj_point = ProjectivePoint::from(element_wrapper.point);
+        let result_proj = proj_point * scalar_wrapper.scalar;
+        let result_affine: AffinePoint = result_proj.into();
+
+        // Encode in uncompressed form
+        let encoded = result_affine.to_encoded_point(false);
+        let mut result = crate::bis::Element::<Self>::default();
+        result.copy_from_slice(encoded.as_bytes());
+        result
+    }
+
+    fn element_to_shared_secret(
+        element: crate::bis::Element<Self>,
+    ) -> crate::bis::SharedSecret<Self> {
+        let encoded = EncodedPoint::from_bytes(&element).expect("Invalid point encoding");
+        let x_bytes = encoded.x().expect("Point at infinity");
+        let mut result = crate::bis::SharedSecret::<Self>::default();
+        result.copy_from_slice(x_bytes);
+        result
     }
 }

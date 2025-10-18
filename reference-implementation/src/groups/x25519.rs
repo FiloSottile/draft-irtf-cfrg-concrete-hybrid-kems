@@ -4,6 +4,7 @@ use crate::generic::{
     error::KemError,
     traits::{AsBytes, NominalGroup},
 };
+use hybrid_array::typenum::U32;
 use x25519_dalek::{PublicKey, StaticSecret};
 
 /// X25519 nominal group
@@ -110,5 +111,56 @@ impl NominalGroup for X25519Group {
     fn element_to_shared_secret(p: &Self::Element) -> Vec<u8> {
         // For X25519, the element itself is the shared secret
         p.bytes.clone()
+    }
+}
+
+// Implementation of the new bis traits
+impl crate::bis::SeedSize for X25519Group {
+    type SeedSize = U32;
+}
+
+impl crate::bis::SharedSecretSize for X25519Group {
+    type SharedSecretSize = U32;
+}
+
+impl crate::bis::NominalGroup for X25519Group {
+    type ScalarSize = U32;
+    type ElementSize = U32;
+
+    const G: crate::bis::Element<Self> = {
+        // X25519 generator is 9
+        hybrid_array::Array([
+            9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0,
+        ])
+    };
+
+    fn random_scalar(seed: crate::bis::Seed<Self>) -> crate::bis::Scalar<Self> {
+        // For X25519, seed is directly used as scalar
+        seed
+    }
+
+    fn exp(
+        element: &crate::bis::Element<Self>,
+        scalar: &crate::bis::Scalar<Self>,
+    ) -> crate::bis::Element<Self> {
+        let mut element_bytes = [0u8; 32];
+        element_bytes.copy_from_slice(element.as_slice());
+        let public = PublicKey::from(element_bytes);
+
+        let mut scalar_bytes = [0u8; 32];
+        scalar_bytes.copy_from_slice(scalar.as_slice());
+        let secret = StaticSecret::from(scalar_bytes);
+
+        // Compute the Diffie-Hellman operation
+        let shared_secret = secret.diffie_hellman(&public);
+        crate::bis::Element::<Self>::try_from(shared_secret.as_bytes() as &[u8]).expect("Size mismatch")
+    }
+
+    fn element_to_shared_secret(
+        element: crate::bis::Element<Self>,
+    ) -> crate::bis::SharedSecret<Self> {
+        // For X25519, the element itself is the shared secret
+        element
     }
 }

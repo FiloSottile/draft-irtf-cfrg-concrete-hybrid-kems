@@ -5,6 +5,7 @@ use crate::generic::{
     traits::{AsBytes, EncapsDerand, Kem},
 };
 use crate::utils::RngWrapper;
+use hybrid_array::typenum::{U32, U64};
 use ml_kem::{
     kem::{Decapsulate, Encapsulate, EncapsulationKey},
     Ciphertext, EncapsulateDeterministic, EncodedSizeUser, KemCore, MlKem1024, MlKem1024Params,
@@ -62,7 +63,12 @@ impl From<&[u8]> for MlKem1024DecapsulationKey {
 }
 
 impl MlKem1024DecapsulationKey {
-    fn generate_keys_from_seed(&self) -> (ml_kem::kem::DecapsulationKey<MlKem1024Params>, ml_kem::kem::EncapsulationKey<MlKem1024Params>) {
+    fn generate_keys_from_seed(
+        &self,
+    ) -> (
+        ml_kem::kem::DecapsulationKey<MlKem1024Params>,
+        ml_kem::kem::EncapsulationKey<MlKem1024Params>,
+    ) {
         let d = ml_kem::B32::try_from(&self.seed[..32]).unwrap();
         let z = ml_kem::B32::try_from(&self.seed[32..]).unwrap();
         MlKem1024::generate_deterministic(&d, &z)
@@ -199,3 +205,71 @@ impl EncapsDerand for MlKem1024Kem {
         ))
     }
 }
+
+// Implementation of the new bis traits
+impl crate::bis::SeedSize for MlKem1024Kem {
+    type SeedSize = U64;
+}
+
+impl crate::bis::SharedSecretSize for MlKem1024Kem {
+    type SharedSecretSize = U32;
+}
+
+impl crate::bis::Kem for MlKem1024Kem {
+    type EncapsulationKeySize =
+        <ml_kem::kem::EncapsulationKey<MlKem1024Params> as EncodedSizeUser>::EncodedSize;
+    type DecapsulationKeySize = U64;
+    type CiphertextSize = <MlKem1024 as KemCore>::CiphertextSize;
+
+    fn derive_key_pair(
+        seed: crate::bis::Seed<Self>,
+    ) -> (
+        crate::bis::DecapsulationKey<Self>,
+        crate::bis::EncapsulationKey<Self>,
+    ) {
+        let d = ml_kem::B32::try_from(&seed[..32]).expect("Invalid seed slice");
+        let z = ml_kem::B32::try_from(&seed[32..]).expect("Invalid seed slice");
+        let (_dk_inner, ek_inner) = MlKem1024::generate_deterministic(&d, &z);
+
+        let ek = crate::bis::EncapsulationKey::<Self>::try_from(ek_inner.as_bytes().as_slice())
+            .expect("Size mismatch");
+
+        (seed, ek)
+    }
+
+    fn encaps(
+        ek: &crate::bis::EncapsulationKey<Self>,
+        rng: &mut impl rand::CryptoRng,
+    ) -> (crate::bis::SharedSecret<Self>, crate::bis::Ciphertext<Self>) {
+        let ek_inner: EncapsulationKey<MlKem1024Params> =
+            EncapsulationKey::from_bytes(ek.as_slice().try_into().expect("Invalid EK size"));
+        let (ct_inner, ss_inner) = ek_inner
+            .encapsulate(&mut RngWrapper(rng))
+            .expect("Encapsulation failed");
+
+        let ss = crate::bis::SharedSecret::<Self>::try_from(ss_inner.as_slice())
+            .expect("Size mismatch");
+        let ct = crate::bis::Ciphertext::<Self>::try_from(ct_inner.as_slice())
+            .expect("Size mismatch");
+
+        (ss, ct)
+    }
+
+    fn decaps(
+        dk: &crate::bis::DecapsulationKey<Self>,
+        ct: &crate::bis::Ciphertext<Self>,
+    ) -> crate::bis::SharedSecret<Self> {
+        let d = ml_kem::B32::try_from(&dk[..32]).expect("Invalid DK slice");
+        let z = ml_kem::B32::try_from(&dk[32..]).expect("Invalid DK slice");
+        let (dk_inner, _ek_inner) = MlKem1024::generate_deterministic(&d, &z);
+
+        let ct_inner = Ciphertext::<MlKem1024>::try_from(ct.as_slice()).expect("Invalid CT");
+        let ss_inner = dk_inner
+            .decapsulate(&ct_inner)
+            .expect("Decapsulation failed");
+
+        crate::bis::SharedSecret::<Self>::try_from(ss_inner.as_slice()).expect("Size mismatch")
+    }
+}
+
+impl crate::bis::PqKem for MlKem1024Kem {}
