@@ -2,76 +2,87 @@ use hybrid_array::{typenum::*, Array, ArraySize};
 use rand::{CryptoRng, Rng};
 use std::ops::{Add, Sub};
 
-type Bytes<N> = Array<u8, N>;
+pub type Bytes<N> = Array<u8, N>;
 
-trait SeedSize {
+pub trait SeedSize {
     type SeedSize: ArraySize;
 }
 
-trait NominalGroup: SeedSize {
-    type Scalar;
-    type Element;
-    type SharedSecret;
+pub type Seed<T> = Bytes<<T as SeedSize>::SeedSize>;
 
-    const G: Self::Element;
-
-    fn random_scalar(seed: Bytes<Self::SeedSize>) -> Self::Scalar;
-    fn exp(element: &Self::Element, scalar: &Self::Scalar) -> Self::Element;
-    fn element_to_shared_secret(element: Self::Element) -> Self::SharedSecret;
+pub trait SharedSecretSize {
+    type SharedSecretSize: ArraySize;
 }
 
-trait Kem: SeedSize {
-    type EncapsulationKey;
-    type DecapsulationKey;
-    type Ciphertext;
-    type SharedSecret;
+pub type SharedSecret<T> = Bytes<<T as SharedSecretSize>::SharedSecretSize>;
 
-    fn derive_key_pair(
-        seed: Bytes<Self::SeedSize>,
-    ) -> (Self::DecapsulationKey, Self::EncapsulationKey);
+pub trait NominalGroup: SeedSize + SharedSecretSize {
+    type ScalarSize: ArraySize;
+    type ElementSize: ArraySize;
+
+    const G: Element<Self>;
+
+    fn random_scalar(seed: Seed<Self>) -> Scalar<Self>;
+    fn exp(element: &Element<Self>, scalar: &Scalar<Self>) -> Element<Self>;
+    fn element_to_shared_secret(element: Element<Self>) -> SharedSecret<Self>;
+}
+
+pub type Scalar<T> = Bytes<<T as NominalGroup>::ScalarSize>;
+pub type Element<T> = Bytes<<T as NominalGroup>::ElementSize>;
+
+pub trait Kem: SeedSize + SharedSecretSize {
+    type EncapsulationKeySize: ArraySize;
+    type DecapsulationKeySize: ArraySize;
+    type CiphertextSize: ArraySize;
+
+    fn derive_key_pair(seed: Seed<Self>) -> (DecapsulationKey<Self>, EncapsulationKey<Self>);
 
     fn encaps(
-        ek: &Self::EncapsulationKey,
+        ek: &EncapsulationKey<Self>,
         rng: &mut impl CryptoRng,
-    ) -> (Self::SharedSecret, Self::Ciphertext);
+    ) -> (SharedSecret<Self>, Ciphertext<Self>);
 
-    fn decaps(dk: &Self::DecapsulationKey, ct: &Self::Ciphertext) -> Self::SharedSecret;
+    fn decaps(dk: &DecapsulationKey<Self>, ct: &Ciphertext<Self>) -> SharedSecret<Self>;
 }
+
+pub type EncapsulationKey<T> = Bytes<<T as Kem>::EncapsulationKeySize>;
+pub type DecapsulationKey<T> = Bytes<<T as Kem>::DecapsulationKeySize>;
+pub type Ciphertext<T> = Bytes<<T as Kem>::CiphertextSize>;
 
 /// Marker trait for traditional KEMs
-trait TKem: Kem {}
+pub trait TKem: Kem {}
 
 /// Marker trait for post-quantum KEMs
-trait PqKem: Kem {}
+pub trait PqKem: Kem {}
 
-trait Combiner {}
-
-trait Kdf {
+pub trait Kdf {
     type OutputSize: ArraySize;
 
-    fn compute(input: impl Iterator<Item = u8>) -> Bytes<Self::OutputSize>;
+    fn compute(input: impl Iterator<Item = u8>) -> Output<Self>;
 }
 
-trait Prg {
+pub type Output<T> = Bytes<<T as Kdf>::OutputSize>;
+
+pub trait Prg {
     fn generate<N: ArraySize>(seed: &[u8]) -> Bytes<N>;
 }
 
-type FullSeed<PQ, T> = Bytes<Sum<<PQ as SeedSize>::SeedSize, <T as SeedSize>::SeedSize>>;
+pub type FullSeed<PQ, T> = Bytes<Sum<<PQ as SeedSize>::SeedSize, <T as SeedSize>::SeedSize>>;
 
 // TODO: Make seed a fixed-length thing
-fn expand_decaps_key_group<PQ: PqKem, T: NominalGroup, PRG: Prg>(
-    seed: &[u8],
+fn expand_decaps_key_group<PQ: PqKem, T: NominalGroup, PRG: Prg, N: ArraySize>(
+    seed: &Bytes<N>,
 ) -> (
-    PQ::DecapsulationKey,
-    T::Scalar,
-    PQ::EncapsulationKey,
-    T::Element,
+    DecapsulationKey<PQ>,
+    Scalar<T>,
+    EncapsulationKey<PQ>,
+    Element<T>,
 )
 where
     PQ::SeedSize: Add<T::SeedSize>,
     Sum<PQ::SeedSize, T::SeedSize>: ArraySize + Sub<PQ::SeedSize, Output = T::SeedSize>,
 {
-    let seed_full: FullSeed<PQ, T> = PRG::generate(seed);
+    let seed_full: FullSeed<PQ, T> = PRG::generate(&seed);
     let (seed_pq, seed_t) = seed_full.split();
 
     let (dk_pq, ek_pq) = PQ::derive_key_pair(seed_pq);
@@ -81,19 +92,19 @@ where
     (dk_pq, dk_t, ek_pq, ek_t)
 }
 
-fn prepare_encap_group<PQ: PqKem, T: NominalGroup>(
-    ek_pq: &PQ::EncapsulationKey,
-    ek_t: &T::Element,
+fn prepare_encaps_group<PQ: PqKem, T: NominalGroup>(
+    ek_pq: &EncapsulationKey<PQ>,
+    ek_t: &Element<T>,
     rng: &mut impl CryptoRng,
 ) -> (
-    PQ::SharedSecret,
-    T::SharedSecret,
-    PQ::Ciphertext,
-    T::Element,
+    SharedSecret<PQ>,
+    SharedSecret<T>,
+    Ciphertext<PQ>,
+    Element<T>,
 ) {
     let (ss_pq, ct_pq) = PQ::encaps(&ek_pq, rng);
 
-    let mut seed_e: Bytes<T::SeedSize> = Default::default();
+    let mut seed_e: Seed<T> = Default::default();
     let seed_content: &mut [u8] = seed_e.as_mut();
     rng.fill(seed_content);
     let sk_e = T::random_scalar(seed_e);
@@ -103,25 +114,25 @@ fn prepare_encap_group<PQ: PqKem, T: NominalGroup>(
     (ss_pq, ss_t, ct_pq, ct_t)
 }
 
-fn prepare_decap_group<PQ: PqKem, T: NominalGroup>(
-    ct_pq: &PQ::Ciphertext,
-    ct_t: &T::Element,
-    dk_pq: &PQ::DecapsulationKey,
-    dk_t: &T::Scalar,
-) -> (PQ::SharedSecret, T::SharedSecret) {
+fn prepare_decaps_group<PQ: PqKem, T: NominalGroup>(
+    ct_pq: &Ciphertext<PQ>,
+    ct_t: &Element<T>,
+    dk_pq: &DecapsulationKey<PQ>,
+    dk_t: &Scalar<T>,
+) -> (SharedSecret<PQ>, SharedSecret<T>) {
     let ss_pq = PQ::decaps(dk_pq, ct_pq);
     let ss_t = T::element_to_shared_secret(T::exp(ct_t, dk_t));
     (ss_pq, ss_t)
 }
 
 // TODO: Make seed a fixed-length thing
-fn expand_decaps_key_kem<PQ: PqKem, T: TKem, PRG: Prg>(
-    seed: &[u8],
+fn expand_decaps_key_kem<PQ: PqKem, T: TKem, PRG: Prg, N: ArraySize>(
+    seed: &Bytes<N>,
 ) -> (
-    PQ::DecapsulationKey,
-    T::DecapsulationKey,
-    PQ::EncapsulationKey,
-    T::EncapsulationKey,
+    DecapsulationKey<PQ>,
+    DecapsulationKey<T>,
+    EncapsulationKey<PQ>,
+    EncapsulationKey<T>,
 )
 where
     PQ::SeedSize: Add<T::SeedSize>,
@@ -136,27 +147,27 @@ where
     (dk_pq, dk_t, ek_pq, ek_t)
 }
 
-fn prepare_encap_kem<PQ: PqKem, T: TKem>(
-    ek_pq: &PQ::EncapsulationKey,
-    ek_t: &T::EncapsulationKey,
+fn prepare_encaps_kem<PQ: PqKem, T: TKem>(
+    ek_pq: &EncapsulationKey<PQ>,
+    ek_t: &EncapsulationKey<T>,
     rng: &mut impl CryptoRng,
 ) -> (
-    PQ::SharedSecret,
-    T::SharedSecret,
-    PQ::Ciphertext,
-    T::Ciphertext,
+    SharedSecret<PQ>,
+    SharedSecret<T>,
+    Ciphertext<PQ>,
+    Ciphertext<T>,
 ) {
     let (ss_pq, ct_pq) = PQ::encaps(&ek_pq, rng);
     let (ss_t, ct_t) = T::encaps(&ek_t, rng);
     (ss_pq, ss_t, ct_pq, ct_t)
 }
 
-fn prepare_decap_kem<PQ: PqKem, T: TKem>(
-    ct_pq: &PQ::Ciphertext,
-    ct_t: &T::Ciphertext,
-    dk_pq: &PQ::DecapsulationKey,
-    dk_t: &T::DecapsulationKey,
-) -> (PQ::SharedSecret, T::SharedSecret) {
+fn prepare_decaps_kem<PQ: PqKem, T: TKem>(
+    ct_pq: &Ciphertext<PQ>,
+    ct_t: &Ciphertext<T>,
+    dk_pq: &DecapsulationKey<PQ>,
+    dk_t: &DecapsulationKey<T>,
+) -> (SharedSecret<PQ>, SharedSecret<T>) {
     let ss_pq = PQ::decaps(dk_pq, ct_pq);
     let ss_t = T::decaps(dk_t, ct_t);
     (ss_pq, ss_t)
@@ -202,7 +213,7 @@ fn c2pri_combiner<K: Kdf>(
     )
 }
 
-trait HybridKemConstants: SeedSize {
+pub trait HybridKemConstants: SeedSize {
     const LABEL: &[u8];
     type SharedSecretSize: ArraySize;
 }
@@ -212,35 +223,253 @@ pub struct GU<PQ, T, P, K, C> {
     _phantom: core::marker::PhantomData<(PQ, T, P, K, C)>,
 }
 
-/*
-impl<PQ, T, P, K, C> Kem for GU<PQ, T, P, K, L>
+impl<PQ, T, P, K, C> SeedSize for GU<PQ, T, P, K, C>
+where
+    C: SeedSize,
+{
+    type SeedSize = C::SeedSize;
+}
+
+impl<PQ, T, P, K, C> SharedSecretSize for GU<PQ, T, P, K, C>
+where
+    C: HybridKemConstants,
+{
+    type SharedSecretSize = C::SharedSecretSize;
+}
+
+impl<PQ, T, P, K, C> Kem for GU<PQ, T, P, K, C>
 where
     PQ: PqKem,
     T: NominalGroup,
     P: Prg,
-    K: Kdf,
+    K: Kdf<OutputSize = <C as HybridKemConstants>::SharedSecretSize>,
     C: HybridKemConstants,
+    PQ::SeedSize: Add<T::SeedSize>,
+    Sum<PQ::SeedSize, T::SeedSize>: ArraySize + Sub<PQ::SeedSize, Output = T::SeedSize>,
+    PQ::EncapsulationKeySize: Add<T::ElementSize>,
+    Sum<PQ::EncapsulationKeySize, T::ElementSize>:
+        ArraySize + Sub<PQ::EncapsulationKeySize, Output = T::ElementSize>,
+    PQ::CiphertextSize: Add<T::ElementSize>,
+    Sum<PQ::CiphertextSize, T::ElementSize>:
+        ArraySize + Sub<PQ::CiphertextSize, Output = T::ElementSize>,
 {
-    type EncapsulationKey;
-    type DecapsulationKey;
-    type Ciphertext;
-    type SharedSecret;
+    type EncapsulationKeySize = Sum<PQ::EncapsulationKeySize, T::ElementSize>;
+    type DecapsulationKeySize = C::SeedSize;
+    type CiphertextSize = Sum<PQ::CiphertextSize, T::ElementSize>;
 
-    fn derive_key_pair(
-        seed: Bytes<Self::SeedSize>,
-    ) -> (Self::DecapsulationKey, Self::EncapsulationKey) {
-        todo!()
+    fn derive_key_pair(seed: Seed<Self>) -> (DecapsulationKey<Self>, EncapsulationKey<Self>) {
+        let (_dk_pq, _dk_t, ek_pq, ek_t) = expand_decaps_key_group::<PQ, T, P, C::SeedSize>(&seed);
+        (seed, ek_pq.concat(ek_t))
     }
 
     fn encaps(
-        ek: &Self::EncapsulationKey,
+        ek: &EncapsulationKey<Self>,
         rng: &mut impl CryptoRng,
-    ) -> (Self::SharedSecret, Self::Ciphertext) {
-        todo!()
+    ) -> (SharedSecret<Self>, Ciphertext<Self>) {
+        let (ek_pq, ek_t) = ek.split_ref();
+        let (ss_pq, ss_t, ct_pq, ct_t) = prepare_encaps_group::<PQ, T>(&ek_pq, &ek_t, rng);
+        let ss_h = universal_combiner::<K>(&ss_pq, &ss_t, &ct_pq, &ct_t, &ek_pq, &ek_t, C::LABEL);
+        let ct_h = ct_pq.concat(ct_t);
+        (ss_h, ct_h)
     }
 
-    fn decaps(dk: &Self::DecapsulationKey, ct: &Self::Ciphertext) -> Self::SharedSecret {
-        todo!()
+    fn decaps(dk: &DecapsulationKey<Self>, ct: &Ciphertext<Self>) -> SharedSecret<Self> {
+        let (ct_pq, ct_t) = ct.split_ref();
+        let (dk_pq, dk_t, ek_pq, ek_t) = expand_decaps_key_group::<PQ, T, P, C::SeedSize>(dk);
+        let (ss_pq, ss_t) = prepare_decaps_group::<PQ, T>(ct_pq, ct_t, &dk_pq, &dk_t);
+        let ss_h = universal_combiner::<K>(&ss_pq, &ss_t, ct_pq, ct_t, &ek_pq, &ek_t, C::LABEL);
+        ss_h
     }
 }
-*/
+
+#[derive(Default)]
+pub struct GC<PQ, T, P, K, C> {
+    _phantom: core::marker::PhantomData<(PQ, T, P, K, C)>,
+}
+
+impl<PQ, T, P, K, C> SeedSize for GC<PQ, T, P, K, C>
+where
+    C: SeedSize,
+{
+    type SeedSize = C::SeedSize;
+}
+
+impl<PQ, T, P, K, C> SharedSecretSize for GC<PQ, T, P, K, C>
+where
+    C: HybridKemConstants,
+{
+    type SharedSecretSize = C::SharedSecretSize;
+}
+
+impl<PQ, T, P, K, C> Kem for GC<PQ, T, P, K, C>
+where
+    PQ: PqKem,
+    T: NominalGroup,
+    P: Prg,
+    K: Kdf<OutputSize = <C as HybridKemConstants>::SharedSecretSize>,
+    C: HybridKemConstants,
+    PQ::SeedSize: Add<T::SeedSize>,
+    Sum<PQ::SeedSize, T::SeedSize>: ArraySize + Sub<PQ::SeedSize, Output = T::SeedSize>,
+    PQ::EncapsulationKeySize: Add<T::ElementSize>,
+    Sum<PQ::EncapsulationKeySize, T::ElementSize>:
+        ArraySize + Sub<PQ::EncapsulationKeySize, Output = T::ElementSize>,
+    PQ::CiphertextSize: Add<T::ElementSize>,
+    Sum<PQ::CiphertextSize, T::ElementSize>:
+        ArraySize + Sub<PQ::CiphertextSize, Output = T::ElementSize>,
+{
+    type EncapsulationKeySize = Sum<PQ::EncapsulationKeySize, T::ElementSize>;
+    type DecapsulationKeySize = C::SeedSize;
+    type CiphertextSize = Sum<PQ::CiphertextSize, T::ElementSize>;
+
+    fn derive_key_pair(seed: Seed<Self>) -> (DecapsulationKey<Self>, EncapsulationKey<Self>) {
+        let (_dk_pq, _dk_t, ek_pq, ek_t) = expand_decaps_key_group::<PQ, T, P, C::SeedSize>(&seed);
+        (seed, ek_pq.concat(ek_t))
+    }
+
+    fn encaps(
+        ek: &EncapsulationKey<Self>,
+        rng: &mut impl CryptoRng,
+    ) -> (SharedSecret<Self>, Ciphertext<Self>) {
+        let (ek_pq, ek_t) = ek.split_ref();
+        let (ss_pq, ss_t, ct_pq, ct_t) = prepare_encaps_group::<PQ, T>(&ek_pq, &ek_t, rng);
+        let ss_h = c2pri_combiner::<K>(&ss_pq, &ss_t, &ct_t, &ek_t, C::LABEL);
+        let ct_h = ct_pq.concat(ct_t);
+        (ss_h, ct_h)
+    }
+
+    fn decaps(dk: &DecapsulationKey<Self>, ct: &Ciphertext<Self>) -> SharedSecret<Self> {
+        let (ct_pq, ct_t) = ct.split_ref();
+        let (dk_pq, dk_t, _ek_pq, ek_t) = expand_decaps_key_group::<PQ, T, P, C::SeedSize>(dk);
+        let (ss_pq, ss_t) = prepare_decaps_group::<PQ, T>(ct_pq, ct_t, &dk_pq, &dk_t);
+        let ss_h = c2pri_combiner::<K>(&ss_pq, &ss_t, ct_t, &ek_t, C::LABEL);
+        ss_h
+    }
+}
+
+#[derive(Default)]
+pub struct KU<PQ, T, P, K, C> {
+    _phantom: core::marker::PhantomData<(PQ, T, P, K, C)>,
+}
+
+impl<PQ, T, P, K, C> SeedSize for KU<PQ, T, P, K, C>
+where
+    C: SeedSize,
+{
+    type SeedSize = C::SeedSize;
+}
+
+impl<PQ, T, P, K, C> SharedSecretSize for KU<PQ, T, P, K, C>
+where
+    C: HybridKemConstants,
+{
+    type SharedSecretSize = C::SharedSecretSize;
+}
+
+impl<PQ, T, P, K, C> Kem for KU<PQ, T, P, K, C>
+where
+    PQ: PqKem,
+    T: TKem,
+    P: Prg,
+    K: Kdf<OutputSize = <C as HybridKemConstants>::SharedSecretSize>,
+    C: HybridKemConstants,
+    PQ::SeedSize: Add<T::SeedSize>,
+    Sum<PQ::SeedSize, T::SeedSize>: ArraySize + Sub<PQ::SeedSize, Output = T::SeedSize>,
+    PQ::EncapsulationKeySize: Add<T::EncapsulationKeySize>,
+    Sum<PQ::EncapsulationKeySize, T::EncapsulationKeySize>:
+        ArraySize + Sub<PQ::EncapsulationKeySize, Output = T::EncapsulationKeySize>,
+    PQ::CiphertextSize: Add<T::CiphertextSize>,
+    Sum<PQ::CiphertextSize, T::CiphertextSize>:
+        ArraySize + Sub<PQ::CiphertextSize, Output = T::CiphertextSize>,
+{
+    type EncapsulationKeySize = Sum<PQ::EncapsulationKeySize, T::EncapsulationKeySize>;
+    type DecapsulationKeySize = C::SeedSize;
+    type CiphertextSize = Sum<PQ::CiphertextSize, T::CiphertextSize>;
+
+    fn derive_key_pair(seed: Seed<Self>) -> (DecapsulationKey<Self>, EncapsulationKey<Self>) {
+        let (_dk_pq, _dk_t, ek_pq, ek_t) = expand_decaps_key_kem::<PQ, T, P, C::SeedSize>(&seed);
+        (seed, ek_pq.concat(ek_t))
+    }
+
+    fn encaps(
+        ek: &EncapsulationKey<Self>,
+        rng: &mut impl CryptoRng,
+    ) -> (SharedSecret<Self>, Ciphertext<Self>) {
+        let (ek_pq, ek_t) = ek.split_ref();
+        let (ss_pq, ss_t, ct_pq, ct_t) = prepare_encaps_kem::<PQ, T>(&ek_pq, &ek_t, rng);
+        let ss_h = universal_combiner::<K>(&ss_pq, &ss_t, &ct_pq, &ct_t, &ek_pq, &ek_t, C::LABEL);
+        let ct_h = ct_pq.concat(ct_t);
+        (ss_h, ct_h)
+    }
+
+    fn decaps(dk: &DecapsulationKey<Self>, ct: &Ciphertext<Self>) -> SharedSecret<Self> {
+        let (ct_pq, ct_t) = ct.split_ref();
+        let (dk_pq, dk_t, ek_pq, ek_t) = expand_decaps_key_kem::<PQ, T, P, C::SeedSize>(dk);
+        let (ss_pq, ss_t) = prepare_decaps_kem::<PQ, T>(ct_pq, ct_t, &dk_pq, &dk_t);
+        let ss_h = universal_combiner::<K>(&ss_pq, &ss_t, ct_pq, ct_t, &ek_pq, &ek_t, C::LABEL);
+        ss_h
+    }
+}
+
+#[derive(Default)]
+pub struct KC<PQ, T, P, K, C> {
+    _phantom: core::marker::PhantomData<(PQ, T, P, K, C)>,
+}
+
+impl<PQ, T, P, K, C> SeedSize for KC<PQ, T, P, K, C>
+where
+    C: SeedSize,
+{
+    type SeedSize = C::SeedSize;
+}
+
+impl<PQ, T, P, K, C> SharedSecretSize for KC<PQ, T, P, K, C>
+where
+    C: HybridKemConstants,
+{
+    type SharedSecretSize = C::SharedSecretSize;
+}
+
+impl<PQ, T, P, K, C> Kem for KC<PQ, T, P, K, C>
+where
+    PQ: PqKem,
+    T: TKem,
+    P: Prg,
+    K: Kdf<OutputSize = <C as HybridKemConstants>::SharedSecretSize>,
+    C: HybridKemConstants,
+    PQ::SeedSize: Add<T::SeedSize>,
+    Sum<PQ::SeedSize, T::SeedSize>: ArraySize + Sub<PQ::SeedSize, Output = T::SeedSize>,
+    PQ::EncapsulationKeySize: Add<T::EncapsulationKeySize>,
+    Sum<PQ::EncapsulationKeySize, T::EncapsulationKeySize>:
+        ArraySize + Sub<PQ::EncapsulationKeySize, Output = T::EncapsulationKeySize>,
+    PQ::CiphertextSize: Add<T::CiphertextSize>,
+    Sum<PQ::CiphertextSize, T::CiphertextSize>:
+        ArraySize + Sub<PQ::CiphertextSize, Output = T::CiphertextSize>,
+{
+    type EncapsulationKeySize = Sum<PQ::EncapsulationKeySize, T::EncapsulationKeySize>;
+    type DecapsulationKeySize = C::SeedSize;
+    type CiphertextSize = Sum<PQ::CiphertextSize, T::CiphertextSize>;
+
+    fn derive_key_pair(seed: Seed<Self>) -> (DecapsulationKey<Self>, EncapsulationKey<Self>) {
+        let (_dk_pq, _dk_t, ek_pq, ek_t) = expand_decaps_key_kem::<PQ, T, P, C::SeedSize>(&seed);
+        (seed, ek_pq.concat(ek_t))
+    }
+
+    fn encaps(
+        ek: &EncapsulationKey<Self>,
+        rng: &mut impl CryptoRng,
+    ) -> (SharedSecret<Self>, Ciphertext<Self>) {
+        let (ek_pq, ek_t) = ek.split_ref();
+        let (ss_pq, ss_t, ct_pq, ct_t) = prepare_encaps_kem::<PQ, T>(&ek_pq, &ek_t, rng);
+        let ss_h = c2pri_combiner::<K>(&ss_pq, &ss_t, &ct_t, &ek_t, C::LABEL);
+        let ct_h = ct_pq.concat(ct_t);
+        (ss_h, ct_h)
+    }
+
+    fn decaps(dk: &DecapsulationKey<Self>, ct: &Ciphertext<Self>) -> SharedSecret<Self> {
+        let (ct_pq, ct_t) = ct.split_ref();
+        let (dk_pq, dk_t, _ek_pq, ek_t) = expand_decaps_key_kem::<PQ, T, P, C::SeedSize>(dk);
+        let (ss_pq, ss_t) = prepare_decaps_kem::<PQ, T>(ct_pq, ct_t, &dk_pq, &dk_t);
+        let ss_h = c2pri_combiner::<K>(&ss_pq, &ss_t, ct_t, &ek_t, C::LABEL);
+        ss_h
+    }
+}
