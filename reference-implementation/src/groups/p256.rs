@@ -1,11 +1,11 @@
 //! P-256 nominal group implementation
 
+use crate::bis::SeedSize;
 use crate::generic::{
     error::KemError,
     traits::{AsBytes, NominalGroup},
 };
 use hex_literal::hex;
-use hybrid_array::typenum::{U32, U48, U65};
 use num_bigint::BigUint;
 use p256::{
     elliptic_curve::{
@@ -127,33 +127,31 @@ impl NominalGroup for P256Group {
 
 // Implementation of the new bis traits
 impl crate::bis::SeedSize for P256Group {
-    type SeedSize = U48;
+    const SEED_SIZE: usize = 48;
 }
 
 impl crate::bis::SharedSecretSize for P256Group {
-    type SharedSecretSize = U32;
+    const SHARED_SECRET_SIZE: usize = 32;
 }
 
 impl crate::bis::NominalGroup for P256Group {
-    type ScalarSize = U32;
-    type ElementSize = U65;
+    const SCALAR_SIZE: usize = 32;
+    const ELEMENT_SIZE: usize = 65;
 
-    const G: crate::bis::Element<Self> = {
+    fn generator() -> crate::bis::Element {
         // P-256 generator in uncompressed form (0x04 || x || y)
-        hybrid_array::Array(*b"\x04\x6b\x17\xd1\xf2\xe1\x2c\x42\x47\xf8\xbc\xe6\xe5\x63\xa4\x40\xf2\x77\x03\x7d\x81\x2d\xeb\x33\xa0\xf4\xa1\x39\x45\xd8\x98\xc2\x96\x4f\xe3\x42\xe2\xfe\x1a\x7f\x9b\x8e\xe7\xeb\x4a\x7c\x0f\x9e\x16\x2b\xce\x33\x57\x6b\x31\x5e\xce\xcb\xb6\x40\x68\x37\xbf\x51\xf5")
-    };
-
-    fn random_scalar(seed: crate::bis::Seed<Self>) -> crate::bis::Scalar<Self> {
-        let scalar_wrapper = P256Scalar::from(seed.as_slice());
-        let mut result = crate::bis::Scalar::<Self>::default();
-        result.copy_from_slice(scalar_wrapper.as_bytes());
-        result
+        b"\x04\x6b\x17\xd1\xf2\xe1\x2c\x42\x47\xf8\xbc\xe6\xe5\x63\xa4\x40\xf2\x77\x03\x7d\x81\x2d\xeb\x33\xa0\xf4\xa1\x39\x45\xd8\x98\xc2\x96\x4f\xe3\x42\xe2\xfe\x1a\x7f\x9b\x8e\xe7\xeb\x4a\x7c\x0f\x9e\x16\x2b\xce\x33\x57\x6b\x31\x5e\xce\xcb\xb6\x40\x68\x37\xbf\x51\xf5".to_vec()
     }
 
-    fn exp(
-        element: &crate::bis::Element<Self>,
-        scalar: &crate::bis::Scalar<Self>,
-    ) -> crate::bis::Element<Self> {
+    fn random_scalar(seed: &[u8]) -> crate::bis::Scalar {
+        assert_eq!(seed.len(), Self::SEED_SIZE);
+        let scalar_wrapper = P256Scalar::from(seed);
+        scalar_wrapper.as_bytes().to_vec()
+    }
+
+    fn exp(element: &crate::bis::Element, scalar: &crate::bis::Scalar) -> crate::bis::Element {
+        assert_eq!(element.len(), Self::ELEMENT_SIZE);
+        assert_eq!(scalar.len(), Self::SCALAR_SIZE);
         let element_wrapper = P256Element::from(element.as_slice());
         let scalar_wrapper = P256Scalar::from(scalar.as_slice());
 
@@ -164,18 +162,13 @@ impl crate::bis::NominalGroup for P256Group {
 
         // Encode in uncompressed form
         let encoded = result_affine.to_encoded_point(false);
-        let mut result = crate::bis::Element::<Self>::default();
-        result.copy_from_slice(encoded.as_bytes());
-        result
+        encoded.as_bytes().to_vec()
     }
 
-    fn element_to_shared_secret(
-        element: crate::bis::Element<Self>,
-    ) -> crate::bis::SharedSecret<Self> {
-        let encoded = EncodedPoint::from_bytes(&element).expect("Invalid point encoding");
+    fn element_to_shared_secret(element: &crate::bis::Element) -> crate::bis::SharedSecret {
+        assert_eq!(element.len(), Self::ELEMENT_SIZE);
+        let encoded = EncodedPoint::from_bytes(element).expect("Invalid point encoding");
         let x_bytes = encoded.x().expect("Point at infinity");
-        let mut result = crate::bis::SharedSecret::<Self>::default();
-        result.copy_from_slice(x_bytes);
-        result
+        x_bytes.to_vec()
     }
 }

@@ -29,7 +29,7 @@ mod tests {
 
         // Test 1: Generator should be the same
         let old_gen = <P256Group as GenericGroup>::generator();
-        let new_gen = <P256Group as BisGroup>::G;
+        let new_gen = <P256Group as BisGroup>::generator();
         assert_eq!(
             old_gen.as_bytes(),
             new_gen.as_slice(),
@@ -37,11 +37,7 @@ mod tests {
         );
 
         // Test 2: Same seed should produce same scalar
-        let test_seeds = vec![
-            vec![0u8; 48],
-            vec![0xFF; 48],
-            (0..48).collect::<Vec<u8>>(),
-        ];
+        let test_seeds = vec![vec![0u8; 48], vec![0xFF; 48], (0..48).collect::<Vec<u8>>()];
 
         for seed in test_seeds {
             let old_scalar = <P256Group as GenericGroup>::random_scalar(&seed).unwrap();
@@ -64,7 +60,7 @@ mod tests {
         );
 
         let old_gen = <P256Group as GenericGroup>::generator();
-        let new_gen = <P256Group as BisGroup>::G;
+        let new_gen = <P256Group as BisGroup>::generator();
 
         let old_result = <P256Group as GenericGroup>::exp(&old_gen, &old_scalar);
         let new_result = <P256Group as BisGroup>::exp(&new_gen, &new_scalar);
@@ -77,7 +73,7 @@ mod tests {
 
         // Test 4: Same element should produce same shared secret
         let old_ss = <P256Group as GenericGroup>::element_to_shared_secret(&old_result);
-        let new_ss = <P256Group as BisGroup>::element_to_shared_secret(new_result);
+        let new_ss = <P256Group as BisGroup>::element_to_shared_secret(&new_result);
 
         assert_eq!(
             old_ss.as_slice(),
@@ -93,7 +89,7 @@ mod tests {
 
         // Test 1: Generator should be the same
         let old_gen = <P384Group as GenericGroup>::generator();
-        let new_gen = <P384Group as BisGroup>::G;
+        let new_gen = <P384Group as BisGroup>::generator();
         assert_eq!(
             old_gen.as_bytes(),
             new_gen.as_slice(),
@@ -101,11 +97,7 @@ mod tests {
         );
 
         // Test 2: Same seed should produce same scalar
-        let test_seeds = vec![
-            vec![0u8; 72],
-            vec![0xFF; 72],
-            (0..72).collect::<Vec<u8>>(),
-        ];
+        let test_seeds = vec![vec![0u8; 72], vec![0xFF; 72], (0..72).collect::<Vec<u8>>()];
 
         for seed in test_seeds {
             let old_scalar = <P384Group as GenericGroup>::random_scalar(&seed).unwrap();
@@ -128,7 +120,7 @@ mod tests {
         );
 
         let old_gen = <P384Group as GenericGroup>::generator();
-        let new_gen = <P384Group as BisGroup>::G;
+        let new_gen = <P384Group as BisGroup>::generator();
 
         let old_result = <P384Group as GenericGroup>::exp(&old_gen, &old_scalar);
         let new_result = <P384Group as BisGroup>::exp(&new_gen, &new_scalar);
@@ -141,7 +133,7 @@ mod tests {
 
         // Test 4: Same element should produce same shared secret
         let old_ss = <P384Group as GenericGroup>::element_to_shared_secret(&old_result);
-        let new_ss = <P384Group as BisGroup>::element_to_shared_secret(new_result);
+        let new_ss = <P384Group as BisGroup>::element_to_shared_secret(&new_result);
 
         assert_eq!(
             old_ss.as_slice(),
@@ -157,7 +149,7 @@ mod tests {
 
         // Test 1: Generator should be the same
         let old_gen = <X25519Group as GenericGroup>::generator();
-        let new_gen = <X25519Group as BisGroup>::G;
+        let new_gen = <X25519Group as BisGroup>::generator();
         assert_eq!(
             old_gen.as_bytes(),
             new_gen.as_slice(),
@@ -165,11 +157,7 @@ mod tests {
         );
 
         // Test 2: Same seed should produce same scalar
-        let test_seeds = vec![
-            vec![0u8; 32],
-            vec![0xFF; 32],
-            (0..32).collect::<Vec<u8>>(),
-        ];
+        let test_seeds = vec![vec![0u8; 32], vec![0xFF; 32], (0..32).collect::<Vec<u8>>()];
 
         for seed in test_seeds {
             let old_scalar = <X25519Group as GenericGroup>::random_scalar(&seed).unwrap();
@@ -192,7 +180,7 @@ mod tests {
         );
 
         let old_gen = <X25519Group as GenericGroup>::generator();
-        let new_gen = <X25519Group as BisGroup>::G;
+        let new_gen = <X25519Group as BisGroup>::generator();
 
         let old_result = <X25519Group as GenericGroup>::exp(&old_gen, &old_scalar);
         let new_result = <X25519Group as BisGroup>::exp(&new_gen, &new_scalar);
@@ -205,7 +193,7 @@ mod tests {
 
         // Test 4: Same element should produce same shared secret
         let old_ss = <X25519Group as GenericGroup>::element_to_shared_secret(&old_result);
-        let new_ss = <X25519Group as BisGroup>::element_to_shared_secret(new_result);
+        let new_ss = <X25519Group as BisGroup>::element_to_shared_secret(&new_result);
 
         assert_eq!(
             old_ss.as_slice(),

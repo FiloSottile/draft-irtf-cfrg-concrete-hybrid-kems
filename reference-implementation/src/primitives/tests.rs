@@ -52,7 +52,6 @@ mod tests {
     fn test_prg_cross_compatibility() {
         use crate::bis::Prg as BisPrg;
         use crate::generic::traits::Prg as GenericPrg;
-        use hybrid_array::typenum::U64;
 
         // Test with various seeds
         let test_seeds = vec![
@@ -71,7 +70,7 @@ mod tests {
             let old_output = Shake256Prg::<64>::prg(&seed);
 
             // Call new implementation
-            let new_output: hybrid_array::Array<u8, U64> = Shake256Prg::<64>::generate(&seed);
+            let new_output = Shake256Prg::<64>::generate(&seed, 64);
 
             // Verify outputs match
             assert_eq!(

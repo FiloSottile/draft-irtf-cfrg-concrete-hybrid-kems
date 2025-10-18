@@ -19,15 +19,14 @@ impl GenericKdf for Sha3_256Kdf {
 
 // Implementation of the new bis::Kdf trait
 impl crate::bis::Kdf for Sha3_256Kdf {
-    type OutputSize = hybrid_array::typenum::U32;
+    const OUTPUT_SIZE: usize = 32;
 
-    fn compute(input: impl Iterator<Item = u8>) -> crate::bis::Output<Self> {
+    fn compute(input: impl Iterator<Item = u8>) -> crate::bis::Output {
         let mut hasher = Sha3_256::new();
         for byte in input {
             hasher.update(&[byte]);
         }
         let result = hasher.finalize();
-        // Convert from GenericArray to hybrid_array::Array
-        crate::bis::Output::<Self>::try_from(result.as_slice()).expect("Size mismatch")
+        result.to_vec()
     }
 }
