@@ -6,6 +6,7 @@
 //! It builds on the generic hybrid KEM framework to provide specific instantiations
 //! with well-defined cryptographic primitives.
 
+pub mod bis;
 pub mod generic;
 pub mod groups;
 pub mod instantiations;
