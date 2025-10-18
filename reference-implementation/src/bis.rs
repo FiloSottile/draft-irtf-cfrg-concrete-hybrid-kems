@@ -213,9 +213,8 @@ fn c2pri_combiner<K: Kdf>(
     )
 }
 
-pub trait HybridKemConstants: SeedSize {
+pub trait HybridKemConstants: SeedSize + SharedSecretSize {
     const LABEL: &[u8];
-    type SharedSecretSize: ArraySize;
 }
 
 #[derive(Default)]
@@ -242,7 +241,7 @@ where
     PQ: PqKem,
     T: NominalGroup,
     P: Prg,
-    K: Kdf<OutputSize = <C as HybridKemConstants>::SharedSecretSize>,
+    K: Kdf<OutputSize = <C as SharedSecretSize>::SharedSecretSize>,
     C: HybridKemConstants,
     PQ::SeedSize: Add<T::SeedSize>,
     Sum<PQ::SeedSize, T::SeedSize>: ArraySize + Sub<PQ::SeedSize, Output = T::SeedSize>,
@@ -306,7 +305,7 @@ where
     PQ: PqKem,
     T: NominalGroup,
     P: Prg,
-    K: Kdf<OutputSize = <C as HybridKemConstants>::SharedSecretSize>,
+    K: Kdf<OutputSize = <C as SharedSecretSize>::SharedSecretSize>,
     C: HybridKemConstants,
     PQ::SeedSize: Add<T::SeedSize>,
     Sum<PQ::SeedSize, T::SeedSize>: ArraySize + Sub<PQ::SeedSize, Output = T::SeedSize>,
@@ -370,7 +369,7 @@ where
     PQ: PqKem,
     T: TKem,
     P: Prg,
-    K: Kdf<OutputSize = <C as HybridKemConstants>::SharedSecretSize>,
+    K: Kdf<OutputSize = <C as SharedSecretSize>::SharedSecretSize>,
     C: HybridKemConstants,
     PQ::SeedSize: Add<T::SeedSize>,
     Sum<PQ::SeedSize, T::SeedSize>: ArraySize + Sub<PQ::SeedSize, Output = T::SeedSize>,
@@ -434,7 +433,7 @@ where
     PQ: PqKem,
     T: TKem,
     P: Prg,
-    K: Kdf<OutputSize = <C as HybridKemConstants>::SharedSecretSize>,
+    K: Kdf<OutputSize = <C as SharedSecretSize>::SharedSecretSize>,
     C: HybridKemConstants,
     PQ::SeedSize: Add<T::SeedSize>,
     Sum<PQ::SeedSize, T::SeedSize>: ArraySize + Sub<PQ::SeedSize, Output = T::SeedSize>,
@@ -473,3 +472,75 @@ where
         ss_h
     }
 }
+
+/// Constants for QSF-P256-MLKEM768-SHAKE256-SHA3256 hybrid KEM
+pub struct MlKem768P256Constants;
+
+impl SeedSize for MlKem768P256Constants {
+    type SeedSize = U32;
+}
+
+impl SharedSecretSize for MlKem768P256Constants {
+    type SharedSecretSize = U32;
+}
+
+impl HybridKemConstants for MlKem768P256Constants {
+    const LABEL: &[u8] = b"|-()-|";
+}
+
+/// QSF-P256-MLKEM768-SHAKE256-SHA3256 hybrid KEM
+pub type MlKem768P256 = GC<
+    crate::kems::MlKem768Kem,
+    crate::groups::P256Group,
+    crate::primitives::Shake256Prg<112>, // 48 (P256 seed) + 64 (ML-KEM-768 seed)
+    crate::primitives::Sha3_256Kdf,
+    MlKem768P256Constants,
+>;
+
+/// Constants for QSF-X25519-MLKEM768-SHAKE256-SHA3256 hybrid KEM (X-Wing compatible)
+pub struct MlKem768X25519Constants;
+
+impl SeedSize for MlKem768X25519Constants {
+    type SeedSize = U32;
+}
+
+impl SharedSecretSize for MlKem768X25519Constants {
+    type SharedSecretSize = U32;
+}
+
+impl HybridKemConstants for MlKem768X25519Constants {
+    const LABEL: &[u8] = b"\\.//^\\";
+}
+
+/// QSF-X25519-MLKEM768-SHAKE256-SHA3256 hybrid KEM (X-Wing)
+pub type MlKem768X25519 = GC<
+    crate::kems::MlKem768Kem,
+    crate::groups::X25519Group,
+    crate::primitives::Shake256Prg<96>, // 32 (X25519 seed) + 64 (ML-KEM-768 seed)
+    crate::primitives::Sha3_256Kdf,
+    MlKem768X25519Constants,
+>;
+
+/// Constants for QSF-P384-MLKEM1024-SHAKE256-SHA3256 hybrid KEM
+pub struct MlKem1024P384Constants;
+
+impl SeedSize for MlKem1024P384Constants {
+    type SeedSize = U32;
+}
+
+impl SharedSecretSize for MlKem1024P384Constants {
+    type SharedSecretSize = U32;
+}
+
+impl HybridKemConstants for MlKem1024P384Constants {
+    const LABEL: &[u8] = b" | /-\\";
+}
+
+/// QSF-P384-MLKEM1024-SHAKE256-SHA3256 hybrid KEM
+pub type MlKem1024P384 = GC<
+    crate::kems::MlKem1024Kem,
+    crate::groups::P384Group,
+    crate::primitives::Shake256Prg<136>, // 72 (P384 seed) + 64 (ML-KEM-1024 seed)
+    crate::primitives::Sha3_256Kdf,
+    MlKem1024P384Constants,
+>;
