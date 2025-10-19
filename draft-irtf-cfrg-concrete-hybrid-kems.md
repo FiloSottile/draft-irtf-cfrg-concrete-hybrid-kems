@@ -198,7 +198,8 @@ define how they meet the Nominal Group interface described in
 
 Group elements are elliptic curve points, represented as byte strings in the
 uncompressed representation defined by the Elliptic-Curve-Point-to-Octet-String
-function in {{SEC1}}.
+function in {{SEC1}}.  Scalars are represented as integers in big-endian byte
+order.
 
 The Nominal Group algorithms are the same for both groups:
 
@@ -249,14 +250,14 @@ P-384:
 
 The group constants for the P-256 group are as follows:
 
-- `Nseed`: 48
+- `Nseed`: 32
 - `Nscalar`: 32
 - `Nelem`: 65
 - `Nss`: 32
 
 The group constants for the P-384 group are as follows:
 
-- `Nseed`: 72
+- `Nseed`: 48
 - `Nscalar`: 48
 - `Nelem`: 97
 - `Nss`: 48
@@ -385,8 +386,8 @@ This hybrid KEM combines ML-KEM-768 with X25519 using the GC framework from
 {{HYBRID-KEMS}}. It is identical to the X-Wing construction from {{XWING-SPEC}}.
 It has the following components:
 
-* `Group_T`: Curve25519 {{group-curve25519}}
 * `KEM_PQ`: ML-KEM-768 {{mlkem}}
+* `Group_T`: Curve25519 {{group-curve25519}}
 * `PRG`: SHAKE-256 {{FIPS202}}
 * `KDF`: SHA3-256 {{FIPS202}}
 * `Label`: `\.//^\` (0x5C2E2F2F5E5C)
@@ -448,7 +449,17 @@ The components used in this document meet these requirements:
 
 # IANA Considerations
 
-This document has no IANA actions.
+This document requests that the following values be added to the "Hybrid KEM
+Labels" registry:
+
+| Label     | Fw | PQ Component | T Component | KDF      | PRG       | Nseed | Nss | Reference |
+|===========|====|==============|=============|==========|===========|=======|=====|===========|
+| "\|-()-\|"  | GC | ML-KEM-768   | Curve25519  | SHA3-256 | SHAKE-256 | 32    | 32  | [RFCXXXX] |
+| "\\.//^\\"  | GC | ML-KEM-768   | Curve25519  | SHA3-256 | SHAKE-256 | 32    | 32  | [RFCXXXX] |
+| " \| /-\\" | GC | ML-KEM-768   | Curve25519  | SHA3-256 | SHAKE-256 | 32    | 32  | [RFCXXXX] |
+{: #iana-table title="Hybrid KEM Labels" }
+
+[ RFC EDITOR: Please replace "XXXX" above with the number assigned to this RFC ]
 
 --- back
 
@@ -460,6 +471,8 @@ key generation followed by an encapsulation:
 
 * `seed` - the seed used for deterministic key generation
 * `decapsulation_key` - the derived decapsulation key
+* `decapsulation_key_pq` - the decapsulation key sub-key for the PQ component
+* `decapsulation_key_t` - the decapsulation key sub-key for the T component
 * `encapsulation_key` - the derived encapsulation key
 * `randomness` - the randomness used for encapsulation
 * `ciphertext` - the ciphertext produced by the encapsulation operation

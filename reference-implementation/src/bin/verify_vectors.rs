@@ -1,12 +1,9 @@
 //! Test vector verification binary
 
 use concrete_hybrid_kem::{
-    generic::traits::{AsBytes, EncapsDerand, Kem},
-    instantiations::{
-        QsfP256MlKem768Shake256Sha3256, QsfP384MlKem1024Shake256Sha3256,
-        QsfX25519MlKem768Shake256Sha3256,
-    },
-    test_vectors::{HybridKemTestVector, TestVectors},
+    hybrid::HybridKem,
+    test_vectors::{HybridKemTestVector, TestVectors, VerifyError},
+    MlKem1024P384, MlKem768P256, MlKem768X25519,
 };
 use std::env;
 use std::fs;
@@ -38,27 +35,18 @@ fn main() {
 
     println!("Verifying test vectors from {}...", filename);
 
-    let mut success = true;
+    let mlkem768_p256 =
+        verify_hybrid_kem_vectors::<MlKem768P256>("MLKEM768-P256", &test_vectors.mlkem768_p256);
 
-    // Verify QSF-P256-MLKEM768-SHAKE256-SHA3256 hybrid KEM
-    success &= verify_hybrid_kem_vectors::<QsfP256MlKem768Shake256Sha3256>(
-        "QSF_P256_MLKEM768_SHAKE256_SHA3256",
-        &test_vectors.qsf_p256_mlkem768_shake256_sha3256,
+    let mlkem768_x25519 = verify_hybrid_kem_vectors::<MlKem768X25519>(
+        "MLKEM768-X25519",
+        &test_vectors.mlkem768_x25519,
     );
 
-    // Verify QSF-X25519-MLKEM768-SHAKE256-SHA3256 hybrid KEM
-    success &= verify_hybrid_kem_vectors::<QsfX25519MlKem768Shake256Sha3256>(
-        "QSF_X25519_MLKEM768_SHAKE256_SHA3256",
-        &test_vectors.qsf_x25519_mlkem768_shake256_sha3256,
-    );
+    let mlkem1024_p384 =
+        verify_hybrid_kem_vectors::<MlKem1024P384>("MLKEM1024-P384", &test_vectors.mlkem1024_p384);
 
-    // Verify QSF-P384-MLKEM1024-SHAKE256-SHA3256 hybrid KEM
-    success &= verify_hybrid_kem_vectors::<QsfP384MlKem1024Shake256Sha3256>(
-        "QSF_P384_MLKEM1024_SHAKE256_SHA3256",
-        &test_vectors.qsf_p384_mlkem1024_shake256_sha3256,
-    );
-
-    if success {
+    if mlkem768_p256 && mlkem768_x25519 && mlkem1024_p384 {
         println!("✅ All test vectors verified successfully!");
     } else {
         println!("❌ Some test vectors failed verification");
@@ -66,52 +54,49 @@ fn main() {
     }
 }
 
-fn verify_hybrid_kem_vectors<T>(name: &str, vectors: &[HybridKemTestVector]) -> bool
-where
-    T: Kem + EncapsDerand,
-    T::SharedSecret: PartialEq<Vec<u8>>,
-{
+fn verify_hybrid_kem_vectors<K: HybridKem>(name: &str, vectors: &[HybridKemTestVector]) -> bool {
     println!("Verifying {} hybrid KEM...", name);
-    let mut local_success = true;
 
-    for (i, test_vector) in vectors.iter().enumerate() {
-        if !verify_hybrid_kem::<T>(test_vector) {
-            println!("  ❌ Test vector {} failed", i);
-            local_success = false;
-        }
-    }
+    let error_count = vectors
+        .iter()
+        .map(|v| v.verify::<K>())
+        .enumerate()
+        .filter_map(|(i, rv)| rv.err().map(|rv| (i, rv)))
+        .map(|(i, err)| print_failure(name, i, err))
+        .count();
 
-    if local_success {
-        println!("  ✅ All {} test vectors passed", vectors.len());
-    }
-
-    local_success
+    error_count == 0
 }
 
-fn verify_hybrid_kem<T>(data: &HybridKemTestVector) -> bool
-where
-    T: Kem + EncapsDerand,
-    T::SharedSecret: PartialEq<Vec<u8>>,
-{
-    // Verify deterministic key generation
-    let (ek_regenerated, dk_regenerated) = T::derive_key_pair(&data.seed).unwrap();
-    if ek_regenerated.as_bytes() != data.encapsulation_key
-        || dk_regenerated.as_bytes() != data.decapsulation_key
-    {
-        return false;
+fn print_failure(name: &str, index: usize, err: VerifyError) {
+    println!("Error in vector #{} for {}", index, name);
+    match err {
+        VerifyError::EncapsulationKey(my, vec) => println!(
+            "EncapsulationKey my={} vec={}",
+            hex::encode(my),
+            hex::encode(vec)
+        ),
+
+        VerifyError::DecapsulationKey(my, vec) => println!(
+            "DecapsulationKey my={} vec={}",
+            hex::encode(my),
+            hex::encode(vec)
+        ),
+
+        VerifyError::Ciphertext(my, vec) => {
+            println!("Ciphertext my={} vec={}", hex::encode(my), hex::encode(vec))
+        }
+
+        VerifyError::SharedSecretEncaps(my, vec) => println!(
+            "SharedSecretEncaps my={} vec={}",
+            hex::encode(my),
+            hex::encode(vec)
+        ),
+
+        VerifyError::SharedSecretDecaps(my, vec) => println!(
+            "SharedSecretDecaps my={} vec={}",
+            hex::encode(my),
+            hex::encode(vec)
+        ),
     }
-
-    // Verify deterministic encapsulation
-    let (ct_regenerated, ss_regenerated) =
-        T::encaps_derand(&ek_regenerated, &data.randomness).unwrap();
-    if ct_regenerated.as_bytes() != data.ciphertext || ss_regenerated != data.shared_secret {
-        return false;
-    }
-
-    // Verify decapsulation consistency
-    let dk = T::DecapsulationKey::from(data.decapsulation_key.as_slice());
-    let ct = T::Ciphertext::from(data.ciphertext.as_slice());
-    let ss = T::decaps(&dk, &ct).unwrap();
-
-    ss == data.shared_secret
 }
