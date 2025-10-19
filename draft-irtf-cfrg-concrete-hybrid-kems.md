@@ -215,14 +215,14 @@ The Nominal Group algorithms are the same for both groups:
 
 The group constants for the P-256 group are as follows:
 
-- `Nseed`: 48
+- `Nseed`: 32
 - `Nscalar`: 32
 - `Nelem`: 65
 - `Nss`: 32
 
 The group constants for the P-384 group are as follows:
 
-- `Nseed`: 72
+- `Nseed`: 48
 - `Nscalar`: 48
 - `Nelem`: 97
 - `Nss`: 48

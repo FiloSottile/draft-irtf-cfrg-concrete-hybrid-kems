@@ -70,7 +70,6 @@ macro_rules! define_nist_group {
         pub struct $group;
 
         impl SeedSize for $group {
-            // XXX: This doesn't match the spec, but I think it's the spec that's wrong
             const SEED_SIZE: usize = Self::SCALAR_SIZE;
         }
 
