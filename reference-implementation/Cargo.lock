@@ -45,8 +45,10 @@ checksum = "9555578bc9e57714c812a1f84e4fc5b4d21fcb063490c624de019f7464c91268"
 name = "concrete-hybrid-kem"
 version = "0.1.0"
 dependencies = [
+ "elliptic-curve",
  "hex",
  "hex-literal",
+ "hybrid-array",
  "ml-kem",
  "num-bigint",
  "p256",
@@ -322,9 +324,9 @@ checksum = "32a282da65faaf38286cf3be983213fcf1d2e2a58700e808f83f4ea9a4804bc0"
 
 [[package]]
 name = "ml-kem"
-version = "0.3.0-pre"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "44fde1200e61dd95a2c6143baa22dbab79d8dad2644f55e955dd8a3d535f5d9f"
+checksum = "97befee0c869cb56f3118f49d0f9bb68c9e3f380dec23c1100aedc4ec3ba239a"
 dependencies = [
  "hybrid-array",
  "kem",
