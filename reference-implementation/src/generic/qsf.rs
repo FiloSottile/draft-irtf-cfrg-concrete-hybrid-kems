@@ -44,15 +44,15 @@ where
         // Generate post-quantum key pair
         let (ek_pq, dk_pq) = KemPq::derive_key_pair(seed_pq).map_err(|_| KemError::PostQuantum)?;
 
-        println!("ExpandDecapsKey:");
-        println!("  seed: {}", hex::encode(&seed));
-        println!("  seed_full: {}", hex::encode(&seed_full));
-        println!("  seed_pq: {}", hex::encode(&seed_pq));
-        println!("  seed_t: {}", hex::encode(&seed_t));
-        println!("  dk_pq: {}", hex::encode(dk_pq.as_bytes()));
-        println!("  ek_pq: {}", hex::encode(ek_pq.as_bytes()));
-        println!("  dk_t: {}", hex::encode(dk_t.as_bytes()));
-        println!("  ek_t: {}", hex::encode(ek_t.as_bytes()));
+        // println!("ExpandDecapsKey:");
+        // println!("  seed: {}", hex::encode(&seed));
+        // println!("  seed_full: {}", hex::encode(&seed_full));
+        // println!("  seed_pq: {}", hex::encode(&seed_pq));
+        // println!("  seed_t: {}", hex::encode(&seed_t));
+        // println!("  dk_pq: {}", hex::encode(dk_pq.as_bytes()));
+        // println!("  ek_pq: {}", hex::encode(ek_pq.as_bytes()));
+        // println!("  dk_t: {}", hex::encode(dk_t.as_bytes()));
+        // println!("  ek_t: {}", hex::encode(ek_t.as_bytes()));
 
         Ok((ek_pq, ek_t, dk_pq, dk_t))
     }
@@ -251,14 +251,14 @@ where
 
         let ss_hybrid = KdfImpl::kdf(&kdf_input);
 
-        println!("EncapsDerand KDF inputs:");
-        println!("   ss_pq: {}", hex::encode(ss_pq.as_bytes()));
-        println!("   ss_t: {}", hex::encode(&ss_t));
-        println!("   ct_t: {}", hex::encode(ct_t.as_bytes()));
-        println!("   ek_t: {}", hex::encode(ek_t.as_bytes()));
-        println!("   label: {}", hex::encode(Label::LABEL));
-        println!("== input: {}", hex::encode(kdf_input));
-        println!("=> ss_h {}", hex::encode(&ss_hybrid));
+        // println!("EncapsDerand KDF inputs:");
+        // println!("   ss_pq: {}", hex::encode(ss_pq.as_bytes()));
+        // println!("   ss_t: {}", hex::encode(&ss_t));
+        // println!("   ct_t: {}", hex::encode(ct_t.as_bytes()));
+        // println!("   ek_t: {}", hex::encode(ek_t.as_bytes()));
+        // println!("   label: {}", hex::encode(Label::LABEL));
+        // println!("== input: {}", hex::encode(kdf_input));
+        // println!("=> ss_h {}", hex::encode(&ss_hybrid));
 
         Ok((ct_hybrid, ss_hybrid))
     }

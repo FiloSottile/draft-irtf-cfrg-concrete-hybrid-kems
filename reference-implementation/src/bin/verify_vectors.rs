@@ -1,11 +1,9 @@
 //! Test vector verification binary
+//!
+//! This version uses the bis module implementation instead of the generic traits.
 
 use concrete_hybrid_kem::{
-    generic::traits::{AsBytes, EncapsDerand, Kem},
-    instantiations::{
-        QsfP256MlKem768Shake256Sha3256, QsfP384MlKem1024Shake256Sha3256,
-        QsfX25519MlKem768Shake256Sha3256,
-    },
+    bis::{EncapsDerand, Kem, MlKem1024P384, MlKem768P256, MlKem768X25519, SeedSize},
     test_vectors::{HybridKemTestVector, TestVectors},
 };
 use std::env;
@@ -37,24 +35,25 @@ fn main() {
     };
 
     println!("Verifying test vectors from {}...", filename);
+    println!("Using bis module implementation");
 
     let mut success = true;
 
-    // Verify QSF-P256-MLKEM768-SHAKE256-SHA3256 hybrid KEM
-    success &= verify_hybrid_kem_vectors::<QsfP256MlKem768Shake256Sha3256>(
-        "QSF_P256_MLKEM768_SHAKE256_SHA3256",
+    // Verify QSF-P256-MLKEM768-SHAKE256-SHA3256 hybrid KEM using bis::MlKem768P256
+    success &= verify_hybrid_kem_vectors::<MlKem768P256>(
+        "QSF_P256_MLKEM768_SHAKE256_SHA3256 (bis::MlKem768P256)",
         &test_vectors.qsf_p256_mlkem768_shake256_sha3256,
     );
 
-    // Verify QSF-X25519-MLKEM768-SHAKE256-SHA3256 hybrid KEM
-    success &= verify_hybrid_kem_vectors::<QsfX25519MlKem768Shake256Sha3256>(
-        "QSF_X25519_MLKEM768_SHAKE256_SHA3256",
+    // Verify QSF-X25519-MLKEM768-SHAKE256-SHA3256 hybrid KEM using bis::MlKem768X25519
+    success &= verify_hybrid_kem_vectors::<MlKem768X25519>(
+        "QSF_X25519_MLKEM768_SHAKE256_SHA3256 (bis::MlKem768X25519)",
         &test_vectors.qsf_x25519_mlkem768_shake256_sha3256,
     );
 
-    // Verify QSF-P384-MLKEM1024-SHAKE256-SHA3256 hybrid KEM
-    success &= verify_hybrid_kem_vectors::<QsfP384MlKem1024Shake256Sha3256>(
-        "QSF_P384_MLKEM1024_SHAKE256_SHA3256",
+    // Verify QSF-P384-MLKEM1024-SHAKE256-SHA3256 hybrid KEM using bis::MlKem1024P384
+    success &= verify_hybrid_kem_vectors::<MlKem1024P384>(
+        "QSF_P384_MLKEM1024_SHAKE256_SHA3256 (bis::MlKem1024P384)",
         &test_vectors.qsf_p384_mlkem1024_shake256_sha3256,
     );
 
@@ -68,8 +67,7 @@ fn main() {
 
 fn verify_hybrid_kem_vectors<T>(name: &str, vectors: &[HybridKemTestVector]) -> bool
 where
-    T: Kem + EncapsDerand,
-    T::SharedSecret: PartialEq<Vec<u8>>,
+    T: Kem + EncapsDerand + SeedSize,
 {
     println!("Verifying {} hybrid KEM...", name);
     let mut local_success = true;
@@ -90,28 +88,39 @@ where
 
 fn verify_hybrid_kem<T>(data: &HybridKemTestVector) -> bool
 where
-    T: Kem + EncapsDerand,
-    T::SharedSecret: PartialEq<Vec<u8>>,
+    T: Kem + EncapsDerand + SeedSize,
 {
     // Verify deterministic key generation
-    let (ek_regenerated, dk_regenerated) = T::derive_key_pair(&data.seed).unwrap();
-    if ek_regenerated.as_bytes() != data.encapsulation_key
-        || dk_regenerated.as_bytes() != data.decapsulation_key
-    {
+    let (dk_regenerated, ek_regenerated) = T::derive_key_pair(&data.seed);
+    if ek_regenerated != data.encapsulation_key || dk_regenerated != data.decapsulation_key {
+        eprintln!("  Key derivation mismatch");
+        eprintln!("    Expected EK: {}", hex::encode(&data.encapsulation_key));
+        eprintln!("    Got EK:      {}", hex::encode(&ek_regenerated));
+        eprintln!("    Expected DK: {}", hex::encode(&data.decapsulation_key));
+        eprintln!("    Got DK:      {}", hex::encode(&dk_regenerated));
         return false;
     }
 
     // Verify deterministic encapsulation
-    let (ct_regenerated, ss_regenerated) =
-        T::encaps_derand(&ek_regenerated, &data.randomness).unwrap();
-    if ct_regenerated.as_bytes() != data.ciphertext || ss_regenerated != data.shared_secret {
+    let (ct_regenerated, ss_regenerated) = T::encaps_derand(&ek_regenerated, &data.randomness);
+    if ct_regenerated != data.ciphertext || ss_regenerated != data.shared_secret {
+        eprintln!("  Encapsulation mismatch");
+        eprintln!("    Expected CT: {}", hex::encode(&data.ciphertext));
+        eprintln!("    Got CT:      {}", hex::encode(&ct_regenerated));
+        eprintln!("    Expected SS: {}", hex::encode(&data.shared_secret));
+        eprintln!("    Got SS:      {}", hex::encode(&ss_regenerated));
         return false;
     }
 
     // Verify decapsulation consistency
-    let dk = T::DecapsulationKey::from(data.decapsulation_key.as_slice());
-    let ct = T::Ciphertext::from(data.ciphertext.as_slice());
-    let ss = T::decaps(&dk, &ct).unwrap();
+    let ss = T::decaps(&dk_regenerated, &ct_regenerated);
 
-    ss == data.shared_secret
+    if ss != data.shared_secret {
+        eprintln!("  Decapsulation mismatch");
+        eprintln!("    Expected SS: {}", hex::encode(&data.shared_secret));
+        eprintln!("    Got SS:      {}", hex::encode(&ss));
+        return false;
+    }
+
+    true
 }
