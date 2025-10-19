@@ -1,6 +1,6 @@
 //! P-384 nominal group implementation
 
-use crate::bis::SeedSize;
+use crate::hybrid::SeedSize;
 use hex_literal::hex;
 use num_bigint::BigUint;
 use p384::{
@@ -32,30 +32,30 @@ fn bytes_to_scalar(bytes: &[u8]) -> Scalar {
 }
 
 // Implementation of the bis traits
-impl crate::bis::SeedSize for P384Group {
+impl crate::hybrid::SeedSize for P384Group {
     const SEED_SIZE: usize = 72;
 }
 
-impl crate::bis::SharedSecretSize for P384Group {
+impl crate::hybrid::SharedSecretSize for P384Group {
     const SHARED_SECRET_SIZE: usize = 48;
 }
 
-impl crate::bis::NominalGroup for P384Group {
+impl crate::hybrid::NominalGroup for P384Group {
     const SCALAR_SIZE: usize = 48;
     const ELEMENT_SIZE: usize = 97;
 
-    fn generator() -> crate::bis::Element {
+    fn generator() -> crate::hybrid::Element {
         // P-384 generator in uncompressed form (0x04 || x || y)
         b"\x04\xaa\x87\xca\x22\xbe\x8b\x05\x37\x8e\xb1\xc7\x1e\xf3\x20\xad\x74\x6e\x1d\x3b\x62\x8b\xa7\x9b\x98\x59\xf7\x41\xe0\x82\x54\x2a\x38\x55\x02\xf2\x5d\xbf\x55\x29\x6c\x3a\x54\x5e\x38\x72\x76\x0a\xb7\x36\x17\xde\x4a\x96\x26\x2c\x6f\x5d\x9e\x98\xbf\x92\x92\xdc\x29\xf8\xf4\x1d\xbd\x28\x9a\x14\x7c\xe9\xda\x31\x13\xb5\xf0\xb8\xc0\x0a\x60\xb1\xce\x1d\x7e\x81\x9d\x7a\x43\x1d\x7c\x90\xea\x0e\x5f".to_vec()
     }
 
-    fn random_scalar(seed: &[u8]) -> crate::bis::Scalar {
+    fn random_scalar(seed: &[u8]) -> crate::hybrid::Scalar {
         assert_eq!(seed.len(), Self::SEED_SIZE);
         let scalar = bytes_to_scalar(seed);
         scalar.to_bytes().to_vec()
     }
 
-    fn exp(element: &crate::bis::Element, scalar: &crate::bis::Scalar) -> crate::bis::Element {
+    fn exp(element: &crate::hybrid::Element, scalar: &crate::hybrid::Scalar) -> crate::hybrid::Element {
         assert_eq!(element.len(), Self::ELEMENT_SIZE);
         assert_eq!(scalar.len(), Self::SCALAR_SIZE);
 
@@ -73,7 +73,7 @@ impl crate::bis::NominalGroup for P384Group {
         encoded.as_bytes().to_vec()
     }
 
-    fn element_to_shared_secret(element: &crate::bis::Element) -> crate::bis::SharedSecret {
+    fn element_to_shared_secret(element: &crate::hybrid::Element) -> crate::hybrid::SharedSecret {
         assert_eq!(element.len(), Self::ELEMENT_SIZE);
         let encoded = EncodedPoint::from_bytes(element).expect("Invalid point encoding");
         let x_bytes = encoded.x().expect("Point at infinity");

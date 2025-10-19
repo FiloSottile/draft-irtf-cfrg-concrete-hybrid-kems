@@ -534,7 +534,7 @@ impl HybridKemConstants for MlKem768P256Constants {
 
 /// QSF-P256-MLKEM768-SHAKE256-SHA3256 hybrid KEM
 pub type MlKem768P256 = GC<
-    crate::kems::MlKem768Kem,
+    crate::kems::MlKem768,
     crate::groups::P256Group,
     crate::primitives::Shake256Prg<112>, // 48 (P256 seed) + 64 (ML-KEM-768 seed)
     crate::primitives::Sha3_256Kdf,
@@ -558,7 +558,7 @@ impl HybridKemConstants for MlKem768X25519Constants {
 
 /// QSF-X25519-MLKEM768-SHAKE256-SHA3256 hybrid KEM (X-Wing)
 pub type MlKem768X25519 = GC<
-    crate::kems::MlKem768Kem,
+    crate::kems::MlKem768,
     crate::groups::X25519Group,
     crate::primitives::Shake256Prg<96>, // 32 (X25519 seed) + 64 (ML-KEM-768 seed)
     crate::primitives::Sha3_256Kdf,
@@ -582,7 +582,7 @@ impl HybridKemConstants for MlKem1024P384Constants {
 
 /// QSF-P384-MLKEM1024-SHAKE256-SHA3256 hybrid KEM
 pub type MlKem1024P384 = GC<
-    crate::kems::MlKem1024Kem,
+    crate::kems::MlKem1024,
     crate::groups::P384Group,
     crate::primitives::Shake256Prg<136>, // 72 (P384 seed) + 64 (ML-KEM-1024 seed)
     crate::primitives::Sha3_256Kdf,

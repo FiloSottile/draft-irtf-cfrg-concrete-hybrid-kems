@@ -1,9 +1,7 @@
 //! Test vector generation binary
-//!
-//! This version uses the bis module implementation instead of the generic traits.
 
 use concrete_hybrid_kem::{
-    bis::{EncapsDerand, Kem, MlKem1024P384, MlKem768P256, MlKem768X25519, SeedSize},
+    hybrid::{EncapsDerand, Kem, MlKem1024P384, MlKem768P256, MlKem768X25519, SeedSize},
     test_vectors::{HybridKemTestVector, TestVectors},
 };
 

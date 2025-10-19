@@ -1,25 +1,25 @@
 //! X25519 nominal group implementation
 
-use crate::bis::SeedSize;
+use crate::hybrid::SeedSize;
 use x25519_dalek::{PublicKey, StaticSecret};
 
 /// X25519 nominal group
 pub struct X25519Group;
 
 // Implementation of the bis traits
-impl crate::bis::SeedSize for X25519Group {
+impl crate::hybrid::SeedSize for X25519Group {
     const SEED_SIZE: usize = 32;
 }
 
-impl crate::bis::SharedSecretSize for X25519Group {
+impl crate::hybrid::SharedSecretSize for X25519Group {
     const SHARED_SECRET_SIZE: usize = 32;
 }
 
-impl crate::bis::NominalGroup for X25519Group {
+impl crate::hybrid::NominalGroup for X25519Group {
     const SCALAR_SIZE: usize = 32;
     const ELEMENT_SIZE: usize = 32;
 
-    fn generator() -> crate::bis::Element {
+    fn generator() -> crate::hybrid::Element {
         // X25519 generator is 9
         vec![
             9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -27,13 +27,13 @@ impl crate::bis::NominalGroup for X25519Group {
         ]
     }
 
-    fn random_scalar(seed: &[u8]) -> crate::bis::Scalar {
+    fn random_scalar(seed: &[u8]) -> crate::hybrid::Scalar {
         assert_eq!(seed.len(), Self::SEED_SIZE);
         // For X25519, seed is directly used as scalar
         seed.to_vec()
     }
 
-    fn exp(element: &crate::bis::Element, scalar: &crate::bis::Scalar) -> crate::bis::Element {
+    fn exp(element: &crate::hybrid::Element, scalar: &crate::hybrid::Scalar) -> crate::hybrid::Element {
         assert_eq!(element.len(), Self::ELEMENT_SIZE);
         assert_eq!(scalar.len(), Self::SCALAR_SIZE);
 
@@ -50,7 +50,7 @@ impl crate::bis::NominalGroup for X25519Group {
         shared_secret.as_bytes().to_vec()
     }
 
-    fn element_to_shared_secret(element: &crate::bis::Element) -> crate::bis::SharedSecret {
+    fn element_to_shared_secret(element: &crate::hybrid::Element) -> crate::hybrid::SharedSecret {
         assert_eq!(element.len(), Self::ELEMENT_SIZE);
         // For X25519, the element itself is the shared secret
         element.to_vec()
