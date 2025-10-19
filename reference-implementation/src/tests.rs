@@ -192,7 +192,7 @@ mod tests {
     #[test]
     fn test_kdf_all() {
         use crate::hybrid::test_utils::test_kdf_all;
-        use crate::primitives::Sha3_256Kdf;
+        use crate::kdf::Sha3_256Kdf;
 
         test_kdf_all::<Sha3_256Kdf>();
     }
@@ -200,7 +200,7 @@ mod tests {
     #[test]
     fn test_prg_all() {
         use crate::hybrid::test_utils::test_prg_all;
-        use crate::primitives::Shake256Prg;
+        use crate::prg::Shake256Prg;
 
         test_prg_all::<Shake256Prg<96>>();
         test_prg_all::<Shake256Prg<112>>();
