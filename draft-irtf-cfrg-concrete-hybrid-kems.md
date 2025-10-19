@@ -229,7 +229,7 @@ Given a PRG, the RandomScalar algorithm is defined as follows:
 def RandomScalar(seed):
   state = XOF.Init(seed)
   sk = OS2IP(XOF.Read(state, Nscalar))
-  while sk >= order:
+  while sk == 0 || sk >= order:
     sk = OS2IP(XOF.Read(state, Nscalar))
   return (sk, pk(sk))
 ~~~

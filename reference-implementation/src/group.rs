@@ -65,6 +65,47 @@ impl NominalGroup for X25519 {
     }
 }
 
+// Enable the use of SHAKE256 as an RNG
+struct Shake256Rng(sha3::Shake256Reader);
+
+impl Shake256Rng {
+    fn new(seed: &[u8]) -> Self {
+        use sha3::digest::{ExtendableOutput, Update};
+        let mut shake = sha3::Shake256::default();
+        shake.update(seed);
+        let reader = shake.finalize_xof();
+        Self(reader)
+    }
+}
+
+impl old_rand_core::CryptoRng for Shake256Rng {}
+
+impl old_rand_core::RngCore for Shake256Rng {
+    fn next_u32(&mut self) -> u32 {
+        use sha3::digest::XofReader;
+        let mut data = [0; 4];
+        self.0.read(&mut data);
+        u32::from_be_bytes(data)
+    }
+
+    fn next_u64(&mut self) -> u64 {
+        use sha3::digest::XofReader;
+        let mut data = [0; 8];
+        self.0.read(&mut data);
+        u64::from_be_bytes(data)
+    }
+
+    fn fill_bytes(&mut self, dest: &mut [u8]) {
+        use sha3::digest::XofReader;
+        self.0.read(dest);
+    }
+
+    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), old_rand_core::Error> {
+        self.fill_bytes(dest);
+        Ok(())
+    }
+}
+
 macro_rules! define_nist_group {
     ($group:ident, $mod:ident, $curve:ident) => {
         pub struct $group;
@@ -92,11 +133,13 @@ macro_rules! define_nist_group {
             }
 
             fn random_scalar(seed: &Seed) -> Scalar {
-                use $mod::{elliptic_curve::ops::Reduce, FieldBytes, Scalar};
+                use $mod::NonZeroScalar;
                 assert_eq!(seed.len(), Self::SEED_SIZE);
-                Scalar::reduce_bytes(FieldBytes::from_slice(seed))
-                    .to_bytes()
-                    .to_vec()
+
+                // Coincidentally, NonZeroScalar::random implements exactly the rejection sampling
+                // loop we need here.
+                let mut rng = Shake256Rng::new(seed);
+                NonZeroScalar::random(&mut rng).to_bytes().to_vec()
             }
 
             fn exp(element: &Element, scalar: &Scalar) -> Element {
