@@ -1,6 +1,6 @@
 //! Test vector data structures for serialization
 
-use crate::kem::{EncapsDerand, Kem};
+use crate::hybrid::HybridKem;
 use serde::{Deserialize, Serialize};
 
 /// An enumeration of the ways test vector validation can fail
@@ -28,6 +28,12 @@ pub struct HybridKemTestVector {
     pub decapsulation_key: Vec<u8>,
 
     #[serde(with = "hex::serde")]
+    pub decapsulation_key_pq: Vec<u8>,
+
+    #[serde(with = "hex::serde")]
+    pub decapsulation_key_t: Vec<u8>,
+
+    #[serde(with = "hex::serde")]
     pub ciphertext: Vec<u8>,
 
     #[serde(with = "hex::serde")]
@@ -35,10 +41,10 @@ pub struct HybridKemTestVector {
 }
 
 impl HybridKemTestVector {
-    pub fn generate<K: Kem + EncapsDerand>(index: u8) -> Self {
+    pub fn generate<K: HybridKem>(index: u8) -> Self {
         let seed = vec![index; K::SEED_SIZE];
         let randomness = vec![index.wrapping_add(100); K::RANDOMNESS_SIZE];
-        let (dk, ek) = K::derive_key_pair(&seed);
+        let (dk, ek, info) = K::derive_key_pair(&seed);
         let (ct, ss) = K::encaps_derand(&ek, &randomness);
 
         HybridKemTestVector {
@@ -46,14 +52,16 @@ impl HybridKemTestVector {
             randomness,
             encapsulation_key: ek,
             decapsulation_key: dk,
+            decapsulation_key_pq: info.dk_pq,
+            decapsulation_key_t: info.dk_t,
             ciphertext: ct,
             shared_secret: ss,
         }
     }
 
-    pub fn verify<K: Kem + EncapsDerand>(&self) -> Result<(), VerifyError> {
+    pub fn verify<K: HybridKem>(&self) -> Result<(), VerifyError> {
         // Verify deterministic key generation
-        let (dk, ek) = K::derive_key_pair(&self.seed);
+        let (dk, ek, _) = K::derive_key_pair(&self.seed);
 
         if dk != self.decapsulation_key {
             return Err(VerifyError::DecapsulationKey(

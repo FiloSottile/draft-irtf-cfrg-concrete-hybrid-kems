@@ -24,7 +24,10 @@ pub trait Kem: SeedSize + SharedSecretSize {
     const DECAPSULATION_KEY_SIZE: usize;
     const CIPHERTEXT_SIZE: usize;
 
-    fn derive_key_pair(seed: &[u8]) -> (DecapsulationKey, EncapsulationKey);
+    // Additional information about derived keys (e.g., subkeys)
+    type KeyInfo;
+
+    fn derive_key_pair(seed: &[u8]) -> (DecapsulationKey, EncapsulationKey, Self::KeyInfo);
     fn encaps(ek: &EncapsulationKey, rng: &mut impl CryptoRng) -> (SharedSecret, Ciphertext);
     fn decaps(dk: &DecapsulationKey, ct: &Ciphertext) -> SharedSecret;
 }
@@ -87,11 +90,14 @@ macro_rules! define_ml_kem {
             const DECAPSULATION_KEY_SIZE: usize = 64;
             const CIPHERTEXT_SIZE: usize = <ml_kem::$mlkem as KemCore>::CiphertextSize::USIZE;
 
+            type KeyInfo = ();
+
             fn derive_key_pair(
                 seed: &[u8],
             ) -> (
                 DecapsulationKey,
                 EncapsulationKey,
+                Self::KeyInfo,
             ) {
                 use ml_kem::$mlkem;
 
@@ -101,7 +107,7 @@ macro_rules! define_ml_kem {
                 let (_dk_inner, ek_inner) = $mlkem::generate_deterministic(&d, &z);
 
                 let ek = ek_inner.as_bytes().as_slice().to_vec();
-                (seed.to_vec(), ek)
+                (seed.to_vec(), ek, ())
             }
 
             fn encaps(
@@ -191,8 +197,8 @@ pub mod test {
             .collect();
 
         // Test deterministic key derivation
-        let (dk1, ek1) = K::derive_key_pair(&seed);
-        let (dk2, ek2) = K::derive_key_pair(&seed);
+        let (dk1, ek1, _) = K::derive_key_pair(&seed);
+        let (dk2, ek2, _) = K::derive_key_pair(&seed);
 
         assert_eq!(
             ek1, ek2,
@@ -223,7 +229,7 @@ pub mod test {
         // Generate key pair
         let mut seed = vec![0u8; K::SEED_SIZE];
         rng.fill(seed.as_mut_slice());
-        let (dk, ek) = K::derive_key_pair(&seed);
+        let (dk, ek, _) = K::derive_key_pair(&seed);
 
         // Test encapsulation
         let (ss1, ct) = K::encaps(&ek, &mut rng);
@@ -258,7 +264,7 @@ pub mod test {
     pub fn test_deterministic_encaps<K: Kem + EncapsDerand>() {
         // Generate key pair
         let seed = vec![1u8; K::SEED_SIZE];
-        let (dk, ek) = K::derive_key_pair(&seed);
+        let (dk, ek, _) = K::derive_key_pair(&seed);
 
         // Create deterministic randomness
         let randomness = vec![42u8; K::RANDOMNESS_SIZE];

@@ -67,6 +67,20 @@ fn convert_hybrid_kem_vectors(vectors: &[HybridKemTestVector]) {
         );
         println!(
             "{}",
+            format_hex_field(
+                "decapsulation_key_pq",
+                &hex::encode(&vector.decapsulation_key_pq)
+            )
+        );
+        println!(
+            "{}",
+            format_hex_field(
+                "decapsulation_key_t",
+                &hex::encode(&vector.decapsulation_key_t)
+            )
+        );
+        println!(
+            "{}",
             format_hex_field("ciphertext", &hex::encode(&vector.ciphertext))
         );
         println!(

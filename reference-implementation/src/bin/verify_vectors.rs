@@ -1,7 +1,7 @@
 //! Test vector verification binary
 
 use concrete_hybrid_kem::{
-    kem::{EncapsDerand, Kem},
+    hybrid::HybridKem,
     test_vectors::{HybridKemTestVector, TestVectors, VerifyError},
     MlKem1024P384, MlKem768P256, MlKem768X25519,
 };
@@ -54,10 +54,7 @@ fn main() {
     }
 }
 
-fn verify_hybrid_kem_vectors<K: Kem + EncapsDerand>(
-    name: &str,
-    vectors: &[HybridKemTestVector],
-) -> bool {
+fn verify_hybrid_kem_vectors<K: HybridKem>(name: &str, vectors: &[HybridKemTestVector]) -> bool {
     println!("Verifying {} hybrid KEM...", name);
 
     let error_count = vectors

@@ -25,7 +25,7 @@ fn expand_decaps_key_group<PQ: PqKem, T: NominalGroup, PRG: Prg>(
     PRG::generate(seed, &mut seed_full);
     let (seed_pq, seed_t) = split(&seed_full, PQ::SEED_SIZE, T::SEED_SIZE);
 
-    let (dk_pq, ek_pq) = PQ::derive_key_pair(&seed_pq);
+    let (dk_pq, ek_pq, _key_info) = PQ::derive_key_pair(&seed_pq);
     let dk_t = T::random_scalar(&seed_t);
     let ek_t = T::exp(&T::generator(), &dk_t);
 
@@ -95,8 +95,8 @@ fn expand_decaps_key_kem<PQ: PqKem, T: TKem, PRG: Prg>(
     PRG::generate(seed, &mut seed_full);
     let (seed_pq, seed_t) = split(&seed_full, PQ::SEED_SIZE, T::SEED_SIZE);
 
-    let (dk_pq, ek_pq) = PQ::derive_key_pair(&seed_pq);
-    let (dk_t, ek_t) = T::derive_key_pair(&seed_t);
+    let (dk_pq, ek_pq, _key_info) = PQ::derive_key_pair(&seed_pq);
+    let (dk_t, ek_t, _key_info) = T::derive_key_pair(&seed_t);
 
     (dk_pq, dk_t, ek_pq, ek_t)
 }
@@ -166,6 +166,16 @@ pub trait HybridKemConstants: SeedSize + SharedSecretSize {
     const LABEL: &'static [u8];
 }
 
+// We use this struct to smuggle out intermediate values to the test vectors
+pub struct HybridSubKeys {
+    pub dk_pq: Vec<u8>,
+    pub dk_t: Vec<u8>,
+}
+
+pub trait HybridKem: Kem<KeyInfo = HybridSubKeys> + EncapsDerand {}
+
+impl<K> HybridKem for K where K: Kem<KeyInfo = HybridSubKeys> + EncapsDerand {}
+
 #[derive(Default)]
 pub struct GU<PQ, T, P, K, C> {
     _phantom: core::marker::PhantomData<(PQ, T, P, K, C)>,
@@ -197,12 +207,14 @@ where
     const DECAPSULATION_KEY_SIZE: usize = C::SEED_SIZE;
     const CIPHERTEXT_SIZE: usize = PQ::CIPHERTEXT_SIZE + T::ELEMENT_SIZE;
 
-    fn derive_key_pair(seed: &[u8]) -> (DecapsulationKey, EncapsulationKey) {
+    type KeyInfo = HybridSubKeys;
+
+    fn derive_key_pair(seed: &[u8]) -> (DecapsulationKey, EncapsulationKey, Self::KeyInfo) {
         assert_eq!(seed.len(), Self::SEED_SIZE);
-        let (_dk_pq, _dk_t, ek_pq, ek_t) = expand_decaps_key_group::<PQ, T, P>(&seed);
+        let (dk_pq, dk_t, ek_pq, ek_t) = expand_decaps_key_group::<PQ, T, P>(&seed);
         let mut ek = ek_pq;
         ek.append(&mut ek_t.clone());
-        (seed.to_vec(), ek)
+        (seed.to_vec(), ek, HybridSubKeys { dk_pq, dk_t })
     }
 
     fn encaps(ek: &EncapsulationKey, rng: &mut impl CryptoRng) -> (SharedSecret, Ciphertext) {
@@ -283,12 +295,14 @@ where
     const DECAPSULATION_KEY_SIZE: usize = C::SEED_SIZE;
     const CIPHERTEXT_SIZE: usize = PQ::CIPHERTEXT_SIZE + T::ELEMENT_SIZE;
 
-    fn derive_key_pair(seed: &[u8]) -> (DecapsulationKey, EncapsulationKey) {
+    type KeyInfo = HybridSubKeys;
+
+    fn derive_key_pair(seed: &[u8]) -> (DecapsulationKey, EncapsulationKey, Self::KeyInfo) {
         assert_eq!(seed.len(), Self::SEED_SIZE);
-        let (_dk_pq, _dk_t, ek_pq, ek_t) = expand_decaps_key_group::<PQ, T, P>(&seed);
+        let (dk_pq, dk_t, ek_pq, ek_t) = expand_decaps_key_group::<PQ, T, P>(&seed);
         let mut ek = ek_pq;
         ek.append(&mut ek_t.clone());
-        (seed.to_vec(), ek)
+        (seed.to_vec(), ek, HybridSubKeys { dk_pq, dk_t })
     }
 
     fn encaps(ek: &EncapsulationKey, rng: &mut impl CryptoRng) -> (SharedSecret, Ciphertext) {
@@ -369,12 +383,14 @@ where
     const DECAPSULATION_KEY_SIZE: usize = C::SEED_SIZE;
     const CIPHERTEXT_SIZE: usize = PQ::CIPHERTEXT_SIZE + T::CIPHERTEXT_SIZE;
 
-    fn derive_key_pair(seed: &[u8]) -> (DecapsulationKey, EncapsulationKey) {
+    type KeyInfo = HybridSubKeys;
+
+    fn derive_key_pair(seed: &[u8]) -> (DecapsulationKey, EncapsulationKey, Self::KeyInfo) {
         assert_eq!(seed.len(), Self::SEED_SIZE);
-        let (_dk_pq, _dk_t, ek_pq, ek_t) = expand_decaps_key_kem::<PQ, T, P>(&seed);
+        let (dk_pq, dk_t, ek_pq, ek_t) = expand_decaps_key_kem::<PQ, T, P>(&seed);
         let mut ek = ek_pq;
         ek.append(&mut ek_t.clone());
-        (seed.to_vec(), ek)
+        (seed.to_vec(), ek, HybridSubKeys { dk_pq, dk_t })
     }
 
     fn encaps(ek: &EncapsulationKey, rng: &mut impl CryptoRng) -> (SharedSecret, Ciphertext) {
@@ -429,12 +445,14 @@ where
     const DECAPSULATION_KEY_SIZE: usize = C::SEED_SIZE;
     const CIPHERTEXT_SIZE: usize = PQ::CIPHERTEXT_SIZE + T::CIPHERTEXT_SIZE;
 
-    fn derive_key_pair(seed: &[u8]) -> (DecapsulationKey, EncapsulationKey) {
+    type KeyInfo = HybridSubKeys;
+
+    fn derive_key_pair(seed: &[u8]) -> (DecapsulationKey, EncapsulationKey, Self::KeyInfo) {
         assert_eq!(seed.len(), Self::SEED_SIZE);
-        let (_dk_pq, _dk_t, ek_pq, ek_t) = expand_decaps_key_kem::<PQ, T, P>(&seed);
+        let (dk_pq, dk_t, ek_pq, ek_t) = expand_decaps_key_kem::<PQ, T, P>(&seed);
         let mut ek = ek_pq;
         ek.append(&mut ek_t.clone());
-        (seed.to_vec(), ek)
+        (seed.to_vec(), ek, HybridSubKeys { dk_pq, dk_t })
     }
 
     fn encaps(ek: &EncapsulationKey, rng: &mut impl CryptoRng) -> (SharedSecret, Ciphertext) {
