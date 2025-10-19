@@ -1,15 +1,10 @@
 //! P-256 nominal group implementation
 
 use crate::bis::SeedSize;
-use crate::generic::{
-    error::KemError,
-    traits::{AsBytes, NominalGroup},
-};
 use hex_literal::hex;
 use num_bigint::BigUint;
 use p256::{
     elliptic_curve::{
-        group::prime::PrimeCurveAffine,
         ops::Reduce,
         sec1::{FromEncodedPoint, ToEncodedPoint},
     },
@@ -19,113 +14,24 @@ use p256::{
 /// P-256 nominal group
 pub struct P256Group;
 
-/// Wrapper for P-256 scalar with serialized form
-pub struct P256Scalar {
-    scalar: Scalar,
-    bytes: Vec<u8>,
+// Internal helper function to convert bytes to P-256 scalar
+fn bytes_to_scalar(bytes: &[u8]) -> Scalar {
+    // Manually reduce mod n
+    const MOD: &[u8] = &hex!("ffffffff00000000ffffffffffffffff"
+        "bce6faada7179e84f3b9cac2fc632551");
+    let q = BigUint::from_bytes_be(MOD);
+    let p = BigUint::from_bytes_be(bytes) % &q;
+
+    // Convert to bytes and pad to 32 bytes
+    let mut bytes_be = p.to_bytes_be();
+    // Pad with leading zeros if necessary
+    while bytes_be.len() < 32 {
+        bytes_be.insert(0, 0);
+    }
+    Scalar::reduce_bytes(FieldBytes::from_slice(&bytes_be))
 }
 
-/// Wrapper for P-256 group element with serialized form
-pub struct P256Element {
-    point: AffinePoint,
-    bytes: Vec<u8>,
-}
-
-impl AsBytes for P256Scalar {
-    fn as_bytes(&self) -> &[u8] {
-        &self.bytes
-    }
-}
-
-impl From<&[u8]> for P256Scalar {
-    fn from(bytes: &[u8]) -> Self {
-        // Manually reduce mod n
-        const MOD: &[u8] = &hex!("ffffffff00000000ffffffffffffffff"
-            "bce6faada7179e84f3b9cac2fc632551");
-        let q = BigUint::from_bytes_be(MOD);
-        let p = BigUint::from_bytes_be(bytes) % &q;
-
-        // Convert to bytes and pad to 32 bytes
-        let mut bytes_be = p.to_bytes_be();
-        // Pad with leading zeros if necessary
-        while bytes_be.len() < 32 {
-            bytes_be.insert(0, 0);
-        }
-        let scalar = Scalar::reduce_bytes(FieldBytes::from_slice(&bytes_be));
-        let bytes = scalar.to_bytes().to_vec();
-
-        P256Scalar { scalar, bytes }
-    }
-}
-
-impl AsBytes for P256Element {
-    fn as_bytes(&self) -> &[u8] {
-        &self.bytes
-    }
-}
-
-impl From<&[u8]> for P256Element {
-    fn from(bytes: &[u8]) -> Self {
-        let encoded = EncodedPoint::from_bytes(bytes).expect("Invalid point encoding");
-        let point = AffinePoint::from_encoded_point(&encoded).expect("Invalid point");
-
-        P256Element {
-            point,
-            bytes: bytes.to_vec(),
-        }
-    }
-}
-
-impl NominalGroup for P256Group {
-    const SEED_LENGTH: usize = 48;
-    const SCALAR_LENGTH: usize = 32;
-    const ELEMENT_LENGTH: usize = 65;
-    const SHARED_SECRET_LENGTH: usize = 32;
-
-    type Scalar = P256Scalar;
-    type Element = P256Element;
-
-    fn generator() -> Self::Element {
-        let point = AffinePoint::generator();
-        let encoded = point.to_encoded_point(false);
-        let bytes = encoded.as_bytes().to_vec();
-
-        P256Element { point, bytes }
-    }
-
-    fn exp(p: &Self::Element, x: &Self::Scalar) -> Self::Element {
-        // Convert to projective for scalar multiplication
-        let proj_point = ProjectivePoint::from(p.point);
-        let result_proj = proj_point * x.scalar;
-        let result_affine: AffinePoint = result_proj.into();
-
-        // Encode in uncompressed form
-        let encoded = result_affine.to_encoded_point(false);
-        let bytes = encoded.as_bytes().to_vec();
-
-        P256Element {
-            point: result_affine,
-            bytes,
-        }
-    }
-
-    fn random_scalar(seed: &[u8]) -> Result<Self::Scalar, KemError> {
-        if seed.len() != Self::SEED_LENGTH {
-            return Err(KemError::InvalidInputLength);
-        }
-
-        Ok(P256Scalar::from(seed))
-    }
-
-    fn element_to_shared_secret(p: &Self::Element) -> Vec<u8> {
-        // Extract X coordinate as the shared secret
-        let encoded = p.point.to_encoded_point(false);
-        let x_bytes = encoded.x().expect("Point at infinity");
-        x_bytes.to_vec()
-    }
-}
-
-// Implementation of the new bis traits
+// Implementation of the bis traits
 impl crate::bis::SeedSize for P256Group {
     const SEED_SIZE: usize = 48;
 }
@@ -145,19 +51,21 @@ impl crate::bis::NominalGroup for P256Group {
 
     fn random_scalar(seed: &[u8]) -> crate::bis::Scalar {
         assert_eq!(seed.len(), Self::SEED_SIZE);
-        let scalar_wrapper = P256Scalar::from(seed);
-        scalar_wrapper.as_bytes().to_vec()
+        let scalar = bytes_to_scalar(seed);
+        scalar.to_bytes().to_vec()
     }
 
     fn exp(element: &crate::bis::Element, scalar: &crate::bis::Scalar) -> crate::bis::Element {
         assert_eq!(element.len(), Self::ELEMENT_SIZE);
         assert_eq!(scalar.len(), Self::SCALAR_SIZE);
-        let element_wrapper = P256Element::from(element.as_slice());
-        let scalar_wrapper = P256Scalar::from(scalar.as_slice());
+
+        let encoded_point = EncodedPoint::from_bytes(element).expect("Invalid point encoding");
+        let point = AffinePoint::from_encoded_point(&encoded_point).expect("Invalid point");
+        let scalar_value = bytes_to_scalar(scalar);
 
         // Convert to projective for scalar multiplication
-        let proj_point = ProjectivePoint::from(element_wrapper.point);
-        let result_proj = proj_point * scalar_wrapper.scalar;
+        let proj_point = ProjectivePoint::from(point);
+        let result_proj = proj_point * scalar_value;
         let result_affine: AffinePoint = result_proj.into();
 
         // Encode in uncompressed form

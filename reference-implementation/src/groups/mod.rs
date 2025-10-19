@@ -8,5 +8,3 @@ pub use p256::P256Group;
 pub use p384::P384Group;
 pub use x25519::X25519Group;
 
-#[cfg(test)]
-mod tests;
