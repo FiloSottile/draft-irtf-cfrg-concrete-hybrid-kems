@@ -21,12 +21,10 @@ fn split(v: &[u8], m: usize, n: usize) -> (Vec<u8>, Vec<u8>) {
 fn expand_decaps_key_group<PQ: PqKem, T: NominalGroup, PRG: Prg>(
     seed: &[u8],
 ) -> (DecapsulationKey, Scalar, EncapsulationKey, Element) {
-    let mut seed_full = vec![0; PQ::SEED_SIZE + T::SEED_SIZE];
-    PRG::generate(seed, &mut seed_full);
-    let (seed_pq, seed_t) = split(&seed_full, PQ::SEED_SIZE, T::SEED_SIZE);
+    let mut prg = PRG::new(seed);
 
-    let (dk_pq, ek_pq, _key_info) = PQ::derive_key_pair(&seed_pq);
-    let dk_t = T::random_scalar(&seed_t);
+    let (dk_pq, ek_pq, _key_info) = PQ::generate_key_pair(&mut prg);
+    let dk_t = T::random_scalar(&mut prg);
     let ek_t = T::exp(&T::generator(), &dk_t);
 
     (dk_pq, dk_t, ek_pq, ek_t)
@@ -39,9 +37,7 @@ fn prepare_encaps_group<PQ: PqKem, T: NominalGroup>(
 ) -> (SharedSecret, SharedSecret, Ciphertext, Element) {
     let (ss_pq, ct_pq) = PQ::encaps(&ek_pq, rng);
 
-    let mut seed_e = vec![0u8; T::SEED_SIZE];
-    rng.fill(seed_e.as_mut_slice());
-    let sk_e = T::random_scalar(&seed_e);
+    let sk_e = T::random_scalar(rng);
     let ct_t = T::exp(&T::generator(), &sk_e);
     let ss_t = T::element_to_shared_secret(&T::exp(&ek_t, &sk_e));
 
@@ -65,7 +61,7 @@ fn prepare_encaps_group_derand<PQ: PqKem + EncapsDerand, T: NominalGroup>(
 
     let (ct_pq, ss_pq) = PQ::encaps_derand(&ek_pq, &randomness_pq);
 
-    let sk_e = T::random_scalar(&seed_e);
+    let sk_e = T::random_scalar(&mut TrivialPrg::new(&seed_e));
     let ct_t = T::exp(&T::generator(), &sk_e);
     let ss_t = T::element_to_shared_secret(&T::exp(&ek_t, &sk_e));
 
@@ -91,12 +87,10 @@ fn expand_decaps_key_kem<PQ: PqKem, T: TKem, PRG: Prg>(
     EncapsulationKey,
     EncapsulationKey,
 ) {
-    let mut seed_full = vec![0; PQ::SEED_SIZE + T::SEED_SIZE];
-    PRG::generate(seed, &mut seed_full);
-    let (seed_pq, seed_t) = split(&seed_full, PQ::SEED_SIZE, T::SEED_SIZE);
+    let mut prg = PRG::new(seed);
 
-    let (dk_pq, ek_pq, _key_info) = PQ::derive_key_pair(&seed_pq);
-    let (dk_t, ek_t, _key_info) = T::derive_key_pair(&seed_t);
+    let (dk_pq, ek_pq, _key_info) = PQ::generate_key_pair(&mut prg);
+    let (dk_t, ek_t, _key_info) = T::generate_key_pair(&mut prg);
 
     (dk_pq, dk_t, ek_pq, ek_t)
 }
@@ -209,8 +203,12 @@ where
 
     type KeyInfo = HybridSubKeys;
 
-    fn derive_key_pair(seed: &[u8]) -> (DecapsulationKey, EncapsulationKey, Self::KeyInfo) {
-        assert_eq!(seed.len(), Self::SEED_SIZE);
+    fn generate_key_pair(
+        prg: &mut impl CryptoRng,
+    ) -> (DecapsulationKey, EncapsulationKey, Self::KeyInfo) {
+        let mut seed = vec![0u8; Self::SEED_SIZE];
+        prg.fill(seed.as_mut_slice());
+
         let (dk_pq, dk_t, ek_pq, ek_t) = expand_decaps_key_group::<PQ, T, P>(&seed);
         let mut ek = ek_pq;
         ek.append(&mut ek_t.clone());
@@ -297,7 +295,12 @@ where
 
     type KeyInfo = HybridSubKeys;
 
-    fn derive_key_pair(seed: &[u8]) -> (DecapsulationKey, EncapsulationKey, Self::KeyInfo) {
+    fn generate_key_pair(
+        prg: &mut impl CryptoRng,
+    ) -> (DecapsulationKey, EncapsulationKey, Self::KeyInfo) {
+        let mut seed = vec![0u8; Self::SEED_SIZE];
+        prg.fill(seed.as_mut_slice());
+
         assert_eq!(seed.len(), Self::SEED_SIZE);
         let (dk_pq, dk_t, ek_pq, ek_t) = expand_decaps_key_group::<PQ, T, P>(&seed);
         let mut ek = ek_pq;
@@ -345,6 +348,8 @@ where
             prepare_encaps_group_derand::<PQ, T>(&ek_pq, &ek_t, randomness);
         let ss_h = c2pri_combiner::<K>(&ss_pq, &ss_t, &ct_t, &ek_t, C::LABEL);
 
+        println!("ct_len pq={} t={}", ct_pq.len(), ct_t.len());
+
         let mut ct_h = ct_pq;
         ct_h.append(&mut ct_t.clone());
 
@@ -385,8 +390,12 @@ where
 
     type KeyInfo = HybridSubKeys;
 
-    fn derive_key_pair(seed: &[u8]) -> (DecapsulationKey, EncapsulationKey, Self::KeyInfo) {
-        assert_eq!(seed.len(), Self::SEED_SIZE);
+    fn generate_key_pair(
+        prg: &mut impl CryptoRng,
+    ) -> (DecapsulationKey, EncapsulationKey, Self::KeyInfo) {
+        let mut seed = vec![0u8; Self::SEED_SIZE];
+        prg.fill(seed.as_mut_slice());
+
         let (dk_pq, dk_t, ek_pq, ek_t) = expand_decaps_key_kem::<PQ, T, P>(&seed);
         let mut ek = ek_pq;
         ek.append(&mut ek_t.clone());
@@ -447,8 +456,12 @@ where
 
     type KeyInfo = HybridSubKeys;
 
-    fn derive_key_pair(seed: &[u8]) -> (DecapsulationKey, EncapsulationKey, Self::KeyInfo) {
-        assert_eq!(seed.len(), Self::SEED_SIZE);
+    fn generate_key_pair(
+        prg: &mut impl CryptoRng,
+    ) -> (DecapsulationKey, EncapsulationKey, Self::KeyInfo) {
+        let mut seed = vec![0u8; Self::SEED_SIZE];
+        prg.fill(seed.as_mut_slice());
+
         let (dk_pq, dk_t, ek_pq, ek_t) = expand_decaps_key_kem::<PQ, T, P>(&seed);
         let mut ek = ek_pq;
         ek.append(&mut ek_t.clone());

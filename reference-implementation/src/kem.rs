@@ -3,7 +3,7 @@ use ml_kem::{
     kem::{Decapsulate, Encapsulate},
     EncapsulateDeterministic, EncodedSizeUser, KemCore,
 };
-use rand::CryptoRng;
+use rand::{CryptoRng, Rng};
 
 pub type Seed = Vec<u8>;
 pub type EncapsulationKey = Vec<u8>;
@@ -27,7 +27,9 @@ pub trait Kem: SeedSize + SharedSecretSize {
     // Additional information about derived keys (e.g., subkeys)
     type KeyInfo;
 
-    fn derive_key_pair(seed: &[u8]) -> (DecapsulationKey, EncapsulationKey, Self::KeyInfo);
+    fn generate_key_pair(
+        rng: &mut impl CryptoRng,
+    ) -> (DecapsulationKey, EncapsulationKey, Self::KeyInfo);
     fn encaps(ek: &EncapsulationKey, rng: &mut impl CryptoRng) -> (SharedSecret, Ciphertext);
     fn decaps(dk: &DecapsulationKey, ct: &Ciphertext) -> SharedSecret;
 }
@@ -45,7 +47,7 @@ pub trait TKem: Kem {}
 pub trait PqKem: Kem {}
 
 /// RNG wrapper to bridge between rand_core versions
-pub struct RngWrapper<'a, R: rand::CryptoRng>(pub &'a mut R);
+pub(crate) struct RngWrapper<'a, R: rand::CryptoRng>(pub &'a mut R);
 
 impl<'a, R> old_rand_core::RngCore for RngWrapper<'a, R>
 where
@@ -92,8 +94,8 @@ macro_rules! define_ml_kem {
 
             type KeyInfo = ();
 
-            fn derive_key_pair(
-                seed: &[u8],
+            fn generate_key_pair(
+                rng: &mut impl CryptoRng,
             ) -> (
                 DecapsulationKey,
                 EncapsulationKey,
@@ -101,13 +103,16 @@ macro_rules! define_ml_kem {
             ) {
                 use ml_kem::$mlkem;
 
-                assert_eq!(seed.len(), Self::SEED_SIZE);
-                let d = ml_kem::B32::try_from(&seed[..32]).expect("Invalid seed slice");
-                let z = ml_kem::B32::try_from(&seed[32..]).expect("Invalid seed slice");
+                let mut d = ml_kem::B32::default();
+                let mut z = ml_kem::B32::default();
+
+                rng.fill(d.as_mut_slice());
+                rng.fill(z.as_mut_slice());
                 let (_dk_inner, ek_inner) = $mlkem::generate_deterministic(&d, &z);
 
+                let dk = d.concat(z).to_vec();
                 let ek = ek_inner.as_bytes().as_slice().to_vec();
-                (seed.to_vec(), ek, ())
+                (dk, ek, ())
             }
 
             fn encaps(
@@ -189,6 +194,7 @@ define_ml_kem! { MlKem1024, ml_kem::MlKem1024Params }
 #[cfg(test)]
 pub mod test {
     use super::*;
+    use crate::prg::{Prg, TrivialPrg};
 
     fn test_deterministic_derivation<K: Kem>() {
         // Create test seed
@@ -197,8 +203,8 @@ pub mod test {
             .collect();
 
         // Test deterministic key derivation
-        let (dk1, ek1, _) = K::derive_key_pair(&seed);
-        let (dk2, ek2, _) = K::derive_key_pair(&seed);
+        let (dk1, ek1, _) = K::generate_key_pair(&mut TrivialPrg::new(&seed));
+        let (dk2, ek2, _) = K::generate_key_pair(&mut TrivialPrg::new(&seed));
 
         assert_eq!(
             ek1, ek2,
@@ -223,13 +229,10 @@ pub mod test {
     }
 
     fn test_roundtrip<K: Kem>() {
-        use rand::Rng;
         let mut rng = rand::rng();
 
         // Generate key pair
-        let mut seed = vec![0u8; K::SEED_SIZE];
-        rng.fill(seed.as_mut_slice());
-        let (dk, ek, _) = K::derive_key_pair(&seed);
+        let (dk, ek, _) = K::generate_key_pair(&mut rng);
 
         // Test encapsulation
         let (ss1, ct) = K::encaps(&ek, &mut rng);
@@ -263,8 +266,8 @@ pub mod test {
 
     pub fn test_deterministic_encaps<K: Kem + EncapsDerand>() {
         // Generate key pair
-        let seed = vec![1u8; K::SEED_SIZE];
-        let (dk, ek, _) = K::derive_key_pair(&seed);
+        let mut rng = rand::rng();
+        let (dk, ek, _) = K::generate_key_pair(&mut rng);
 
         // Create deterministic randomness
         let randomness = vec![42u8; K::RANDOMNESS_SIZE];
