@@ -1,7 +1,8 @@
+use crate::group::*;
+use crate::kdf::*;
+use crate::kem::*;
+use crate::prg::*;
 use rand::{CryptoRng, Rng};
-
-#[cfg(test)]
-pub mod test_utils;
 
 /// Split a vector into two parts
 fn split(v: &[u8], m: usize, n: usize) -> (Vec<u8>, Vec<u8>) {
@@ -15,68 +16,6 @@ fn split(v: &[u8], m: usize, n: usize) -> (Vec<u8>, Vec<u8>) {
     let first = v[..m].to_vec();
     let second = v[m..].to_vec();
     (first, second)
-}
-
-// All of these are Vec<u8> for convenience, but we define aliases so that the method signatures
-// tell you which thing is expected to be which.
-pub type Seed = Vec<u8>;
-pub type SharedSecret = Vec<u8>;
-pub type Scalar = Vec<u8>;
-pub type Element = Vec<u8>;
-pub type EncapsulationKey = Vec<u8>;
-pub type DecapsulationKey = Vec<u8>;
-pub type Ciphertext = Vec<u8>;
-
-pub trait SeedSize {
-    const SEED_SIZE: usize;
-}
-
-pub trait SharedSecretSize {
-    const SHARED_SECRET_SIZE: usize;
-}
-
-pub trait NominalGroup: SeedSize + SharedSecretSize {
-    const SCALAR_SIZE: usize;
-    const ELEMENT_SIZE: usize;
-
-    fn generator() -> Element;
-    fn random_scalar(seed: &[u8]) -> Scalar;
-    fn exp(element: &Element, scalar: &Scalar) -> Element;
-    fn element_to_shared_secret(element: &Element) -> SharedSecret;
-}
-
-pub trait Kem: SeedSize + SharedSecretSize {
-    const ENCAPSULATION_KEY_SIZE: usize;
-    const DECAPSULATION_KEY_SIZE: usize;
-    const CIPHERTEXT_SIZE: usize;
-
-    fn derive_key_pair(seed: &[u8]) -> (DecapsulationKey, EncapsulationKey);
-    fn encaps(ek: &EncapsulationKey, rng: &mut impl CryptoRng) -> (SharedSecret, Ciphertext);
-    fn decaps(dk: &DecapsulationKey, ct: &Ciphertext) -> SharedSecret;
-}
-
-pub trait EncapsDerand: Kem {
-    const RANDOMNESS_SIZE: usize;
-
-    fn encaps_derand(ek: &EncapsulationKey, randomness: &[u8]) -> (Ciphertext, SharedSecret);
-}
-
-/// Marker trait for traditional KEMs
-pub trait TKem: Kem {}
-
-/// Marker trait for post-quantum KEMs
-pub trait PqKem: Kem {}
-
-pub trait Kdf {
-    const OUTPUT_SIZE: usize;
-
-    fn compute(input: impl Iterator<Item = u8>) -> Output;
-}
-
-pub type Output = Vec<u8>;
-
-pub trait Prg {
-    fn generate(seed: &[u8], output: &mut [u8]);
 }
 
 fn expand_decaps_key_group<PQ: PqKem, T: NominalGroup, PRG: Prg>(
@@ -518,75 +457,3 @@ where
         ss_h
     }
 }
-
-/// Constants for QSF-P256-MLKEM768-SHAKE256-SHA3256 hybrid KEM
-pub struct MlKem768P256Constants;
-
-impl SeedSize for MlKem768P256Constants {
-    const SEED_SIZE: usize = 32;
-}
-
-impl SharedSecretSize for MlKem768P256Constants {
-    const SHARED_SECRET_SIZE: usize = 32;
-}
-
-impl HybridKemConstants for MlKem768P256Constants {
-    const LABEL: &'static [u8] = b"|-()-|";
-}
-
-/// QSF-P256-MLKEM768-SHAKE256-SHA3256 hybrid KEM
-pub type MlKem768P256 = GC<
-    crate::kems::MlKem768,
-    crate::groups::P256Group,
-    crate::prg::Shake256Prg,
-    crate::kdf::Sha3_256Kdf,
-    MlKem768P256Constants,
->;
-
-/// Constants for QSF-X25519-MLKEM768-SHAKE256-SHA3256 hybrid KEM (X-Wing compatible)
-pub struct MlKem768X25519Constants;
-
-impl SeedSize for MlKem768X25519Constants {
-    const SEED_SIZE: usize = 32;
-}
-
-impl SharedSecretSize for MlKem768X25519Constants {
-    const SHARED_SECRET_SIZE: usize = 32;
-}
-
-impl HybridKemConstants for MlKem768X25519Constants {
-    const LABEL: &'static [u8] = b"\\.//^\\";
-}
-
-/// QSF-X25519-MLKEM768-SHAKE256-SHA3256 hybrid KEM (X-Wing)
-pub type MlKem768X25519 = GC<
-    crate::kems::MlKem768,
-    crate::groups::X25519Group,
-    crate::prg::Shake256Prg,
-    crate::kdf::Sha3_256Kdf,
-    MlKem768X25519Constants,
->;
-
-/// Constants for QSF-P384-MLKEM1024-SHAKE256-SHA3256 hybrid KEM
-pub struct MlKem1024P384Constants;
-
-impl SeedSize for MlKem1024P384Constants {
-    const SEED_SIZE: usize = 32;
-}
-
-impl SharedSecretSize for MlKem1024P384Constants {
-    const SHARED_SECRET_SIZE: usize = 32;
-}
-
-impl HybridKemConstants for MlKem1024P384Constants {
-    const LABEL: &'static [u8] = b" | /-\\";
-}
-
-/// QSF-P384-MLKEM1024-SHAKE256-SHA3256 hybrid KEM
-pub type MlKem1024P384 = GC<
-    crate::kems::MlKem1024,
-    crate::groups::P384Group,
-    crate::prg::Shake256Prg,
-    crate::kdf::Sha3_256Kdf,
-    MlKem1024P384Constants,
->;

@@ -1,8 +1,9 @@
 //! Test vector verification binary
 
 use concrete_hybrid_kem::{
-    hybrid::{EncapsDerand, Kem, MlKem1024P384, MlKem768P256, MlKem768X25519, SeedSize},
+    kem::{EncapsDerand, Kem, SeedSize},
     test_vectors::{HybridKemTestVector, TestVectors},
+    MlKem1024P384, MlKem768P256, MlKem768X25519,
 };
 use std::env;
 use std::fs;
