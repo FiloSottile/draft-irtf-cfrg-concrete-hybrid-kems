@@ -1,12 +1,38 @@
 //! KEM implementations for ML-KEM
 
 use crate::hybrid::SeedSize;
-use crate::utils::RngWrapper;
 use hybrid_array::typenum::Unsigned;
 use ml_kem::{
     kem::{Decapsulate, Encapsulate, EncapsulationKey},
     Ciphertext, EncapsulateDeterministic, EncodedSizeUser, KemCore,
 };
+
+/// RNG wrapper to bridge between rand_core versions
+pub struct RngWrapper<'a, R: rand::CryptoRng>(pub &'a mut R);
+
+impl<'a, R> old_rand_core::RngCore for RngWrapper<'a, R>
+where
+    R: rand::CryptoRng,
+{
+    fn next_u32(&mut self) -> u32 {
+        self.0.next_u32()
+    }
+
+    fn next_u64(&mut self) -> u64 {
+        self.0.next_u64()
+    }
+
+    fn fill_bytes(&mut self, dest: &mut [u8]) {
+        self.0.fill_bytes(dest)
+    }
+
+    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), old_rand_core::Error> {
+        self.0.fill_bytes(dest);
+        Ok(())
+    }
+}
+
+impl<'a, R> old_rand_core::CryptoRng for RngWrapper<'a, R> where R: rand::CryptoRng {}
 
 macro_rules! define_ml_kem {
     ($mlkem:ident, $params:ty) => {

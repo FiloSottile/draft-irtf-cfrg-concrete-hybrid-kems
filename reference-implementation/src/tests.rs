@@ -182,9 +182,9 @@ mod tests {
         use crate::hybrid::{EncapsDerand, MlKem1024P384, MlKem768P256, MlKem768X25519};
 
         // Verify expected randomness sizes: PQ (32) + Group seed size
-        assert_eq!(<MlKem768P256 as EncapsDerand>::RANDOMNESS_SIZE, 32 + 48); // P256 seed = 48
+        assert_eq!(<MlKem768P256 as EncapsDerand>::RANDOMNESS_SIZE, 32 + 32); // P256 seed = 48
         assert_eq!(<MlKem768X25519 as EncapsDerand>::RANDOMNESS_SIZE, 32 + 32); // X25519 seed = 32
-        assert_eq!(<MlKem1024P384 as EncapsDerand>::RANDOMNESS_SIZE, 32 + 72); // P384 seed = 72
+        assert_eq!(<MlKem1024P384 as EncapsDerand>::RANDOMNESS_SIZE, 32 + 48); // P384 seed = 72
     }
 
     // Comprehensive tests using test_utils

@@ -32,6 +32,7 @@ serde_json = "1.0"
 num-bigint = "0.4.6"
 hex-literal = "1.0.0"
 hybrid-array = "0.2.3"
+elliptic-curve = "0.13.8"
 
 [dev-dependencies]
 

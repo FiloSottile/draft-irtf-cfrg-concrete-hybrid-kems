@@ -19,9 +19,6 @@ mod primitives;
 /// Definition of test vector formats, generation, and validation
 pub mod test_vectors;
 
-/// An RNG wrapper utility that maps between versions of the `rand` crate
-mod utils;
-
 /// The hybrid KEMs
 pub mod hybrid;
 
