@@ -76,13 +76,14 @@ pub trait Kdf {
 pub type Output = Vec<u8>;
 
 pub trait Prg {
-    fn generate(seed: &[u8], output_len: usize) -> Vec<u8>;
+    fn generate(seed: &[u8], output: &mut [u8]);
 }
 
 fn expand_decaps_key_group<PQ: PqKem, T: NominalGroup, PRG: Prg>(
     seed: &[u8],
 ) -> (DecapsulationKey, Scalar, EncapsulationKey, Element) {
-    let seed_full = PRG::generate(seed, PQ::SEED_SIZE + T::SEED_SIZE);
+    let mut seed_full = vec![0; PQ::SEED_SIZE + T::SEED_SIZE];
+    PRG::generate(seed, &mut seed_full);
     let (seed_pq, seed_t) = split(&seed_full, PQ::SEED_SIZE, T::SEED_SIZE);
 
     let (dk_pq, ek_pq) = PQ::derive_key_pair(&seed_pq);
@@ -151,7 +152,8 @@ fn expand_decaps_key_kem<PQ: PqKem, T: TKem, PRG: Prg>(
     EncapsulationKey,
     EncapsulationKey,
 ) {
-    let seed_full = PRG::generate(seed, PQ::SEED_SIZE + T::SEED_SIZE);
+    let mut seed_full = vec![0; PQ::SEED_SIZE + T::SEED_SIZE];
+    PRG::generate(seed, &mut seed_full);
     let (seed_pq, seed_t) = split(&seed_full, PQ::SEED_SIZE, T::SEED_SIZE);
 
     let (dk_pq, ek_pq) = PQ::derive_key_pair(&seed_pq);
@@ -536,7 +538,7 @@ impl HybridKemConstants for MlKem768P256Constants {
 pub type MlKem768P256 = GC<
     crate::kems::MlKem768,
     crate::groups::P256Group,
-    crate::prg::Shake256Prg<112>, // 48 (P256 seed) + 64 (ML-KEM-768 seed)
+    crate::prg::Shake256Prg,
     crate::kdf::Sha3_256Kdf,
     MlKem768P256Constants,
 >;
@@ -560,7 +562,7 @@ impl HybridKemConstants for MlKem768X25519Constants {
 pub type MlKem768X25519 = GC<
     crate::kems::MlKem768,
     crate::groups::X25519Group,
-    crate::prg::Shake256Prg<96>, // 32 (X25519 seed) + 64 (ML-KEM-768 seed)
+    crate::prg::Shake256Prg,
     crate::kdf::Sha3_256Kdf,
     MlKem768X25519Constants,
 >;
@@ -584,7 +586,7 @@ impl HybridKemConstants for MlKem1024P384Constants {
 pub type MlKem1024P384 = GC<
     crate::kems::MlKem1024,
     crate::groups::P384Group,
-    crate::prg::Shake256Prg<136>, // 72 (P384 seed) + 64 (ML-KEM-1024 seed)
+    crate::prg::Shake256Prg,
     crate::kdf::Sha3_256Kdf,
     MlKem1024P384Constants,
 >;

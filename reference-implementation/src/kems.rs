@@ -1,10 +1,13 @@
 //! KEM implementations for ML-KEM
 
-use crate::hybrid::SeedSize;
+use crate::hybrid::{
+    Ciphertext, DecapsulationKey, EncapsDerand, EncapsulationKey, Kem, PqKem, SeedSize,
+    SharedSecret, SharedSecretSize,
+};
 use hybrid_array::typenum::Unsigned;
 use ml_kem::{
-    kem::{Decapsulate, Encapsulate, EncapsulationKey},
-    Ciphertext, EncapsulateDeterministic, EncodedSizeUser, KemCore,
+    kem::{Decapsulate, Encapsulate},
+    EncapsulateDeterministic, EncodedSizeUser, KemCore,
 };
 
 /// RNG wrapper to bridge between rand_core versions
@@ -39,15 +42,15 @@ macro_rules! define_ml_kem {
         pub struct $mlkem;
 
         // Implementation of the bis traits
-        impl crate::hybrid::SeedSize for $mlkem {
+        impl SeedSize for $mlkem {
             const SEED_SIZE: usize = 64;
         }
 
-        impl crate::hybrid::SharedSecretSize for $mlkem {
+        impl SharedSecretSize for $mlkem {
             const SHARED_SECRET_SIZE: usize = 32;
         }
 
-        impl crate::hybrid::Kem for $mlkem {
+        impl Kem for $mlkem {
             const ENCAPSULATION_KEY_SIZE: usize =
                 <<ml_kem::$mlkem as KemCore>::EncapsulationKey as EncodedSizeUser>::EncodedSize::USIZE;
             const DECAPSULATION_KEY_SIZE: usize = 64;
@@ -56,8 +59,8 @@ macro_rules! define_ml_kem {
             fn derive_key_pair(
                 seed: &[u8],
             ) -> (
-                crate::hybrid::DecapsulationKey,
-                crate::hybrid::EncapsulationKey,
+                DecapsulationKey,
+                EncapsulationKey,
             ) {
                 use ml_kem::$mlkem;
 
@@ -71,12 +74,12 @@ macro_rules! define_ml_kem {
             }
 
             fn encaps(
-                ek: &crate::hybrid::EncapsulationKey,
+                ek: &EncapsulationKey,
                 rng: &mut impl rand::CryptoRng,
-            ) -> (crate::hybrid::SharedSecret, crate::hybrid::Ciphertext) {
+            ) -> (SharedSecret, crate::hybrid::Ciphertext) {
                 assert_eq!(ek.len(), Self::ENCAPSULATION_KEY_SIZE);
-                let ek_inner: EncapsulationKey<$params> =
-                    EncapsulationKey::from_bytes(ek.as_slice().try_into().expect("Invalid EK size"));
+                let ek_inner: ml_kem::kem::EncapsulationKey<$params> =
+                    ml_kem::kem::EncapsulationKey::from_bytes(ek.as_slice().try_into().expect("Invalid EK size"));
                 let (ct_inner, ss_inner) = ek_inner
                     .encapsulate(&mut RngWrapper(rng))
                     .expect("Encapsulation failed");
@@ -88,9 +91,9 @@ macro_rules! define_ml_kem {
             }
 
             fn decaps(
-                dk: &crate::hybrid::DecapsulationKey,
-                ct: &crate::hybrid::Ciphertext,
-            ) -> crate::hybrid::SharedSecret {
+                dk: &DecapsulationKey,
+                ct: &Ciphertext,
+            ) -> SharedSecret {
                 use ml_kem::$mlkem;
 
                 assert_eq!(dk.len(), Self::DECAPSULATION_KEY_SIZE);
@@ -99,7 +102,7 @@ macro_rules! define_ml_kem {
                 let z = ml_kem::B32::try_from(&dk[32..]).expect("Invalid DK slice");
                 let (dk_inner, _ek_inner) = $mlkem::generate_deterministic(&d, &z);
 
-                let ct_inner = Ciphertext::<$mlkem>::try_from(ct.as_slice()).expect("Invalid CT");
+                let ct_inner = ml_kem::Ciphertext::<$mlkem>::try_from(ct.as_slice()).expect("Invalid CT");
                 let ss_inner = dk_inner
                     .decapsulate(&ct_inner)
                     .expect("Decapsulation failed");
@@ -108,18 +111,18 @@ macro_rules! define_ml_kem {
             }
         }
 
-        impl crate::hybrid::PqKem for $mlkem {}
+        impl PqKem for $mlkem {}
 
-        impl crate::hybrid::EncapsDerand for $mlkem {
+        impl EncapsDerand for $mlkem {
             const RANDOMNESS_SIZE: usize = 32;
 
             fn encaps_derand(
-                ek: &crate::hybrid::EncapsulationKey,
+                ek: &EncapsulationKey,
                 randomness: &[u8],
-            ) -> (crate::hybrid::Ciphertext, crate::hybrid::SharedSecret) {
+            ) -> (Ciphertext, crate::hybrid::SharedSecret) {
                 assert_eq!(
                     ek.len(),
-                    <Self as crate::hybrid::Kem>::ENCAPSULATION_KEY_SIZE
+                    <Self as Kem>::ENCAPSULATION_KEY_SIZE
                 );
                 assert_eq!(randomness.len(), Self::RANDOMNESS_SIZE);
 
