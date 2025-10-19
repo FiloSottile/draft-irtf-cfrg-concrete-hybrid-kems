@@ -275,3 +275,28 @@ impl crate::bis::Kem for MlKem768Kem {
 }
 
 impl crate::bis::PqKem for MlKem768Kem {}
+
+impl crate::bis::EncapsDerand for MlKem768Kem {
+    const RANDOMNESS_SIZE: usize = 32;
+
+    fn encaps_derand(
+        ek: &crate::bis::EncapsulationKey,
+        randomness: &[u8],
+    ) -> (crate::bis::Ciphertext, crate::bis::SharedSecret) {
+        assert_eq!(ek.len(), <Self as crate::bis::Kem>::ENCAPSULATION_KEY_SIZE);
+        assert_eq!(randomness.len(), Self::RANDOMNESS_SIZE);
+
+        let m = ml_kem::B32::try_from(randomness).expect("Invalid randomness length");
+
+        let ek_inner: EncapsulationKey<MlKem768Params> =
+            EncapsulationKey::from_bytes(ek.as_slice().try_into().expect("Invalid EK size"));
+        let (ct_inner, ss_inner) = ek_inner
+            .encapsulate_deterministic(&m)
+            .expect("Deterministic encapsulation failed");
+
+        let ct = ct_inner.as_slice().to_vec();
+        let ss = ss_inner.as_slice().to_vec();
+
+        (ct, ss)
+    }
+}
