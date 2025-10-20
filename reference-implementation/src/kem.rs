@@ -1,7 +1,7 @@
 use hybrid_array::typenum::Unsigned;
 use ml_kem::{
     kem::{Decapsulate, Encapsulate},
-    EncapsulateDeterministic, EncodedSizeUser, KemCore,
+    EncodedSizeUser, KemCore,
 };
 use rand::{CryptoRng, Rng};
 
@@ -20,6 +20,7 @@ pub trait SharedSecretSize {
 }
 
 pub trait Kem: SeedSize + SharedSecretSize {
+    const ENCAPS_RANDOMNESS_SIZE: usize;
     const ENCAPSULATION_KEY_SIZE: usize;
     const DECAPSULATION_KEY_SIZE: usize;
     const CIPHERTEXT_SIZE: usize;
@@ -32,12 +33,6 @@ pub trait Kem: SeedSize + SharedSecretSize {
     ) -> (DecapsulationKey, EncapsulationKey, Self::KeyInfo);
     fn encaps(ek: &EncapsulationKey, rng: &mut impl CryptoRng) -> (SharedSecret, Ciphertext);
     fn decaps(dk: &DecapsulationKey, ct: &Ciphertext) -> SharedSecret;
-}
-
-pub trait EncapsDerand: Kem {
-    const RANDOMNESS_SIZE: usize;
-
-    fn encaps_derand(ek: &EncapsulationKey, randomness: &[u8]) -> (Ciphertext, SharedSecret);
 }
 
 /// Marker trait for traditional KEMs
@@ -87,6 +82,7 @@ macro_rules! define_ml_kem {
         }
 
         impl Kem for $mlkem {
+            const ENCAPS_RANDOMNESS_SIZE: usize = 32;
             const ENCAPSULATION_KEY_SIZE: usize =
                 <<ml_kem::$mlkem as KemCore>::EncapsulationKey as EncodedSizeUser>::EncodedSize::USIZE;
             const DECAPSULATION_KEY_SIZE: usize = 64;
@@ -154,36 +150,6 @@ macro_rules! define_ml_kem {
         }
 
         impl PqKem for $mlkem {}
-
-        impl EncapsDerand for $mlkem {
-            const RANDOMNESS_SIZE: usize = 32;
-
-            fn encaps_derand(
-                ek: &EncapsulationKey,
-                randomness: &[u8],
-            ) -> (Ciphertext, SharedSecret) {
-                assert_eq!(
-                    ek.len(),
-                    <Self as Kem>::ENCAPSULATION_KEY_SIZE
-                );
-                assert_eq!(randomness.len(), Self::RANDOMNESS_SIZE);
-
-                let m = ml_kem::B32::try_from(randomness).expect("Invalid randomness length");
-
-                let ek_inner: ml_kem::kem::EncapsulationKey<$params> =
-                    ml_kem::kem::EncapsulationKey::from_bytes(
-                        ek.as_slice().try_into().expect("Invalid EK size"),
-                    );
-                let (ct_inner, ss_inner) = ek_inner
-                    .encapsulate_deterministic(&m)
-                    .expect("Deterministic encapsulation failed");
-
-                let ct = ct_inner.as_slice().to_vec();
-                let ss = ss_inner.as_slice().to_vec();
-
-                (ct, ss)
-            }
-        }
     }
 }
 
@@ -194,7 +160,7 @@ define_ml_kem! { MlKem1024, ml_kem::MlKem1024Params }
 #[cfg(test)]
 pub mod test {
     use super::*;
-    use crate::prg::{Prg, TrivialPrg};
+    use crate::prg::AsTrivialPrg;
 
     fn test_deterministic_derivation<K: Kem>() {
         // Create test seed
@@ -203,8 +169,8 @@ pub mod test {
             .collect();
 
         // Test deterministic key derivation
-        let (dk1, ek1, _) = K::generate_key_pair(&mut TrivialPrg::new(&seed));
-        let (dk2, ek2, _) = K::generate_key_pair(&mut TrivialPrg::new(&seed));
+        let (dk1, ek1, _) = K::generate_key_pair(&mut seed.as_trivial_prg());
+        let (dk2, ek2, _) = K::generate_key_pair(&mut seed.as_trivial_prg());
 
         assert_eq!(
             ek1, ek2,
@@ -264,17 +230,17 @@ pub mod test {
         );
     }
 
-    pub fn test_deterministic_encaps<K: Kem + EncapsDerand>() {
+    pub fn test_deterministic_encaps<K: Kem>() {
         // Generate key pair
         let mut rng = rand::rng();
         let (dk, ek, _) = K::generate_key_pair(&mut rng);
 
         // Create deterministic randomness
-        let randomness = vec![42u8; K::RANDOMNESS_SIZE];
+        let randomness = vec![42u8; K::ENCAPS_RANDOMNESS_SIZE];
 
         // Test deterministic encapsulation
-        let (ct1, ss1) = K::encaps_derand(&ek, &randomness);
-        let (ct2, ss2) = K::encaps_derand(&ek, &randomness);
+        let (ss1, ct1) = K::encaps(&ek, &mut randomness.as_trivial_prg());
+        let (ss2, ct2) = K::encaps(&ek, &mut randomness.as_trivial_prg());
 
         assert_eq!(
             ct1, ct2,
@@ -302,8 +268,8 @@ pub mod test {
         );
 
         // Test that different randomness produces different outputs
-        let randomness2 = vec![43u8; K::RANDOMNESS_SIZE];
-        let (ct4, ss4) = K::encaps_derand(&ek, &randomness2);
+        let randomness2 = vec![43u8; K::ENCAPS_RANDOMNESS_SIZE];
+        let (ct4, ss4) = K::encaps(&ek, &mut randomness2.as_trivial_prg());
 
         assert_ne!(
             ct1, ct4,
@@ -315,7 +281,7 @@ pub mod test {
         );
     }
 
-    pub fn test_all<K: Kem + EncapsDerand>() {
+    pub fn test_all<K: Kem>() {
         test_deterministic_derivation::<K>();
         test_roundtrip::<K>();
         test_deterministic_encaps::<K>();

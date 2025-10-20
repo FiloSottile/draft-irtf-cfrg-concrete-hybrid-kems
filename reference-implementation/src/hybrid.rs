@@ -41,29 +41,7 @@ fn prepare_encaps_group<PQ: PqKem, T: NominalGroup>(
     let ct_t = T::exp(&T::generator(), &sk_e);
     let ss_t = T::element_to_shared_secret(&T::exp(&ek_t, &sk_e));
 
-    (ss_pq, ss_t, ct_pq, ct_t)
-}
-
-fn prepare_encaps_group_derand<PQ: PqKem + EncapsDerand, T: NominalGroup>(
-    ek_pq: &EncapsulationKey,
-    ek_t: &Element,
-    randomness: &[u8],
-) -> (SharedSecret, SharedSecret, Ciphertext, Element) {
-    assert_eq!(
-        randomness.len(),
-        PQ::RANDOMNESS_SIZE + T::SEED_SIZE,
-        "prepare_encaps_group_derand: expected {} bytes of randomness, got {}",
-        PQ::RANDOMNESS_SIZE + T::SEED_SIZE,
-        randomness.len()
-    );
-
-    let (randomness_pq, seed_e) = split(randomness, PQ::RANDOMNESS_SIZE, T::SEED_SIZE);
-
-    let (ct_pq, ss_pq) = PQ::encaps_derand(&ek_pq, &randomness_pq);
-
-    let sk_e = T::random_scalar(&mut TrivialPrg::new(&seed_e));
-    let ct_t = T::exp(&T::generator(), &sk_e);
-    let ss_t = T::element_to_shared_secret(&T::exp(&ek_t, &sk_e));
+    println!("ct_len pq={} t={}", ct_pq.len(), ct_t.len());
 
     (ss_pq, ss_t, ct_pq, ct_t)
 }
@@ -166,9 +144,9 @@ pub struct HybridSubKeys {
     pub dk_t: Vec<u8>,
 }
 
-pub trait HybridKem: Kem<KeyInfo = HybridSubKeys> + EncapsDerand {}
+pub trait HybridKem: Kem<KeyInfo = HybridSubKeys> {}
 
-impl<K> HybridKem for K where K: Kem<KeyInfo = HybridSubKeys> + EncapsDerand {}
+impl<K> HybridKem for K where K: Kem<KeyInfo = HybridSubKeys> {}
 
 #[derive(Default)]
 pub struct GU<PQ, T, P, K, C> {
@@ -197,6 +175,7 @@ where
     K: Kdf,
     C: HybridKemConstants,
 {
+    const ENCAPS_RANDOMNESS_SIZE: usize = PQ::ENCAPS_RANDOMNESS_SIZE + T::SEED_SIZE;
     const ENCAPSULATION_KEY_SIZE: usize = PQ::ENCAPSULATION_KEY_SIZE + T::ELEMENT_SIZE;
     const DECAPSULATION_KEY_SIZE: usize = C::SEED_SIZE;
     const CIPHERTEXT_SIZE: usize = PQ::CIPHERTEXT_SIZE + T::ELEMENT_SIZE;
@@ -236,32 +215,6 @@ where
     }
 }
 
-impl<PQ, T, P, K, C> EncapsDerand for GU<PQ, T, P, K, C>
-where
-    PQ: PqKem + EncapsDerand,
-    T: NominalGroup,
-    P: Prg,
-    K: Kdf,
-    C: HybridKemConstants,
-{
-    const RANDOMNESS_SIZE: usize = PQ::RANDOMNESS_SIZE + T::SEED_SIZE;
-
-    fn encaps_derand(ek: &EncapsulationKey, randomness: &[u8]) -> (Ciphertext, SharedSecret) {
-        assert_eq!(ek.len(), Self::ENCAPSULATION_KEY_SIZE);
-        assert_eq!(randomness.len(), Self::RANDOMNESS_SIZE);
-
-        let (ek_pq, ek_t) = split(ek, PQ::ENCAPSULATION_KEY_SIZE, T::ELEMENT_SIZE);
-        let (ss_pq, ss_t, ct_pq, ct_t) =
-            prepare_encaps_group_derand::<PQ, T>(&ek_pq, &ek_t, randomness);
-        let ss_h = universal_combiner::<K>(&ss_pq, &ss_t, &ct_pq, &ct_t, &ek_pq, &ek_t, C::LABEL);
-
-        let mut ct_h = ct_pq;
-        ct_h.append(&mut ct_t.clone());
-
-        (ct_h, ss_h)
-    }
-}
-
 #[derive(Default)]
 pub struct GC<PQ, T, P, K, C> {
     _phantom: core::marker::PhantomData<(PQ, T, P, K, C)>,
@@ -289,6 +242,7 @@ where
     K: Kdf,
     C: HybridKemConstants,
 {
+    const ENCAPS_RANDOMNESS_SIZE: usize = PQ::ENCAPS_RANDOMNESS_SIZE + T::SEED_SIZE;
     const ENCAPSULATION_KEY_SIZE: usize = PQ::ENCAPSULATION_KEY_SIZE + T::ELEMENT_SIZE;
     const DECAPSULATION_KEY_SIZE: usize = C::SEED_SIZE;
     const CIPHERTEXT_SIZE: usize = PQ::CIPHERTEXT_SIZE + T::ELEMENT_SIZE;
@@ -313,8 +267,10 @@ where
         let (ek_pq, ek_t) = split(ek, PQ::ENCAPSULATION_KEY_SIZE, T::ELEMENT_SIZE);
         let (ss_pq, ss_t, ct_pq, ct_t) = prepare_encaps_group::<PQ, T>(&ek_pq, &ek_t, rng);
         let ss_h = c2pri_combiner::<K>(&ss_pq, &ss_t, &ct_t, &ek_t, C::LABEL);
+
         let mut ct_h = ct_pq;
         ct_h.append(&mut ct_t.clone());
+
         (ss_h, ct_h)
     }
 
@@ -326,34 +282,6 @@ where
         let (ss_pq, ss_t) = prepare_decaps_group::<PQ, T>(&ct_pq, &ct_t, &dk_pq, &dk_t);
         let ss_h = c2pri_combiner::<K>(&ss_pq, &ss_t, &ct_t, &ek_t, C::LABEL);
         ss_h
-    }
-}
-
-impl<PQ, T, P, K, C> EncapsDerand for GC<PQ, T, P, K, C>
-where
-    PQ: PqKem + EncapsDerand,
-    T: NominalGroup,
-    P: Prg,
-    K: Kdf,
-    C: HybridKemConstants,
-{
-    const RANDOMNESS_SIZE: usize = PQ::RANDOMNESS_SIZE + T::SEED_SIZE;
-
-    fn encaps_derand(ek: &EncapsulationKey, randomness: &[u8]) -> (Ciphertext, SharedSecret) {
-        assert_eq!(ek.len(), Self::ENCAPSULATION_KEY_SIZE);
-        assert_eq!(randomness.len(), Self::RANDOMNESS_SIZE);
-
-        let (ek_pq, ek_t) = split(ek, PQ::ENCAPSULATION_KEY_SIZE, T::ELEMENT_SIZE);
-        let (ss_pq, ss_t, ct_pq, ct_t) =
-            prepare_encaps_group_derand::<PQ, T>(&ek_pq, &ek_t, randomness);
-        let ss_h = c2pri_combiner::<K>(&ss_pq, &ss_t, &ct_t, &ek_t, C::LABEL);
-
-        println!("ct_len pq={} t={}", ct_pq.len(), ct_t.len());
-
-        let mut ct_h = ct_pq;
-        ct_h.append(&mut ct_t.clone());
-
-        (ct_h, ss_h)
     }
 }
 
@@ -384,6 +312,7 @@ where
     K: Kdf,
     C: HybridKemConstants,
 {
+    const ENCAPS_RANDOMNESS_SIZE: usize = PQ::ENCAPS_RANDOMNESS_SIZE + T::ENCAPS_RANDOMNESS_SIZE;
     const ENCAPSULATION_KEY_SIZE: usize = PQ::ENCAPSULATION_KEY_SIZE + T::ENCAPSULATION_KEY_SIZE;
     const DECAPSULATION_KEY_SIZE: usize = C::SEED_SIZE;
     const CIPHERTEXT_SIZE: usize = PQ::CIPHERTEXT_SIZE + T::CIPHERTEXT_SIZE;
@@ -450,6 +379,7 @@ where
     K: Kdf,
     C: HybridKemConstants,
 {
+    const ENCAPS_RANDOMNESS_SIZE: usize = PQ::ENCAPS_RANDOMNESS_SIZE + T::ENCAPS_RANDOMNESS_SIZE;
     const ENCAPSULATION_KEY_SIZE: usize = PQ::ENCAPSULATION_KEY_SIZE + T::ENCAPSULATION_KEY_SIZE;
     const DECAPSULATION_KEY_SIZE: usize = C::SEED_SIZE;
     const CIPHERTEXT_SIZE: usize = PQ::CIPHERTEXT_SIZE + T::CIPHERTEXT_SIZE;
