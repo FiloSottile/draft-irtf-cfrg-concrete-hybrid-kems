@@ -112,7 +112,7 @@ informative:
   CDM23:
     title: "Keeping Up with the KEMs: Stronger Security Notions for KEMs and automated analysis of KEM-based protocols"
     target: https://eprint.iacr.org/2023/1933.pdf
-    date: 2023/
+    date: 2023
     author:
       -
         ins: C. Cremers
@@ -344,16 +344,16 @@ output, so it is appropriate for use in hybrid KEMs with `Nss = 32`.
 This section instantiates the following concrete KEMs:
 
 MLKEM768-P256:
-: A hybrid KEM composing ML-KEM-768 and P-256 using the GC framework, with
+: A hybrid KEM composing ML-KEM-768 and P-256 using the CG framework, with
   SHAKE256 as the PRG and SHA3-256 as the KDF.
 
 MLKEM768-X25519:
-: A hybrid KEM composing ML-KEM-768 and Curve25519 using the GC framework, with
+: A hybrid KEM composing ML-KEM-768 and Curve25519 using the CG framework, with
   SHAKE256 as the PRG and SHA3-256 as the KDF. This construction is identical
   to the X-Wing construction in {{XWING-SPEC}}.
 
 MLKEM1024-P384:
-: A hybrid KEM composing ML-KEM-1024 and P-384 using the GC framework, with
+: A hybrid KEM composing ML-KEM-1024 and P-384 using the CG framework, with
   SHAKE256 as the PRG and SHA3-256 as the KDF.
 
 Each instance specifies the PQ and traditional KEMs being combined, the
@@ -363,7 +363,7 @@ use throughout.
 
 ## MLKEM768-P256
 
-This hybrid KEM combines ML-KEM-768 with P-256 using the GC framework from
+This hybrid KEM combines ML-KEM-768 with P-256 using the CG framework from
 {{HYBRID-KEMS}}. It has the following components:
 
 * `Group_T`: P-256 {{group-nist}}
@@ -382,7 +382,7 @@ The KEM constants for the resulting hybrid KEM are as follows:
 
 ## MLKEM768-X25519
 
-This hybrid KEM combines ML-KEM-768 with X25519 using the GC framework from
+This hybrid KEM combines ML-KEM-768 with X25519 using the CG framework from
 {{HYBRID-KEMS}}. It is identical to the X-Wing construction from {{XWING-SPEC}}.
 It has the following components:
 
@@ -402,7 +402,7 @@ The following constants for the hybrid KEM are also defined:
 
 ## MLKEM1024-P384
 
-This hybrid KEM combines ML-KEM-1024 with P-384 using the GC framework from
+This hybrid KEM combines ML-KEM-1024 with P-384 using the CG framework from
 {{HYBRID-KEMS}}. It has the following components:
 
 * `Group_T`: P-384 {{group-nist}}
@@ -452,11 +452,11 @@ The components used in this document meet these requirements:
 This document requests that the following values be added to the "Hybrid KEM
 Labels" registry:
 
-| Label     | Fw | PQ Component | T Component | KDF      | PRG       | Nseed | Nss | Reference |
-|===========|====|==============|=============|==========|===========|=======|=====|===========|
-| "\|-()-\|"  | GC | ML-KEM-768   | Curve25519  | SHA3-256 | SHAKE-256 | 32    | 32  | [RFCXXXX] |
-| "\\.//^\\"  | GC | ML-KEM-768   | Curve25519  | SHA3-256 | SHAKE-256 | 32    | 32  | [RFCXXXX] |
-| " \| /-\\" | GC | ML-KEM-768   | Curve25519  | SHA3-256 | SHAKE-256 | 32    | 32  | [RFCXXXX] |
+| Label      | Fw | PQ Component | T Component | KDF      | PRG       | Nseed | Nss | Reference |
+|============|====|==============|=============|==========|===========|=======|=====|===========|
+| "\|-()-\|" | CG | ML-KEM-768   | Curve25519  | SHA3-256 | SHAKE-256 | 32    | 32  | [RFCXXXX] |
+| "\\.//^\\" | CG | ML-KEM-768   | Curve25519  | SHA3-256 | SHAKE-256 | 32    | 32  | [RFCXXXX] |
+| " \| /-\\" | CG | ML-KEM-768   | Curve25519  | SHA3-256 | SHAKE-256 | 32    | 32  | [RFCXXXX] |
 {: #iana-table title="Hybrid KEM Labels" }
 
 [ RFC EDITOR: Please replace "XXXX" above with the number assigned to this RFC ]
