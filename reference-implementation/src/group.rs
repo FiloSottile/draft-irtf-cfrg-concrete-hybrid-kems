@@ -1,8 +1,7 @@
-use crate::kem::{RngWrapper, SeedSize, SharedSecret, SharedSecretSize};
+use crate::kem::{Seed, SeedSize, SharedSecret, SharedSecretSize};
 use elliptic_curve::Curve;
 use hex_literal::hex;
 use hybrid_array::typenum::Unsigned;
-use rand::CryptoRng;
 use x25519_dalek::{PublicKey, StaticSecret};
 
 pub type Scalar = Vec<u8>;
@@ -13,7 +12,7 @@ pub trait NominalGroup: SeedSize + SharedSecretSize {
     const ELEMENT_SIZE: usize;
 
     fn generator() -> Element;
-    fn random_scalar(seed: &mut impl CryptoRng) -> Scalar;
+    fn random_scalar(seed: &Seed) -> Scalar;
     fn exp(element: &Element, scalar: &Scalar) -> Element;
     fn element_to_shared_secret(element: &Element) -> SharedSecret;
 }
@@ -38,10 +37,8 @@ impl NominalGroup for X25519 {
         hex!("0900000000000000000000000000000000000000000000000000000000000000").to_vec()
     }
 
-    fn random_scalar(prg: &mut impl CryptoRng) -> Scalar {
-        use rand::Rng;
-        let mut seed = [0u8; Self::SEED_SIZE];
-        prg.fill(&mut seed);
+    fn random_scalar(seed: &Seed) -> Scalar {
+        assert_eq!(seed.len(), Self::SEED_SIZE);
         seed.to_vec()
     }
 
@@ -65,6 +62,47 @@ impl NominalGroup for X25519 {
     fn element_to_shared_secret(element: &Element) -> SharedSecret {
         assert_eq!(element.len(), Self::ELEMENT_SIZE);
         element.clone()
+    }
+}
+
+// Enable the use of SHAKE256 as an RNG
+struct Shake256Rng(sha3::Shake256Reader);
+
+impl Shake256Rng {
+    fn new(seed: &[u8]) -> Self {
+        use sha3::digest::{ExtendableOutput, Update};
+        let mut shake = sha3::Shake256::default();
+        shake.update(seed);
+        let reader = shake.finalize_xof();
+        Self(reader)
+    }
+}
+
+impl old_rand_core::CryptoRng for Shake256Rng {}
+
+impl old_rand_core::RngCore for Shake256Rng {
+    fn next_u32(&mut self) -> u32 {
+        use sha3::digest::XofReader;
+        let mut data = [0; 4];
+        self.0.read(&mut data);
+        u32::from_be_bytes(data)
+    }
+
+    fn next_u64(&mut self) -> u64 {
+        use sha3::digest::XofReader;
+        let mut data = [0; 8];
+        self.0.read(&mut data);
+        u64::from_be_bytes(data)
+    }
+
+    fn fill_bytes(&mut self, dest: &mut [u8]) {
+        use sha3::digest::XofReader;
+        self.0.read(dest);
+    }
+
+    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), old_rand_core::Error> {
+        self.fill_bytes(dest);
+        Ok(())
     }
 }
 
@@ -94,12 +132,14 @@ macro_rules! define_nist_group {
                 gen_aff.to_encoded_point(false).as_bytes().to_vec()
             }
 
-            fn random_scalar(prg: &mut impl CryptoRng) -> Scalar {
+            fn random_scalar(seed: &Seed) -> Scalar {
+                use $mod::NonZeroScalar;
+                assert_eq!(seed.len(), Self::SEED_SIZE);
+
                 // Coincidentally, NonZeroScalar::random implements exactly the rejection sampling
                 // loop we need here.
-                $mod::NonZeroScalar::random(&mut RngWrapper(prg))
-                    .to_bytes()
-                    .to_vec()
+                let mut rng = Shake256Rng::new(seed);
+                NonZeroScalar::random(&mut rng).to_bytes().to_vec()
             }
 
             fn exp(element: &Element, scalar: &Scalar) -> Element {
@@ -144,8 +184,6 @@ define_nist_group! { P384, p384, NistP384 }
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::prg::{Prg, TrivialPrg};
-    use rand::Rng;
 
     pub fn test_basic_ops<G: NominalGroup>() {
         // Test generator
@@ -153,8 +191,11 @@ mod test {
         assert_eq!(generator.len(), G::ELEMENT_SIZE, "Generator size mismatch");
 
         // Test scalar generation
-        let mut rng = rand::rng();
-        let scalar = G::random_scalar(&mut rng);
+        let seed: Vec<u8> = (0..G::SEED_SIZE)
+            .map(|i| (i as u8).wrapping_mul(41).wrapping_add(29))
+            .collect();
+
+        let scalar = G::random_scalar(&seed);
         assert_eq!(scalar.len(), G::SCALAR_SIZE, "Scalar size mismatch");
 
         // Test exponentiation
@@ -174,12 +215,11 @@ mod test {
         let generator = G::generator();
 
         // Generate two scalars
-        let mut rng = rand::rng();
-        let mut seed = vec![0u8; G::SEED_SIZE];
-        rng.fill(seed.as_mut_slice());
+        let seed_a = vec![1u8; G::SEED_SIZE];
+        let seed_b = vec![2u8; G::SEED_SIZE];
 
-        let scalar_a = G::random_scalar(&mut TrivialPrg::new(&seed));
-        let scalar_b = G::random_scalar(&mut rng);
+        let scalar_a = G::random_scalar(&seed_a);
+        let scalar_b = G::random_scalar(&seed_b);
 
         // Compute public keys
         let public_a = G::exp(&generator, &scalar_a);
@@ -198,7 +238,7 @@ mod test {
         );
 
         // Test deterministic scalar generation
-        let scalar_a2 = G::random_scalar(&mut TrivialPrg::new(&seed));
+        let scalar_a2 = G::random_scalar(&seed_a);
 
         assert_eq!(
             scalar_a, scalar_a2,
@@ -214,8 +254,8 @@ mod test {
 
         // Test scalar generation determinism
         let seed = vec![42u8; G::SEED_SIZE];
-        let scalar1 = G::random_scalar(&mut TrivialPrg::new(&seed));
-        let scalar2 = G::random_scalar(&mut TrivialPrg::new(&seed));
+        let scalar1 = G::random_scalar(&seed);
+        let scalar2 = G::random_scalar(&seed);
         assert_eq!(
             scalar1, scalar2,
             "Scalar generation should be deterministic"
