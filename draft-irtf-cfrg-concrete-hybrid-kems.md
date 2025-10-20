@@ -112,7 +112,7 @@ informative:
   CDM23:
     title: "Keeping Up with the KEMs: Stronger Security Notions for KEMs and automated analysis of KEM-based protocols"
     target: https://eprint.iacr.org/2023/1933.pdf
-    date: 2023
+    date: 2023/
     author:
       -
         ins: C. Cremers
@@ -206,12 +206,47 @@ The Nominal Group algorithms are the same for both groups:
 - `Exp(p, x) -> q`: This function computes scalar multiplication between the
   input element (or point) `p` and the scalar `x`, according to the group law
   for the curve specified in {{SP800-186}}.
-- `RandomScalar(seed) -> k`: Implemented by converting `seed` to an integer
-  using the Octet-String-to-Integer function in {{SEC1}}, and then reducing
-  the resulting integer modulo the group order.
+- `RandomScalar(seed) -> k`: Implemented using rejection sampling from a PRG,
+  as described below.
 - `ElementToSharedSecret(p) -> ss`: The shared secret is the X coordinate of
   the elliptic curve point `p`, encoded as an `Nss`-byte string using the
   Field-Element-to-Octet-String function in {{SEC1}}.
+
+The RandomScalar algorithm depends on an pseudo-random generator (PRG), with the
+following API:
+
+- `Init(seed) -> state`: Initialize a new state of the pseudo-random generator
+  based on the provided seed.
+- `Read(state, n) -> data`: Read `n` pseudo-random bytes from the PRG, updating
+  `state` to reflect that this read has happened.
+
+A hybrid KEM using these curves MUST specify the PRG that should be used.  All
+of the hybrid KEMs in this document use SHAKE256 {{FIPS202}}.
+
+Given a PRG, the RandomScalar algorithm is defined as follows:
+
+~~~ pseudocode
+def RandomScalar(seed):
+  state = XOF.Init(seed)
+  sk = OS2IP(XOF.Read(state, Nscalar))
+  while sk == 0 || sk >= order:
+    sk = OS2IP(XOF.Read(state, Nscalar))
+  return (sk, pk(sk))
+~~~
+
+The OS2IP function converts a byte string to a non-negative integer, as
+described in {{!RFC8017}}, assuming big-endian byte order.  The `order` variable
+represents the order of the curve being used (see Section 3.2.1 of
+{{SP800-186}}), reproduced here for reference:
+
+~~~ ascii-art
+P-256:
+0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551
+
+P-384:
+0xffffffffffffffffffffffffffffffffffffffffffffffffc7634d81f4372ddf
+  581a0db248b0a77aecec196accc52973
+~~~
 
 The group constants for the P-256 group are as follows:
 
