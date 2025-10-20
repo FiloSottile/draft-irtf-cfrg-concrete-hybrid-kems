@@ -144,7 +144,7 @@ define_nist_group! { P384, p384, NistP384 }
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::prg::AsTrivialPrg;
+    use crate::prg::{Prg, TrivialPrg};
     use rand::Rng;
 
     pub fn test_basic_ops<G: NominalGroup>() {
@@ -178,7 +178,7 @@ mod test {
         let mut seed = vec![0u8; G::SEED_SIZE];
         rng.fill(seed.as_mut_slice());
 
-        let scalar_a = G::random_scalar(&mut seed.as_trivial_prg());
+        let scalar_a = G::random_scalar(&mut TrivialPrg::new(&seed));
         let scalar_b = G::random_scalar(&mut rng);
 
         // Compute public keys
@@ -198,7 +198,7 @@ mod test {
         );
 
         // Test deterministic scalar generation
-        let scalar_a2 = G::random_scalar(&mut seed.as_trivial_prg());
+        let scalar_a2 = G::random_scalar(&mut TrivialPrg::new(&seed));
 
         assert_eq!(
             scalar_a, scalar_a2,
@@ -214,8 +214,8 @@ mod test {
 
         // Test scalar generation determinism
         let seed = vec![42u8; G::SEED_SIZE];
-        let scalar1 = G::random_scalar(&mut seed.as_trivial_prg());
-        let scalar2 = G::random_scalar(&mut seed.as_trivial_prg());
+        let scalar1 = G::random_scalar(&mut TrivialPrg::new(&seed));
+        let scalar2 = G::random_scalar(&mut TrivialPrg::new(&seed));
         assert_eq!(
             scalar1, scalar2,
             "Scalar generation should be deterministic"

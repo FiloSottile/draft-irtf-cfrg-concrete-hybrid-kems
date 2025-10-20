@@ -98,19 +98,6 @@ impl RngCore for TrivialPrg {
     }
 }
 
-pub trait AsTrivialPrg {
-    fn as_trivial_prg(&self) -> TrivialPrg;
-}
-
-impl<T> AsTrivialPrg for T
-where
-    T: AsRef<[u8]>,
-{
-    fn as_trivial_prg(&self) -> TrivialPrg {
-        TrivialPrg::new(self.as_ref())
-    }
-}
-
 #[cfg(test)]
 mod test {
     use super::*;

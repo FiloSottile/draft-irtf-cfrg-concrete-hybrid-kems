@@ -1,7 +1,7 @@
 //! Test vector data structures for serialization
 
 use crate::hybrid::HybridKem;
-use crate::prg::AsTrivialPrg;
+use crate::prg::{Prg, TrivialPrg};
 use serde::{Deserialize, Serialize};
 
 /// An enumeration of the ways test vector validation can fail
@@ -44,10 +44,11 @@ pub struct HybridKemTestVector {
 impl HybridKemTestVector {
     pub fn generate<K: HybridKem>(index: u8) -> Self {
         let seed = vec![index; K::SEED_SIZE];
-        let randomness = vec![index.wrapping_add(100); K::ENCAPS_RANDOMNESS_SIZE];
+        let randomness = vec![index.wrapping_add(100); K::RANDOMNESS_SIZE];
 
-        let (dk, ek, info) = K::generate_key_pair(&mut seed.as_trivial_prg());
-        let (ct, ss) = K::encaps(&ek, &mut randomness.as_trivial_prg());
+        let mut prg = TrivialPrg::new(&seed);
+        let (dk, ek, info) = K::generate_key_pair(&mut prg);
+        let (ct, ss) = K::encaps_derand(&ek, &randomness);
 
         HybridKemTestVector {
             seed,
@@ -63,7 +64,8 @@ impl HybridKemTestVector {
 
     pub fn verify<K: HybridKem>(&self) -> Result<(), VerifyError> {
         // Verify deterministic key generation
-        let (dk, ek, _) = K::generate_key_pair(&mut self.seed.as_trivial_prg());
+        let mut prg = TrivialPrg::new(&self.seed);
+        let (dk, ek, _) = K::generate_key_pair(&mut prg);
 
         if dk != self.decapsulation_key {
             return Err(VerifyError::DecapsulationKey(
@@ -80,7 +82,7 @@ impl HybridKemTestVector {
         }
 
         // Verify deterministic encapsulation
-        let (ct, ss) = K::encaps(&ek, &mut self.randomness.as_trivial_prg());
+        let (ct, ss) = K::encaps_derand(&ek, &self.randomness);
 
         if ct != self.ciphertext {
             return Err(VerifyError::Ciphertext(ct, self.ciphertext.clone()));
