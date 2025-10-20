@@ -483,4 +483,6 @@ key generation followed by an encapsulation:
 # Acknowledgments
 {:numbered="false"}
 
-[[ TODO ]]
+Thanks to Chris Wood and Britta Hale for contributions to early versions of this
+document. Thanks to Filippo Valsorda for the ASCII art labels for the
+non-X-Wing hybrid KEMs.
